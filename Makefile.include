@@ -1,0 +1,58 @@
+CC   ?= gcc
+CXX  ?= g++
+MOC  ?= moc
+FLEX ?= flex
+
+SYSTEM = $(shell uname)
+
+ifeq '$(SYSTEM)' 'FreeBSD'
+  AWK ?= gawk
+  SED ?= gsed
+else
+  AWK ?= awk
+  SED ?= sed
+endif
+
+DEBUG ?= yes
+PROFIL ?= no
+
+ifeq '$(PROFIL)' 'yes'
+  DEBUG = yes
+endif
+
+ifeq '$(DEBUG)' 'yes'
+  CFLAGS = -g
+  CXXFLAGS = -g
+endif
+ifeq '$(PROFIL)' 'yes'
+  CFLAGS += -pg
+  CXXFLAGS += -pg
+endif
+
+CFLAGS   += -Wall -pedantic -std=gnu99
+CXXFLAGS += -Wall -pedantic
+
+LDFLAGS =
+
+ODE_CXXFLAGS = $(shell pkg-config ode --cflags)
+ODE_LDFLAGS  = $(shell pkg-config ode --libs)
+OSG_CXXFLAGS = $(shell pkg-config openscenegraph --cflags)
+OSG_LDFLAGS  = $(shell pkg-config openscenegraph --libs)
+
+showvars:
+	@echo "SYSTEM = "$(SYSTEM)
+	@if [ "$(CC)" != "" ];   then echo "CC   = "$(CC); fi;
+	@if [ "$(CXX)" != "" ];  then echo "CXX  = "$(CXX); fi;
+	@if [ "$(MOC)" != "" ];  then echo "MOC  = $(MOC)"; fi;
+	@if [ "$(FLEX)" != "" ]; then echo "FLEX = "$(FLEX); fi;
+	@if [ "$(AWK)" != "" ];  then echo "AWK  = "$(AWK); fi;
+	@if [ "$(SED)" != "" ];  then echo "SED  = "$(SED); fi;
+	@if [ "$(CFLAGS)" != "" ];   then echo "CFLAGS   = "$(CFLAGS); fi;
+	@if [ "$(CXXFLAGS)" != "" ]; then echo "CXXFLAGS = "$(CXXFLAGS); fi;
+	@if [ "$(LDFLAGS)" != "" ];  then echo "LDFLAGS  = "$(LDFLAGS); fi;
+	@echo "ODE_CXXFLAGS = $(ODE_CXXFLAGS)"
+	@echo "ODE_LDFLAGS = $(ODE_LDFLAGS)"
+	@echo "OSG_CXXFLAGS = $(OSG_CXXFLAGS)"
+	@echo "OSG_LDFLAGS = $(OSG_LDFLAGS)"
+
+.DEFAULT_GOAL := all
