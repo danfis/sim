@@ -3,19 +3,17 @@ CXXFLAGS += $(OSG_CXXFLAGS) $(ODE_CXXFLAGS)
 LDFLAGS += $(OSG_LDFLAGS) $(ODE_LDFLAGS)
 
 
-TARGETS = sim
-OBJS = main.o sim.o object.o
+TARGETS = libsim.a demo
+OBJS = sim.o object.o
 
 all: $(TARGETS)
 
-sim: $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
-
-lib%.a: $(OBJS)
+libsim.a: $(OBJS)
 	ar cr $@ $^
 	ranlib $@
 
-main.cpp: object.o
+demo: demo.o libsim.a
+	$(CXX) $(CXXFLAGS) -o $@ demo.o -L. -lsim $(LDFLAGS)
 
 %.o: %.c %.h
 	$(CC) $(CFLAGS) -c -o $@ $<

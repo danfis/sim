@@ -373,6 +373,10 @@ int main(int argc, char *argv[])
 {
     MySim s;
 
+    std::cout << std::endl;
+    std::cout << "Use 1, 2, 3 keys to add objects to scene" << std::endl;
+    std::cout << std::endl;
+
     s.addObject(new OPlane());
 
     s.run();

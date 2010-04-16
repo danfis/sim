@@ -1,5 +1,5 @@
 *.o
 *.so
 *.a
-sim
 *.log
+demo

@@ -96,7 +96,6 @@ void Sim::run()
     _viewer->setSceneData(_root);
 
     if (!_viewer->getCameraManipulator()){
-        DBG("Adding camera manipulator");
         _viewer->setCameraManipulator(new osgGA::TrackballManipulator());
     }
 
