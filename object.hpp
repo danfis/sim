@@ -51,8 +51,8 @@ class Object {
  * representation.
  * You can set osg node, body and geom by methods _setOsgNode(),
  * _setODEBody() and _setODEGeom().
- * Method applyODE() is already finished to apply transformation from
- * single body to root osg node (transformation node).
+ * Method applyODE() applies transformation from single body to root osg
+ * node (transformation node).
  */
 class ObjectSimple : public Object {
   protected:
@@ -81,6 +81,13 @@ class ObjectSimple : public Object {
 };
 
 
+/**
+ * Object which consists of several bodies.
+ * You can add triplet of body, geom and osg node using _addObj() method.
+ * This triplet will be associated with each other and when position of ODE
+ * body changed osg's node is transformed consequently (by applyODE()
+ * method).
+ */
 class ObjectGroup : public Object {
   protected:
     struct ode_osg {
@@ -105,7 +112,7 @@ class ObjectGroup : public Object {
     inline size_t objsSize() const { return _objs.size(); }
 
     /**
-     * Returns i'th osg node, body or geom.
+     * Returns i'th added osg node, body or geom.
      */
     osg::Node *osgNode(size_t i);
     dBodyID odeBody(size_t i);

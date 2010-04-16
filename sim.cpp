@@ -1,6 +1,7 @@
 #include <osgGA/TrackballManipulator>
 
 #include "sim.hpp"
+#include "geominfo.hpp"
 #include "msg.hpp"
 
 namespace sim {
@@ -137,6 +138,17 @@ void Sim::run()
 void __ode_near_collision(void *data, dGeomID o1, dGeomID o2)
 {
     Sim *sim = (Sim *)data;
+    GeomInfo *info1, *info2;
+
+    info1 = (GeomInfo *)dGeomGetData(o1);
+    info2 = (GeomInfo *)dGeomGetData(o2);
+
+    if (info1 && info2
+            && info1->dont_collide_id
+            && info2->dont_collide_id
+            && info1->dont_collide_id == info2->dont_collide_id){
+        return;
+    }
 
     if (dGeomIsSpace(o1) || dGeomIsSpace(o2)){
         dSpaceCollide2(o1, o2, data, &__ode_near_collision);

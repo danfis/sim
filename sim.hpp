@@ -40,8 +40,15 @@ class Sim {
      */
     virtual void addObject(Object *o);
 
+    /**
+     * Run simulation.
+     */
     virtual void run();
 
+    /**
+     * Is called when key is pressed.
+     * Overload this method if you need to.
+     */
     virtual bool pressedKey(int key) { return false; }
 };
 
