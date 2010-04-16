@@ -5,6 +5,7 @@
 #include <osg/Node>
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
+#include <list>
 
 #include "msg.hpp"
 
@@ -62,7 +63,7 @@ class ObjectSimple : public Object {
 
   public:
     ObjectSimple();
-    ~ObjectSimple();
+    virtual ~ObjectSimple();
 
     osg::Node *osgRootNode() { return static_cast<osg::Node *>(_osg_root); }
     void build(dWorldID, dSpaceID) {}
@@ -79,6 +80,46 @@ class ObjectSimple : public Object {
     void _setODEGeom(dGeomID g) { _ode_geom = g; }
 };
 
+
+class ObjectGroup : public Object {
+  protected:
+    struct ode_osg {
+        osg::PositionAttitudeTransform *osg_node;
+        dBodyID ode_body;
+        dGeomID ode_geom;
+    };
+
+    osg::Group *_osg_root;
+    std::list<ode_osg> _objs;
+
+  public:
+    ObjectGroup();
+    virtual ~ObjectGroup();
+
+    osg::Node *osgRootNode() { return static_cast<osg::Node *>(_osg_root); }
+    void build(dWorldID, dSpaceID) {}
+    void applyODE();
+    void preODE() {}
+
+    inline std::list<ode_osg> &objs() { return _objs; }
+    inline size_t objsSize() const { return _objs.size(); }
+
+    /**
+     * Returns i'th osg node, body or geom.
+     */
+    osg::Node *osgNode(size_t i);
+    dBodyID odeBody(size_t i);
+    dGeomID odeGeom(size_t i);
+
+  protected:
+    /**
+     * Adds triple of body, geom and osg's Node to list of objects.
+     */
+    void _addObj(dBodyID b, dGeomID g, osg::Node *n);
+
+  private:
+    ode_osg &_odeOsg(size_t i);
+};
 
 }
 
