@@ -38,6 +38,8 @@ ODE_CXXFLAGS = $(shell pkg-config ode --cflags)
 ODE_LDFLAGS  = $(shell pkg-config ode --libs)
 OSG_CXXFLAGS = $(shell pkg-config openscenegraph --cflags)
 OSG_LDFLAGS  = $(shell pkg-config openscenegraph --libs)
+BT_CXXFLAGS  = $(shell pkg-config bullet --cflags)
+BT_LDFLAGS   = $(shell pkg-config bullet --libs)
 
 showvars:
 	@echo "SYSTEM = "$(SYSTEM)
@@ -51,8 +53,10 @@ showvars:
 	@if [ "$(CXXFLAGS)" != "" ]; then echo "CXXFLAGS = "$(CXXFLAGS); fi;
 	@if [ "$(LDFLAGS)" != "" ];  then echo "LDFLAGS  = "$(LDFLAGS); fi;
 	@echo "ODE_CXXFLAGS = $(ODE_CXXFLAGS)"
-	@echo "ODE_LDFLAGS = $(ODE_LDFLAGS)"
+	@echo "ODE_LDFLAGS  = $(ODE_LDFLAGS)"
+	@echo "BT_CXXFLAGS  = $(BT_CXXFLAGS)"
+	@echo "BT_LDFLAGS   = $(BT_LDFLAGS)"
 	@echo "OSG_CXXFLAGS = $(OSG_CXXFLAGS)"
-	@echo "OSG_LDFLAGS = $(OSG_LDFLAGS)"
+	@echo "OSG_LDFLAGS  = $(OSG_LDFLAGS)"
 
 .DEFAULT_GOAL := all

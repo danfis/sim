@@ -1,10 +1,10 @@
 -include Makefile.include
-CXXFLAGS += $(OSG_CXXFLAGS) $(ODE_CXXFLAGS)
-LDFLAGS += $(OSG_LDFLAGS) $(ODE_LDFLAGS)
+CXXFLAGS += $(OSG_CXXFLAGS) $(ODE_CXXFLAGS) $(BT_CXXFLAGS)
+LDFLAGS += $(OSG_LDFLAGS) $(ODE_LDFLAGS) $(BT_LDFLAGS)
 
 
 TARGETS = libsim.a demo
-OBJS = sim.o object.o
+OBJS = sim.o object.o obj_base.o obj.o
 
 all: $(TARGETS)
 
