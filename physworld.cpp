@@ -20,7 +20,7 @@ PhysWorld::PhysWorld()
     _solver = dynamic_cast<btConstraintSolver *>(new btSequentialImpulseConstraintSolver());
     _world = dynamic_cast<btDynamicsWorld *>(new btDiscreteDynamicsWorld(_dispatch, _broadphase, _solver, _coll_conf));
 
-	_world->setGravity(btVector3(0,-10,0));
+    _world->setGravity(btVector3(0,-10,0));
 }
 
 PhysWorld::~PhysWorld()
