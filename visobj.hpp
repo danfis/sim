@@ -1,8 +1,7 @@
-#ifndef _SIM_OBJ_BASE_HPP_
-#define _SIM_OBJ_BASE_HPP_
+#ifndef _VIS_OBJ_HPP_
+#define _VIS_OBJ_HPP_
 
 #include <osg/PositionAttitudeTransform>
-#include <BulletDynamics/Dynamics/btRigidBody.h>
 
 namespace sim {
 
@@ -25,15 +24,14 @@ class VisObj {
     const osg::Node *rootNode() const { return _root; }
 
     /**
-     * Pure virtual function which builds content of object.
-     */
-    virtual void build() = 0;
-
-    /**
      * Tranfsforms object in 3D space.
      */
     void setPosition(float x, float y, float z);
+    void setPosition(float *v) { setPosition(v[0], v[1], v[2]); }
     void setRotation(float x, float y, float z, float w);
+
+    void getPosition(float *x, float *y, float *z);
+    void getPosition(float *v) { getPosition(v, v + 1, v + 2); }
 
   protected:
     /**
@@ -43,24 +41,17 @@ class VisObj {
 };
 
 
-/**
- * Physical representation of object.
- */
-class PhysObj {
-    btRigidBody *_body;
-    btCollisionShape *_shape;
 
+class VisObjBox : public VisObj {
   public:
-    PhysObj() {}
-    virtual ~PhysObj() {}
-
-    /**
-     * Pure virtual function which should build object.
-     */
-    virtual void build() = 0;
+    VisObjBox(float width);
 };
 
+class VisObjSphere : public VisObj {
+  public:
+    VisObjSphere(float radius);
+};
 
-}
+} /* namespace sim */
 
-#endif /* _SIM_OBJ_BASE_HPP_ */
+#endif
