@@ -61,6 +61,17 @@ class Obj {
     void _set(VisObj *o, btCollisionShape *shape, float mass);
 };
 
+
+class ObjCube : public Obj {
+  public:
+    ObjCube(float width, float mass);
+};
+
+class ObjBox : public Obj {
+  public:
+    ObjBox(float x, float y, float z, float mass);
+};
+
 }
 
 #endif /* _SIM_OBJ_HPP_ */

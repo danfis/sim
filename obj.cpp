@@ -1,4 +1,7 @@
+#include <BulletCollision/CollisionShapes/btBoxShape.h>
+
 #include "obj.hpp"
+#include "msg.hpp"
 
 namespace sim {
 
@@ -87,9 +90,32 @@ void Obj::setPosRot(float x, float y, float z,
 
 void Obj::_set(VisObj *o, btCollisionShape *shape, float mass)
 {
+    btVector3 local_inertia(0,0,0);
+
+    _vis = o;
     _shape = shape;
     _motion_state = new ObjMotionState(o);
-    _body = new btRigidBody(mass, _motion_state, _shape);
+
+    if (!btFuzzyZero(mass))
+        _shape->calculateLocalInertia(mass, local_inertia);
+
+    _body = new btRigidBody(mass, _motion_state, _shape, local_inertia);
 }
+
+
+
+ObjCube::ObjCube(float w, float mass)
+{
+    btCollisionShape *shape = new btBoxShape(btVector3(w / 2., w / 2., w / 2.));
+    _set(new VisObjCube(w), shape, mass);
+}
+
+ObjBox::ObjBox(float x, float y, float z, float mass)
+{
+    btCollisionShape *shape = new btBoxShape(btVector3(x / 2., y / 2., z / 2.));
+    _set(new VisObjBox(x, y, z), shape, mass);
+}
+
+
 
 }

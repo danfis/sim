@@ -50,6 +50,11 @@ class VisObjCube : public VisObj {
     VisObjCube(float width);
 };
 
+class VisObjBox : public VisObj {
+  public:
+    VisObjBox(float x, float y, float z);
+};
+
 class VisObjSphere : public VisObj {
   public:
     VisObjSphere(float radius);

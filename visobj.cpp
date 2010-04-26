@@ -15,13 +15,13 @@ VisObj::VisObj()
 void VisObj::setPos(float x, float y, float z)
 {
     //_root->setPosition(osg::Vec3(x, y, z));
-    _root->setPosition(osg::Vec3(x, -z, y));
+    _root->setPosition(osg::Vec3(x, z, y));
 }
 
 void VisObj::setRot(float x, float y, float z, float w)
 {
     //_root->setAttitude(osg::Quat(x, y, z, w));
-    _root->setAttitude(osg::Quat(x, -z, y, w));
+    _root->setAttitude(osg::Quat(x, z, y, -w));
 }
 
 void VisObj::getPos(float *x, float *y, float *z)
@@ -34,7 +34,7 @@ void VisObj::getPos(float *x, float *y, float *z)
     */
     *x = v[0];
     *y = v[2];
-    *z = -v[1];
+    *z = v[1];
 }
 
 void VisObj::getRot(float *x, float *y, float *z, float *w)
@@ -48,8 +48,8 @@ void VisObj::getRot(float *x, float *y, float *z, float *w)
     */
     *x = q.x();
     *y = q.z();
-    *z = -q.y();
-    *w = q.w();
+    *z = q.y();
+    *w = -q.w();
 }
 
 void VisObj::_setNode(osg::Node *n)
@@ -63,6 +63,16 @@ VisObjCube::VisObjCube(float width)
 {
     osg::Geode *geode = new osg::Geode();
     osg::Box *box = new osg::Box(osg::Vec3(0., 0., 0.), width);
+
+    geode->addDrawable(new osg::ShapeDrawable(box));
+
+    _setNode(geode);
+}
+
+VisObjBox::VisObjBox(float x, float y, float z)
+{
+    osg::Geode *geode = new osg::Geode();
+    osg::Box *box = new osg::Box(osg::Vec3(0., 0., 0.), x, z, y);
 
     geode->addDrawable(new osg::ShapeDrawable(box));
 
