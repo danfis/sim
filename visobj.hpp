@@ -26,15 +26,15 @@ class VisObj {
     /**
      * Tranfsforms object in 3D space.
      */
-    void setPosition(float x, float y, float z);
-    void setPosition(float *v) { setPosition(v[0], v[1], v[2]); }
-    void setRotation(float x, float y, float z, float w);
-    void setRotation(float *v) { setRotation(v[0], v[1], v[2], v[3]); }
+    void setPos(float x, float y, float z);
+    void setPos(float *v) { setPos(v[0], v[1], v[2]); }
+    void setRot(float x, float y, float z, float w);
+    void setRot(float *v) { setRot(v[0], v[1], v[2], v[3]); }
 
-    void getPosition(float *x, float *y, float *z);
-    void getPosition(float *v) { getPosition(v, v + 1, v + 2); }
-    void getRotation(float *x, float *y, float *z, float *w);
-    void getRotation(float *v) { getRotation(v, v + 1, v + 2, v + 3); }
+    void getPos(float *x, float *y, float *z);
+    void getPos(float *v) { getPos(v, v + 1, v + 2); }
+    void getRot(float *x, float *y, float *z, float *w);
+    void getRot(float *v) { getRot(v, v + 1, v + 2, v + 3); }
 
   protected:
     /**

@@ -12,19 +12,19 @@ VisObj::VisObj()
     _root = new osg::PositionAttitudeTransform();
 }
 
-void VisObj::setPosition(float x, float y, float z)
+void VisObj::setPos(float x, float y, float z)
 {
     //_root->setPosition(osg::Vec3(x, y, z));
     _root->setPosition(osg::Vec3(x, -z, y));
 }
 
-void VisObj::setRotation(float x, float y, float z, float w)
+void VisObj::setRot(float x, float y, float z, float w)
 {
     //_root->setAttitude(osg::Quat(x, y, z, w));
     _root->setAttitude(osg::Quat(x, -z, y, w));
 }
 
-void VisObj::getPosition(float *x, float *y, float *z)
+void VisObj::getPos(float *x, float *y, float *z)
 {
     const osg::Vec3d &v = _root->getPosition();
     /*
@@ -37,7 +37,7 @@ void VisObj::getPosition(float *x, float *y, float *z)
     *z = -v[1];
 }
 
-void VisObj::getRotation(float *x, float *y, float *z, float *w)
+void VisObj::getRot(float *x, float *y, float *z, float *w)
 {
     const osg::Quat &q = _root->getAttitude();
     /*

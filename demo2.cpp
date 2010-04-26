@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     vw->addObj(vbox2);
 
 
-    pbox2->setPosition(0., -10., 0.);
+    pbox2->setPos(0., -10., 0.);
 
     pw->addObj(pbox);
     pw->addObj(pbox2);
@@ -33,15 +33,15 @@ int main(int argc, char *argv[])
 
         pw->step();
 
-        pbox->getPosition(pos);
-        pbox->getRotation(rot);
-        vbox->setPosition(pos);
-        vbox->setRotation(rot);
+        pbox->getPos(pos);
+        pbox->getRot(rot);
+        vbox->setPos(pos);
+        vbox->setRot(rot);
 
-        pbox2->getPosition(pos);
-        pbox2->getRotation(rot);
-        vbox2->setPosition(pos);
-        vbox2->setRotation(rot);
+        pbox2->getPos(pos);
+        pbox2->getRot(rot);
+        vbox2->setPos(pos);
+        vbox2->setRot(rot);
 
         vw->step();
 

@@ -25,7 +25,7 @@ PhysObj::~PhysObj()
         delete _motion_state;
 }
 
-void PhysObj::setPosition(float x, float y, float z)
+void PhysObj::setPos(float x, float y, float z)
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
@@ -35,7 +35,7 @@ void PhysObj::setPosition(float x, float y, float z)
     _body->setWorldTransform(trans);
 }
 
-void PhysObj::setRotation(float x, float y, float z, float w)
+void PhysObj::setRot(float x, float y, float z, float w)
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
@@ -45,7 +45,7 @@ void PhysObj::setRotation(float x, float y, float z, float w)
     _body->setWorldTransform(trans);
 }
 
-void PhysObj::getPosition(float *x, float *y, float *z)
+void PhysObj::getPos(float *x, float *y, float *z)
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
@@ -54,7 +54,7 @@ void PhysObj::getPosition(float *x, float *y, float *z)
     *z = trans.getOrigin().getZ();
 }
 
-void PhysObj::getRotation(float *x, float *y, float *z, float *w)
+void PhysObj::getRot(float *x, float *y, float *z, float *w)
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
