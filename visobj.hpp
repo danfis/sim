@@ -29,9 +29,12 @@ class VisObj {
     void setPosition(float x, float y, float z);
     void setPosition(float *v) { setPosition(v[0], v[1], v[2]); }
     void setRotation(float x, float y, float z, float w);
+    void setRotation(float *v) { setRotation(v[0], v[1], v[2], v[3]); }
 
     void getPosition(float *x, float *y, float *z);
     void getPosition(float *v) { getPosition(v, v + 1, v + 2); }
+    void getRotation(float *x, float *y, float *z, float *w);
+    void getRotation(float *v) { getRotation(v, v + 1, v + 2, v + 3); }
 
   protected:
     /**
@@ -42,9 +45,9 @@ class VisObj {
 
 
 
-class VisObjBox : public VisObj {
+class VisObjCube : public VisObj {
   public:
-    VisObjBox(float width);
+    VisObjCube(float width);
 };
 
 class VisObjSphere : public VisObj {

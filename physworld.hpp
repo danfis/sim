@@ -25,6 +25,25 @@ class PhysWorld {
   public:
     PhysWorld();
     virtual ~PhysWorld();
+
+    void addObj(PhysObj *obj);
+
+    /**
+     * Initializes world.
+     */
+    void init();
+
+    /**
+     * Destroys world.
+     */
+    void destroy();
+
+    /**
+     * Performes one step.
+     */
+    void step();
+
+    bool done() { return false; }
 };
 
 }
