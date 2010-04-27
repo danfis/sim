@@ -1,4 +1,6 @@
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
+#include <BulletCollision/CollisionShapes/btSphereShape.h>
+#include <BulletCollision/CollisionShapes/btCylinderShape.h>
 
 #include "obj.hpp"
 #include "msg.hpp"
@@ -111,22 +113,58 @@ void Obj::_set(VisObj *o, btCollisionShape *shape, Scalar mass)
         _shape->calculateLocalInertia(mass, local_inertia);
 
     _body = new btRigidBody(mass, _motion_state, _shape, local_inertia);
+
+    // TODO
+    _body->setDamping(0.3, 0.2);
 }
 
 
 
 ObjCube::ObjCube(Scalar w, Scalar mass)
+    : Obj()
 {
     btCollisionShape *shape = new btBoxShape(btVector3(w / 2., w / 2., w / 2.));
     _set(new VisObjCube(w), shape, mass);
 }
 
 ObjBox::ObjBox(Scalar x, Scalar y, Scalar z, Scalar mass)
+    : Obj()
 {
     btCollisionShape *shape = new btBoxShape(btVector3(x / 2., y / 2., z / 2.));
     _set(new VisObjBox(x, y, z), shape, mass);
 }
 
+ObjSphere::ObjSphere(Scalar radius, Scalar mass)
+    : Obj()
+{
+    btCollisionShape *shape = new btSphereShape(radius);
+    _set(new VisObjSphere(radius), shape, mass);
+}
 
+ObjCylinder::ObjCylinder(Scalar radius, Scalar height, Scalar mass)
+    : Obj()
+{
+    Vec3 v(radius, height / 2., radius);
+    btCollisionShape *shape = new btCylinderShape(v);
+    _set(new VisObjCylinder(radius, height), shape, mass);
+}
+
+ObjCylinderX::ObjCylinderX(Scalar radius, Scalar height, Scalar mass)
+    : ObjCylinder(radius, height, mass)
+{
+    // parent constructor already created cylinder
+    // now it must be correctly rotated
+    Quat q(Vec3(0., 0., 1.), M_PI * .5);
+    setRot(q);
+}
+
+ObjCylinderZ::ObjCylinderZ(Scalar radius, Scalar height, Scalar mass)
+    : ObjCylinder(radius, height, mass)
+{
+    // parent constructor already created cylinder
+    // now it must be correctly rotated
+    Quat q(Vec3(1., 0., 0.), M_PI * .5);
+    setRot(q);
+}
 
 }

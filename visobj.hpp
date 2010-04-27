@@ -72,6 +72,11 @@ class VisObjSphere : public VisObj {
     VisObjSphere(Scalar radius);
 };
 
+class VisObjCylinder : public VisObj {
+  public:
+    VisObjCylinder(Scalar radius, Scalar height);
+};
+
 } /* namespace sim */
 
 #endif

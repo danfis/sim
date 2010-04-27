@@ -83,6 +83,38 @@ class ObjBox : public Obj {
     ObjBox(Scalar x, Scalar y, Scalar z, Scalar mass);
 };
 
+class ObjSphere : public Obj {
+  public:
+    ObjSphere(Scalar radius, Scalar mass);
+};
+
+/**
+ * Cylinder along Y axis.
+ */
+class ObjCylinder : public Obj {
+  public:
+    ObjCylinder(Scalar radius, Scalar height, Scalar mass);
+};
+
+typedef ObjCylinder ObjCylinderY;
+
+/**
+ * Cylinder along X axis.
+ */
+class ObjCylinderX : public ObjCylinder {
+  public:
+    ObjCylinderX(Scalar radius, Scalar height, Scalar mass);
+};
+
+/**
+ * Cylinder along Z axis.
+ */
+class ObjCylinderZ : public ObjCylinder {
+  public:
+    ObjCylinderZ(Scalar radius, Scalar height, Scalar mass);
+};
+
+
 }
 
 #endif /* _SIM_OBJ_HPP_ */

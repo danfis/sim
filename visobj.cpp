@@ -15,7 +15,7 @@ VisObj::VisObj()
 void VisObj::setPos(Scalar x, Scalar y, Scalar z)
 {
     //_root->setPosition(osg::Vec3(x, y, z));
-    _root->setPosition(osg::Vec3(x, z, y));
+    _root->setPosition(osg::Vec3(x, -z, y));
 }
 
 
@@ -40,7 +40,7 @@ void VisObj::getPos(Scalar *x, Scalar *y, Scalar *z) const
     *z = v[2];
     */
     *x = v[0];
-    *y = v[2];
+    *y = -v[2];
     *z = v[1];
 }
 
@@ -49,7 +49,7 @@ void VisObj::getPos(Vec3 *o) const
     const osg::Vec3d &v = _root->getPosition();
 
     o->setX(v[0]);
-    o->setY(v[2]);
+    o->setY(-v[2]);
     o->setZ(v[1]);
 }
 
@@ -110,6 +110,17 @@ VisObjSphere::VisObjSphere(Scalar radius)
 {
     osg::Geode *geode = new osg::Geode();
     osg::Sphere *sp = new osg::Sphere(osg::Vec3(0., 0., 0.), radius);
+
+    geode->addDrawable(new osg::ShapeDrawable(sp));
+
+    _setNode(geode);
+}
+
+VisObjCylinder::VisObjCylinder(Scalar radius, Scalar height)
+    : VisObj()
+{
+    osg::Geode *geode = new osg::Geode();
+    osg::Cylinder *sp = new osg::Cylinder(osg::Vec3(0., 0., 0.), radius, height);
 
     geode->addDrawable(new osg::ShapeDrawable(sp));
 
