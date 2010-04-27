@@ -3,6 +3,8 @@
 
 #include <osg/PositionAttitudeTransform>
 
+#include "math.hpp"
+
 namespace sim {
 
 /**
@@ -26,15 +28,25 @@ class VisObj {
     /**
      * Tranfsforms object in 3D space.
      */
-    void setPos(float x, float y, float z);
-    void setPos(float *v) { setPos(v[0], v[1], v[2]); }
-    void setRot(float x, float y, float z, float w);
-    void setRot(float *v) { setRot(v[0], v[1], v[2], v[3]); }
+    void setPos(const Scalar x, const Scalar y, const Scalar z);
+    void setPos(const Scalar * const v) { setPos(v[0], v[1], v[2]); }
+    void setPos(const Vec3 *v) { setPos(*v); }
+    void setPos(const Vec3 &v) { setPos(v.x(), v.y(), v.z()); }
 
-    void getPos(float *x, float *y, float *z);
-    void getPos(float *v) { getPos(v, v + 1, v + 2); }
-    void getRot(float *x, float *y, float *z, float *w);
-    void getRot(float *v) { getRot(v, v + 1, v + 2, v + 3); }
+    void setRot(const Scalar x, const Scalar y, const Scalar z, const Scalar w);
+    void setRot(const Scalar * const v) { setRot(v[0], v[1], v[2], v[3]); }
+    void setRot(const Quat *v) { setRot(*v); }
+    void setRot(const Quat &v) { setRot(v.x(), v.y(), v.z(), v.w()); }
+
+    void setPosRot(const Vec3 *v, const Quat *q) { setPosRot(*v, *q); }
+    void setPosRot(const Vec3 &v, const Quat &q);
+
+    void getPos(Scalar *x, Scalar *y, Scalar *z) const;
+    void getPos(Scalar *v) const { getPos(v, v + 1, v + 2); }
+    void getPos(Vec3 *v) const;
+    void getRot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const;
+    void getRot(Scalar *v) const { getRot(v, v + 1, v + 2, v + 3); }
+    void getRot(Quat *q) const;
 
   protected:
     /**
@@ -47,17 +59,17 @@ class VisObj {
 
 class VisObjCube : public VisObj {
   public:
-    VisObjCube(float width);
+    VisObjCube(Scalar width);
 };
 
 class VisObjBox : public VisObj {
   public:
-    VisObjBox(float x, float y, float z);
+    VisObjBox(Scalar x, Scalar y, Scalar z);
 };
 
 class VisObjSphere : public VisObj {
   public:
-    VisObjSphere(float radius);
+    VisObjSphere(Scalar radius);
 };
 
 } /* namespace sim */

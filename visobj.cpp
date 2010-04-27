@@ -12,19 +12,26 @@ VisObj::VisObj()
     _root = new osg::PositionAttitudeTransform();
 }
 
-void VisObj::setPos(float x, float y, float z)
+void VisObj::setPos(Scalar x, Scalar y, Scalar z)
 {
     //_root->setPosition(osg::Vec3(x, y, z));
     _root->setPosition(osg::Vec3(x, z, y));
 }
 
-void VisObj::setRot(float x, float y, float z, float w)
+
+void VisObj::setRot(Scalar x, Scalar y, Scalar z, Scalar w)
 {
     //_root->setAttitude(osg::Quat(x, y, z, w));
     _root->setAttitude(osg::Quat(x, z, y, -w));
 }
 
-void VisObj::getPos(float *x, float *y, float *z)
+void VisObj::setPosRot(const Vec3 &v, const Quat &q)
+{
+    setPos(v);
+    setRot(q);
+}
+
+void VisObj::getPos(Scalar *x, Scalar *y, Scalar *z) const
 {
     const osg::Vec3d &v = _root->getPosition();
     /*
@@ -37,7 +44,16 @@ void VisObj::getPos(float *x, float *y, float *z)
     *z = v[1];
 }
 
-void VisObj::getRot(float *x, float *y, float *z, float *w)
+void VisObj::getPos(Vec3 *o) const
+{
+    const osg::Vec3d &v = _root->getPosition();
+
+    o->setX(v[0]);
+    o->setY(v[2]);
+    o->setZ(v[1]);
+}
+
+void VisObj::getRot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const
 {
     const osg::Quat &q = _root->getAttitude();
     /*
@@ -52,6 +68,16 @@ void VisObj::getRot(float *x, float *y, float *z, float *w)
     *w = -q.w();
 }
 
+void VisObj::getRot(Quat *q) const
+{
+    const osg::Quat &v = _root->getAttitude();
+
+    q->setX(v.x());
+    q->setY(v.z());
+    q->setZ(v.y());
+    q->setW(-v.w());
+}
+
 void VisObj::_setNode(osg::Node *n)
 {
     _node = n;
@@ -59,7 +85,7 @@ void VisObj::_setNode(osg::Node *n)
 }
 
 
-VisObjCube::VisObjCube(float width)
+VisObjCube::VisObjCube(Scalar width)
 {
     osg::Geode *geode = new osg::Geode();
     osg::Box *box = new osg::Box(osg::Vec3(0., 0., 0.), width);
@@ -69,7 +95,7 @@ VisObjCube::VisObjCube(float width)
     _setNode(geode);
 }
 
-VisObjBox::VisObjBox(float x, float y, float z)
+VisObjBox::VisObjBox(Scalar x, Scalar y, Scalar z)
 {
     osg::Geode *geode = new osg::Geode();
     osg::Box *box = new osg::Box(osg::Vec3(0., 0., 0.), x, z, y);
@@ -80,7 +106,7 @@ VisObjBox::VisObjBox(float x, float y, float z)
 }
 
 
-VisObjSphere::VisObjSphere(float radius)
+VisObjSphere::VisObjSphere(Scalar radius)
 {
     osg::Geode *geode = new osg::Geode();
     osg::Sphere *sp = new osg::Sphere(osg::Vec3(0., 0., 0.), radius);

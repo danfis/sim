@@ -19,8 +19,7 @@ void ObjMotionState::setWorldTransform(const btTransform &world)
 
     pos = _world.getOrigin();
     rot = _world.getRotation();
-    _vis->setPos(pos.x(), pos.y(), pos.z());
-    _vis->setRot(rot.x(), rot.y(), rot.z(), rot.w());
+    _vis->setPosRot(pos, rot);
 }
 
 Obj::~Obj()
@@ -35,27 +34,27 @@ Obj::~Obj()
         delete _vis;
 }
 
-void Obj::setPos(float x, float y, float z)
+void Obj::setPos(const Vec3 &v)
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
 
-    trans.setOrigin(btVector3(x, y, z));
+    trans.setOrigin(v);
     _motion_state->setWorldTransform(trans);
     _body->setWorldTransform(trans);
 }
 
-void Obj::setRot(float x, float y, float z, float w)
+void Obj::setRot(const Quat &q)
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
 
-    trans.setRotation(btQuaternion(x, y, z, w));
+    trans.setRotation(q);
     _motion_state->setWorldTransform(trans);
     _body->setWorldTransform(trans);
 }
 
-void Obj::getPos(float *x, float *y, float *z)
+void Obj::getPos(Scalar *x, Scalar *y, Scalar *z) const
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
@@ -63,8 +62,14 @@ void Obj::getPos(float *x, float *y, float *z)
     *y = trans.getOrigin().getY();
     *z = trans.getOrigin().getZ();
 }
+void Obj::getPos(Vec3 *v) const
+{
+    btTransform trans;
+    _motion_state->getWorldTransform(trans);
+    *v = trans.getOrigin();
+}
 
-void Obj::getRot(float *x, float *y, float *z, float *w)
+void Obj::getRot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
@@ -75,20 +80,26 @@ void Obj::getRot(float *x, float *y, float *z, float *w)
     *w = q.w();
 }
 
-void Obj::setPosRot(float x, float y, float z,
-                    float rx, float ry, float rz, float rw)
+void Obj::getRot(Quat *q) const
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
-    trans.setOrigin(btVector3(x, y, z));
-    trans.setRotation(btQuaternion(rx, ry, rz, rw));
+    *q = trans.getRotation();
+}
+
+void Obj::setPosRot(const Vec3 &v, const Quat &q)
+{
+    btTransform trans;
+    _motion_state->getWorldTransform(trans);
+    trans.setOrigin(v);
+    trans.setRotation(q);
     _motion_state->setWorldTransform(trans);
     _body->setWorldTransform(trans);
 }
 
 
 
-void Obj::_set(VisObj *o, btCollisionShape *shape, float mass)
+void Obj::_set(VisObj *o, btCollisionShape *shape, Scalar mass)
 {
     btVector3 local_inertia(0,0,0);
 
@@ -104,13 +115,13 @@ void Obj::_set(VisObj *o, btCollisionShape *shape, float mass)
 
 
 
-ObjCube::ObjCube(float w, float mass)
+ObjCube::ObjCube(Scalar w, Scalar mass)
 {
     btCollisionShape *shape = new btBoxShape(btVector3(w / 2., w / 2., w / 2.));
     _set(new VisObjCube(w), shape, mass);
 }
 
-ObjBox::ObjBox(float x, float y, float z, float mass)
+ObjBox::ObjBox(Scalar x, Scalar y, Scalar z, Scalar mass)
 {
     btCollisionShape *shape = new btBoxShape(btVector3(x / 2., y / 2., z / 2.));
     _set(new VisObjBox(x, y, z), shape, mass);
