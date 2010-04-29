@@ -27,6 +27,21 @@ class Joint {
     void _setJoint(btTypedConstraint *c) { _joint = c; }
 };
 
+class JointFixed : public Joint {
+  public:
+    JointFixed(Obj *oA, Obj *oB);
+};
+
+class JointPoint2Point : public Joint {
+  public:
+    JointPoint2Point(Obj *oA, Obj *oB, const Vec3 &pivotA, const Vec3 &pivotB);
+};
+
+class JointHinge : public Joint {
+  public:
+    JointHinge(Obj *oA, Obj *oB, const Vec3 &anchor, const Vec3 &axis);
+};
+
 class JointHinge2 : public Joint {
   public:
     JointHinge2(Obj *oA, Obj *oB, const Vec3 &anchor, const Vec3 &axis1, const Vec3 &axis2);

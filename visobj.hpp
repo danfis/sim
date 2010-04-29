@@ -62,7 +62,7 @@ class VisObjCube : public VisObj {
 
 class VisObjBox : public VisObj {
   public:
-    VisObjBox(Scalar x, Scalar y, Scalar z);
+    VisObjBox(Vec3 dim);
 };
 
 class VisObjSphere : public VisObj {

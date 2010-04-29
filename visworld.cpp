@@ -28,6 +28,8 @@ void VisWorld::addObj(VisObj *obj)
 
 void VisWorld::init()
 {
+    _viewer->setUpViewInWindow(0, 0, 1200, 800);
+
     _viewer->setSceneData(_root);
 
     if (!_viewer->getCameraManipulator()){

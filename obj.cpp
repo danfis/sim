@@ -124,11 +124,11 @@ ObjCube::ObjCube(Scalar w, Scalar mass)
     _set(new VisObjCube(w), shape, mass);
 }
 
-ObjBox::ObjBox(Scalar x, Scalar y, Scalar z, Scalar mass)
+ObjBox::ObjBox(Vec3 dim, Scalar mass)
     : Obj()
 {
-    btCollisionShape *shape = new btBoxShape(btVector3(x / 2., y / 2., z / 2.));
-    _set(new VisObjBox(x, y, z), shape, mass);
+    btCollisionShape *shape = new btBoxShape(Vec3::toBullet(dim / 2.));
+    _set(new VisObjBox(dim), shape, mass);
 }
 
 ObjSphere::ObjSphere(Scalar radius, Scalar mass)

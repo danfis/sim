@@ -33,6 +33,8 @@ class Vec3 : public osg::Vec3d {
 
     static btVector3 toBullet(Scalar x, Scalar y, Scalar z)
         { return btVector3(x, z, y); }
+    static btVector3 toBullet(const Vec3 &v) { return v.toBullet(); }
+
     static Vec3 fromBullet(const btVector3 &v)
         { return Vec3(v.x(), v.z(), v.y()); }
     

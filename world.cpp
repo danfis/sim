@@ -76,13 +76,14 @@ void World::destroy()
         _vis->destroy();
 }
 
-void World::step()
+void World::step(bool phys, bool vis)
 {
     // perform simulation step
     // TODO: Parametrize this
-    _world->stepSimulation(1./60., 20);
+    if (phys)
+        _world->stepSimulation(1./60., 20);
 
-    if (_vis)
+    if (vis && _vis)
         _vis->step();
 }
 

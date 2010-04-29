@@ -76,7 +76,7 @@ class ObjCube : public Obj {
 
 class ObjBox : public Obj {
   public:
-    ObjBox(Scalar x, Scalar y, Scalar z, Scalar mass);
+    ObjBox(Vec3 dim, Scalar mass);
 };
 
 class ObjSphere : public Obj {

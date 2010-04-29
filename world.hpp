@@ -45,7 +45,7 @@ class World {
     /**
      * Performes one step.
      */
-    void step();
+    void step(bool phys = true, bool vis = true);
 
     bool done();
 };

@@ -65,10 +65,10 @@ VisObjCube::VisObjCube(Scalar width)
     _setNode(geode);
 }
 
-VisObjBox::VisObjBox(Scalar x, Scalar y, Scalar z)
+VisObjBox::VisObjBox(Vec3 dim)
 {
     osg::Geode *geode = new osg::Geode();
-    osg::Box *box = new osg::Box(Vec3(0., 0., 0.), x, z, y);
+    osg::Box *box = new osg::Box(osg::Vec3(0., 0., 0.), dim.x(), dim.y(), dim.z());
 
     geode->addDrawable(new osg::ShapeDrawable(box));
 
