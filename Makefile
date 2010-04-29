@@ -4,7 +4,7 @@ LDFLAGS += $(OSG_LDFLAGS) $(ODE_LDFLAGS) $(BT_LDFLAGS)
 
 
 TARGETS = libsim.a demo demo3
-OBJS = sim.o object.o visobj.o visworld.o obj.o world.o
+OBJS = sim.o object.o visobj.o visworld.o obj.o world.o joint.o
 
 all: $(TARGETS)
 

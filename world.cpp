@@ -54,6 +54,15 @@ void World::addObj(Obj *obj)
         _vis->addObj(vobj);
 }
 
+void World::addJoint(Joint *j)
+{
+    btTypedConstraint *c = j->joint();
+
+    DBG(c);
+    if (c)
+        _world->addConstraint(c);
+}
+
 
 void World::init()
 {

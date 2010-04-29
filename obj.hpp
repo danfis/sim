@@ -61,6 +61,7 @@ class Obj {
     void getPos(Scalar *x, Scalar *y, Scalar *z) const;
     void getPos(Scalar *v) const { getPos(v, v + 1, v + 2); }
     void getPos(Vec3 *v) const;
+    Vec3 getPos() const { Vec3 v; getPos(&v); return v; }
 
     void getRot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const;
     void getRot(Scalar *v) const { getRot(v, v + 1, v + 2, v + 3); }

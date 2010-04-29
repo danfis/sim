@@ -8,6 +8,7 @@
 #include <BulletDynamics/Dynamics/btDynamicsWorld.h>
 
 #include "obj.hpp"
+#include "joint.hpp"
 #include "visworld.hpp"
 
 namespace sim {
@@ -29,6 +30,7 @@ class World {
     virtual ~World();
 
     void addObj(Obj *obj);
+    void addJoint(Joint *j);
 
     /**
      * Initializes world.
