@@ -28,15 +28,15 @@ class VisObj {
     /**
      * Tranfsforms object in 3D space.
      */
-    void setPos(const Scalar x, const Scalar y, const Scalar z);
-    void setPos(const Scalar * const v) { setPos(v[0], v[1], v[2]); }
+    void setPos(const Scalar x, const Scalar y, const Scalar z)
+        { setPos(Vec3(x, y, z)); }
     void setPos(const Vec3 *v) { setPos(*v); }
-    void setPos(const Vec3 &v) { setPos(v.x(), v.y(), v.z()); }
+    void setPos(const Vec3 &v);
 
-    void setRot(const Scalar x, const Scalar y, const Scalar z, const Scalar w);
-    void setRot(const Scalar * const v) { setRot(v[0], v[1], v[2], v[3]); }
+    void setRot(const Scalar x, const Scalar y, const Scalar z, const Scalar w)
+        { setRot(Quat(x, y, z, w)); }
     void setRot(const Quat *v) { setRot(*v); }
-    void setRot(const Quat &v) { setRot(v.x(), v.y(), v.z(), v.w()); }
+    void setRot(const Quat &v);
 
     void setPosRot(const Vec3 *v, const Quat *q) { setPosRot(*v, *q); }
     void setPosRot(const Vec3 &v, const Quat &q);

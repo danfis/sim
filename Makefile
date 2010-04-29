@@ -23,7 +23,7 @@ demo3: demo3.o libsim.a
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-%.o: %.cpp %.hpp
+%.o: %.cpp %.hpp math.hpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<

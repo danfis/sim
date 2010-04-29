@@ -21,7 +21,7 @@ void ObjMotionState::setWorldTransform(const btTransform &world)
 
     pos = _world.getOrigin();
     rot = _world.getRotation();
-    _vis->setPosRot(pos, rot);
+    _vis->setPosRot(Vec3::fromBullet(pos), Quat::fromBullet(rot));
 }
 
 Obj::~Obj()
@@ -41,7 +41,7 @@ void Obj::setPos(const Vec3 &v)
     btTransform trans;
     _motion_state->getWorldTransform(trans);
 
-    trans.setOrigin(v);
+    trans.setOrigin(v.toBullet());
     _motion_state->setWorldTransform(trans);
     _body->setWorldTransform(trans);
 }
@@ -51,31 +51,30 @@ void Obj::setRot(const Quat &q)
     btTransform trans;
     _motion_state->getWorldTransform(trans);
 
-    trans.setRotation(q);
+    trans.setRotation(q.toBullet());
     _motion_state->setWorldTransform(trans);
     _body->setWorldTransform(trans);
 }
 
 void Obj::getPos(Scalar *x, Scalar *y, Scalar *z) const
 {
-    btTransform trans;
-    _motion_state->getWorldTransform(trans);
-    *x = trans.getOrigin().getX();
-    *y = trans.getOrigin().getY();
-    *z = trans.getOrigin().getZ();
+    Vec3 v;
+    getPos(&v);
+    *x = v.x();
+    *y = v.y();
+    *z = v.z();
 }
 void Obj::getPos(Vec3 *v) const
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
-    *v = trans.getOrigin();
+    *v = Vec3::fromBullet(trans.getOrigin());
 }
 
 void Obj::getRot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const
 {
-    btTransform trans;
-    _motion_state->getWorldTransform(trans);
-    btQuaternion q = trans.getRotation();
+    Quat q;
+    getRot(&q);
     *x = q.x();
     *y = q.y();
     *z = q.z();
@@ -86,15 +85,15 @@ void Obj::getRot(Quat *q) const
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
-    *q = trans.getRotation();
+    *q = Quat::fromBullet(trans.getRotation());
 }
 
 void Obj::setPosRot(const Vec3 &v, const Quat &q)
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
-    trans.setOrigin(v);
-    trans.setRotation(q);
+    trans.setOrigin(v.toBullet());
+    trans.setRotation(q.toBullet());
     _motion_state->setWorldTransform(trans);
     _body->setWorldTransform(trans);
 }
@@ -145,7 +144,7 @@ ObjCylinder::ObjCylinder(Scalar radius, Scalar height, Scalar mass)
     : Obj()
 {
     Vec3 v(radius, height / 2., radius);
-    btCollisionShape *shape = new btCylinderShape(v);
+    btCollisionShape *shape = new btCylinderShape(v.toBullet());
     _set(new VisObjCylinder(radius, height), shape, mass);
 }
 
@@ -154,11 +153,11 @@ ObjCylinderX::ObjCylinderX(Scalar radius, Scalar height, Scalar mass)
 {
     // parent constructor already created cylinder
     // now it must be correctly rotated
-    Quat q(Vec3(0., 0., 1.), M_PI * .5);
+    Quat q(Vec3(0., 1., 0.), M_PI * .5);
     setRot(q);
 }
 
-ObjCylinderZ::ObjCylinderZ(Scalar radius, Scalar height, Scalar mass)
+ObjCylinderY::ObjCylinderY(Scalar radius, Scalar height, Scalar mass)
     : ObjCylinder(radius, height, mass)
 {
     // parent constructor already created cylinder

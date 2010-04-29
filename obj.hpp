@@ -47,13 +47,11 @@ class Obj {
      */
     void setPos(const Scalar x, const Scalar y, const Scalar z)
         { setPos(Vec3(x, y, z)); }
-    void setPos(const Scalar *v) { setPos(Vec3(v[0], v[1], v[2])); }
     void setPos(const Vec3 *v) { setPos(*v); }
     void setPos(const Vec3 &v);
 
     void setRot(const Scalar x, const Scalar y, const Scalar z, const Scalar w)
         { setRot(Quat(x, y, z, w)); }
-    void setRot(const Scalar *v) { setRot(Quat(v[0], v[1], v[2], v[3])); }
     void setRot(const Quat *q) { setRot(*q); }
     void setRot(const Quat &q);
 
@@ -89,14 +87,12 @@ class ObjSphere : public Obj {
 };
 
 /**
- * Cylinder along Y axis.
+ * Cylinder along Z axis.
  */
 class ObjCylinder : public Obj {
   public:
     ObjCylinder(Scalar radius, Scalar height, Scalar mass);
 };
-
-typedef ObjCylinder ObjCylinderY;
 
 /**
  * Cylinder along X axis.
@@ -107,11 +103,11 @@ class ObjCylinderX : public ObjCylinder {
 };
 
 /**
- * Cylinder along Z axis.
+ * Cylinder along Y axis.
  */
-class ObjCylinderZ : public ObjCylinder {
+class ObjCylinderY : public ObjCylinder {
   public:
-    ObjCylinderZ(Scalar radius, Scalar height, Scalar mass);
+    ObjCylinderY(Scalar radius, Scalar height, Scalar mass);
 };
 
 
