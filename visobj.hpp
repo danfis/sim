@@ -25,6 +25,11 @@ class VisObj {
     osg::Node *rootNode() { return _root; }
     const osg::Node *rootNode() const { return _root; }
 
+    Vec3 pos() const { return _root->getPosition(); }
+    void pos(Scalar *x, Scalar *y, Scalar *z) const;
+    Quat rot() const { return _root->getAttitude(); }
+    void rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const;
+
     /**
      * Tranfsforms object in 3D space.
      */
@@ -40,13 +45,6 @@ class VisObj {
 
     void setPosRot(const Vec3 *v, const Quat *q) { setPosRot(*v, *q); }
     void setPosRot(const Vec3 &v, const Quat &q);
-
-    void getPos(Scalar *x, Scalar *y, Scalar *z) const;
-    void getPos(Scalar *v) const { getPos(v, v + 1, v + 2); }
-    void getPos(Vec3 *v) const;
-    void getRot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const;
-    void getRot(Scalar *v) const { getRot(v, v + 1, v + 2, v + 3); }
-    void getRot(Quat *q) const;
 
   protected:
     /**

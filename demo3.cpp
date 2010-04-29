@@ -26,13 +26,13 @@ int main(int argc, char *argv[])
     rw2->setPos(-0.65, 0.5, -5.5);
     rw3->setPos(0.65, -0.5, -5.5);
     rw4->setPos(-0.65, -0.5, -5.5);
-    j1 = new sim::JointHinge2(r, rw1, rw1->getPos(),
+    j1 = new sim::JointHinge2(r, rw1, rw1->pos(),
                               sim::Vec3(0., 0., 1.), sim::Vec3(1., 0., 0.));
-    j2 = new sim::JointHinge2(r, rw2, rw2->getPos(),
+    j2 = new sim::JointHinge2(r, rw2, rw2->pos(),
                               sim::Vec3(0., 0., 1.), sim::Vec3(1., 0., 0.));
-    j3 = new sim::JointHinge2(r, rw3, rw3->getPos(),
+    j3 = new sim::JointHinge2(r, rw3, rw3->pos(),
                               sim::Vec3(0., 0., 1.), sim::Vec3(1., 0., 0.));
-    j4 = new sim::JointHinge2(r, rw4, rw4->getPos(),
+    j4 = new sim::JointHinge2(r, rw4, rw4->pos(),
                               sim::Vec3(0., 0., 1.), sim::Vec3(1., 0., 0.));
 
     world->addObj(r);

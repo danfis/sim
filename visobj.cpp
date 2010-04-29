@@ -29,34 +29,24 @@ void VisObj::setPosRot(const Vec3 &v, const Quat &q)
     setRot(q);
 }
 
-void VisObj::getPos(Scalar *x, Scalar *y, Scalar *z) const
+void VisObj::pos(Scalar *x, Scalar *y, Scalar *z) const
 {
-    Vec3 v;
-    getPos(&v);
+    Vec3 v = pos();
     *x = v[0];
     *y = v[1];
     *z = v[2];
 }
 
-void VisObj::getPos(Vec3 *o) const
-{
-    *o = (const Vec3 &)_root->getPosition();
-}
 
-void VisObj::getRot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const
+void VisObj::rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const
 {
-    Quat q;
-    getRot(&q);
+    Quat q = rot();
     *x = q.x();
     *y = q.z();
     *z = q.y();
     *w = -q.w();
 }
 
-void VisObj::getRot(Quat *q) const
-{
-    *q = (const Quat &)_root->getAttitude();
-}
 
 void VisObj::_setNode(osg::Node *n)
 {

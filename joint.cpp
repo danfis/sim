@@ -31,10 +31,6 @@ JointHinge2::JointHinge2(Obj *oA, Obj *oB, const Vec3 &anchor, const Vec3 &axis1
     DBG("anchor: " << anchor.x() << " " << anchor.y() << " " << anchor.z());
     c = new btHinge2Constraint(*b1, *b2, anch, a1, a2);
 
-    c->enableSpring(0, true);
-    c->setStiffness(0, 1000.);
-    c->setStiffness(1, 1000.);
-    c->setStiffness(2, 1000.);
     c->setLinearLowerLimit(Vec3::toBullet(0., 0., 0.));
     c->setLinearUpperLimit(Vec3::toBullet(0., 0., 0.));
 

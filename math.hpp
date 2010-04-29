@@ -27,6 +27,7 @@ class Vec3 : public osg::Vec3d {
     Vec3() : osg::Vec3d() {}
     Vec3(Scalar x, Scalar y, Scalar z)
         : osg::Vec3d(x, y, z){}
+    Vec3(const osg::Vec3d &v) : osg::Vec3d(v){}
 
     btVector3 toBullet() const { return btVector3(x(), z(), y()); }
 
@@ -47,6 +48,7 @@ class Quat : public osg::Quat {
         : osg::Quat(x, y, z, w) {}
     Quat(const Vec3 &axis, Scalar angle)
         : osg::Quat(angle, axis) {}
+    Quat(const osg::Quat &q) : osg::Quat(q){}
 
     btQuaternion toBullet() const { return btQuaternion(x(), z(), y(), -w()); }
 

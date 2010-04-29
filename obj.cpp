@@ -56,36 +56,34 @@ void Obj::setRot(const Quat &q)
     _body->setWorldTransform(trans);
 }
 
-void Obj::getPos(Scalar *x, Scalar *y, Scalar *z) const
+void Obj::pos(Scalar *x, Scalar *y, Scalar *z) const
 {
-    Vec3 v;
-    getPos(&v);
+    Vec3 v = pos();
     *x = v.x();
     *y = v.y();
     *z = v.z();
 }
-void Obj::getPos(Vec3 *v) const
+Vec3 Obj::pos() const
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
-    *v = Vec3::fromBullet(trans.getOrigin());
+    return Vec3::fromBullet(trans.getOrigin());
 }
 
-void Obj::getRot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const
+void Obj::rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const
 {
-    Quat q;
-    getRot(&q);
+    Quat q = rot();
     *x = q.x();
     *y = q.y();
     *z = q.z();
     *w = q.w();
 }
 
-void Obj::getRot(Quat *q) const
+Quat Obj::rot() const
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
-    *q = Quat::fromBullet(trans.getRotation());
+    return Quat::fromBullet(trans.getRotation());
 }
 
 void Obj::setPosRot(const Vec3 &v, const Quat &q)

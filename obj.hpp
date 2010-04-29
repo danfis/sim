@@ -58,14 +58,11 @@ class Obj {
     void setPosRot(const Vec3 *v, const Quat *q) { setPosRot(*v, *q); }
     void setPosRot(const Vec3 &v, const Quat &q);
 
-    void getPos(Scalar *x, Scalar *y, Scalar *z) const;
-    void getPos(Scalar *v) const { getPos(v, v + 1, v + 2); }
-    void getPos(Vec3 *v) const;
-    Vec3 getPos() const { Vec3 v; getPos(&v); return v; }
+    Vec3 pos() const;
+    void pos(Scalar *x, Scalar *y, Scalar *z) const;
 
-    void getRot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const;
-    void getRot(Scalar *v) const { getRot(v, v + 1, v + 2, v + 3); }
-    void getRot(Quat *q) const;
+    Quat rot() const;
+    void rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const;
 
   protected:
     void _set(VisObj *o, btCollisionShape *shape, Scalar mass);
