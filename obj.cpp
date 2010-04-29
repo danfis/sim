@@ -143,7 +143,7 @@ ObjSphere::ObjSphere(Scalar radius, Scalar mass)
 ObjCylinder::ObjCylinder(Scalar radius, Scalar height, Scalar mass)
     : Obj()
 {
-    Vec3 v(radius, height / 2., radius);
+    Vec3 v(radius, radius, height / 2.);
     btCollisionShape *shape = new btCylinderShape(v.toBullet());
     _set(new VisObjCylinder(radius, height), shape, mass);
 }
