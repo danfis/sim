@@ -46,6 +46,8 @@ class VisObj {
     void setPosRot(const Vec3 *v, const Quat *q) { setPosRot(*v, *q); }
     void setPosRot(const Vec3 &v, const Quat &q);
 
+    virtual void setColor(const osg::Vec4 &c) {}
+
   protected:
     /**
      * Set top node of scene graph.
@@ -54,23 +56,32 @@ class VisObj {
 };
 
 
+class VisObjShape : public VisObj {
+  public:
+    VisObjShape() : VisObj() {}
+    void setColor(const osg::Vec4 &c);
 
-class VisObjCube : public VisObj {
+  protected:
+    void _setShape(osg::Shape *shape);
+};
+
+
+class VisObjCube : public VisObjShape {
   public:
     VisObjCube(Scalar width);
 };
 
-class VisObjBox : public VisObj {
+class VisObjBox : public VisObjShape {
   public:
     VisObjBox(Vec3 dim);
 };
 
-class VisObjSphere : public VisObj {
+class VisObjSphere : public VisObjShape {
   public:
     VisObjSphere(Scalar radius);
 };
 
-class VisObjCylinder : public VisObj {
+class VisObjCylinder : public VisObjShape {
   public:
     VisObjCylinder(Scalar radius, Scalar height);
 };

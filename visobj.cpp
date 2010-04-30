@@ -1,8 +1,10 @@
 #include <osg/Geode>
 #include <osg/ShapeDrawable>
 #include <osg/Geometry>
+#include <osg/Array>
 
 #include "visobj.hpp"
+#include "msg.hpp"
 
 namespace sim {
 
@@ -47,7 +49,6 @@ void VisObj::rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const
     *w = -q.w();
 }
 
-
 void VisObj::_setNode(osg::Node *n)
 {
     _node = n;
@@ -55,46 +56,44 @@ void VisObj::_setNode(osg::Node *n)
 }
 
 
-VisObjCube::VisObjCube(Scalar width)
+void VisObjShape::setColor(const osg::Vec4 &c)
+{
+    osg::ShapeDrawable *draw;
+    draw = (osg::ShapeDrawable *)((osg::Geode *)_node)->getDrawable(0);
+    draw->setColor(c);
+}
+
+void VisObjShape::_setShape(osg::Shape *shape)
 {
     osg::Geode *geode = new osg::Geode();
-    osg::Box *box = new osg::Box(Vec3(0., 0., 0.), width);
-
-    geode->addDrawable(new osg::ShapeDrawable(box));
-
+    geode->addDrawable(new osg::ShapeDrawable(shape));
     _setNode(geode);
 }
 
-VisObjBox::VisObjBox(Vec3 dim)
+VisObjCube::VisObjCube(Scalar width)
+    : VisObjShape()
 {
-    osg::Geode *geode = new osg::Geode();
-    osg::Box *box = new osg::Box(osg::Vec3(0., 0., 0.), dim.x(), dim.y(), dim.z());
+    _setShape(new osg::Box(Vec3(0., 0., 0.), width));
+}
 
-    geode->addDrawable(new osg::ShapeDrawable(box));
 
-    _setNode(geode);
+VisObjBox::VisObjBox(Vec3 dim)
+    : VisObjShape()
+{
+    _setShape(new osg::Box(osg::Vec3(0., 0., 0.), dim.x(), dim.y(), dim.z()));
 }
 
 
 VisObjSphere::VisObjSphere(Scalar radius)
+    : VisObjShape()
 {
-    osg::Geode *geode = new osg::Geode();
-    osg::Sphere *sp = new osg::Sphere(Vec3(0., 0., 0.), radius);
-
-    geode->addDrawable(new osg::ShapeDrawable(sp));
-
-    _setNode(geode);
+    _setShape(new osg::Sphere(Vec3(0., 0., 0.), radius));
 }
 
 VisObjCylinder::VisObjCylinder(Scalar radius, Scalar height)
-    : VisObj()
+    : VisObjShape()
 {
-    osg::Geode *geode = new osg::Geode();
-    osg::Cylinder *sp = new osg::Cylinder(Vec3(0., 0., 0.), radius, height);
-
-    geode->addDrawable(new osg::ShapeDrawable(sp));
-
-    _setNode(geode);
+    _setShape(new osg::Cylinder(Vec3(0., 0., 0.), radius, height));
 }
 
 }

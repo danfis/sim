@@ -103,6 +103,9 @@ int main(int argc, char *argv[])
     createHinge(world, sim::Vec3(-6., 6., -9.));
     createFixed(world, sim::Vec3(-6., -6., -9.));
 
+    c->visObj()->setColor(osg::Vec4(0., 0., 0., 1.));
+    s->visObj()->setColor(osg::Vec4(0.6, 0.3, 0., 0.));
+
     cube->setPos(-6., 6., -5.);
     c2->setPos(0., 0., -10.);
     s->setPos(-3., 0., 0.);
