@@ -40,18 +40,18 @@ World::~World()
 }
 
 
-void World::addObj(Obj *obj)
+void World::addBody(Body *obj)
 {
     btRigidBody *body;
-    VisObj *vobj;
+    VisBody *vobj;
 
     body = obj->body();
     if (body)
         _world->addRigidBody(body);
 
-    vobj = obj->visObj();
+    vobj = obj->visBody();
     if (vobj)
-        _vis->addObj(vobj);
+        _vis->addBody(vobj);
 }
 
 void World::addJoint(Joint *j)

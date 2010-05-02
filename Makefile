@@ -3,8 +3,8 @@ CXXFLAGS += $(OSG_CXXFLAGS) $(ODE_CXXFLAGS) $(BT_CXXFLAGS)
 LDFLAGS += $(OSG_LDFLAGS) $(ODE_LDFLAGS) $(BT_LDFLAGS)
 
 
-TARGETS = libsim.a demo demo3
-OBJS = sim.o object.o visobj.o visworld.o obj.o world.o joint.o
+TARGETS = libsim.a demo3
+OBJS = visbody.o visworld.o body.o world.o joint.o
 
 all: $(TARGETS)
 

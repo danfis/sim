@@ -2,17 +2,17 @@
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
 #include <BulletCollision/CollisionShapes/btCylinderShape.h>
 
-#include "obj.hpp"
+#include "body.hpp"
 #include "msg.hpp"
 
 namespace sim {
 
-void ObjMotionState::getWorldTransform(btTransform &world) const
+void BodyMotionState::getWorldTransform(btTransform &world) const
 {
     world = _offset.inverse() * _world;
 }
 
-void ObjMotionState::setWorldTransform(const btTransform &world)
+void BodyMotionState::setWorldTransform(const btTransform &world)
 {
     btVector3 pos;
     btQuaternion rot;
@@ -24,7 +24,7 @@ void ObjMotionState::setWorldTransform(const btTransform &world)
     _vis->setPosRot(Vec3::fromBullet(pos), Quat::fromBullet(rot));
 }
 
-Obj::~Obj()
+Body::~Body()
 {
     if (_body)
         delete _body;
@@ -36,7 +36,7 @@ Obj::~Obj()
         delete _vis;
 }
 
-void Obj::setPos(const Vec3 &v)
+void Body::setPos(const Vec3 &v)
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
@@ -46,7 +46,7 @@ void Obj::setPos(const Vec3 &v)
     _body->setWorldTransform(trans);
 }
 
-void Obj::setRot(const Quat &q)
+void Body::setRot(const Quat &q)
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
@@ -56,21 +56,21 @@ void Obj::setRot(const Quat &q)
     _body->setWorldTransform(trans);
 }
 
-void Obj::pos(Scalar *x, Scalar *y, Scalar *z) const
+void Body::pos(Scalar *x, Scalar *y, Scalar *z) const
 {
     Vec3 v = pos();
     *x = v.x();
     *y = v.y();
     *z = v.z();
 }
-Vec3 Obj::pos() const
+Vec3 Body::pos() const
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
     return Vec3::fromBullet(trans.getOrigin());
 }
 
-void Obj::rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const
+void Body::rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const
 {
     Quat q = rot();
     *x = q.x();
@@ -79,14 +79,14 @@ void Obj::rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const
     *w = q.w();
 }
 
-Quat Obj::rot() const
+Quat Body::rot() const
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
     return Quat::fromBullet(trans.getRotation());
 }
 
-void Obj::setPosRot(const Vec3 &v, const Quat &q)
+void Body::setPosRot(const Vec3 &v, const Quat &q)
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
@@ -98,13 +98,13 @@ void Obj::setPosRot(const Vec3 &v, const Quat &q)
 
 
 
-void Obj::_set(VisObj *o, btCollisionShape *shape, Scalar mass)
+void Body::_set(VisBody *o, btCollisionShape *shape, Scalar mass)
 {
     btVector3 local_inertia(0,0,0);
 
     _vis = o;
     _shape = shape;
-    _motion_state = new ObjMotionState(o);
+    _motion_state = new BodyMotionState(o);
 
     if (!btFuzzyZero(mass))
         _shape->calculateLocalInertia(mass, local_inertia);
@@ -117,37 +117,37 @@ void Obj::_set(VisObj *o, btCollisionShape *shape, Scalar mass)
 
 
 
-ObjCube::ObjCube(Scalar w, Scalar mass)
-    : Obj()
+BodyCube::BodyCube(Scalar w, Scalar mass)
+    : Body()
 {
     btCollisionShape *shape = new btBoxShape(btVector3(w / 2., w / 2., w / 2.));
-    _set(new VisObjCube(w), shape, mass);
+    _set(new VisBodyCube(w), shape, mass);
 }
 
-ObjBox::ObjBox(Vec3 dim, Scalar mass)
-    : Obj()
+BodyBox::BodyBox(Vec3 dim, Scalar mass)
+    : Body()
 {
     btCollisionShape *shape = new btBoxShape(Vec3::toBullet(dim / 2.));
-    _set(new VisObjBox(dim), shape, mass);
+    _set(new VisBodyBox(dim), shape, mass);
 }
 
-ObjSphere::ObjSphere(Scalar radius, Scalar mass)
-    : Obj()
+BodySphere::BodySphere(Scalar radius, Scalar mass)
+    : Body()
 {
     btCollisionShape *shape = new btSphereShape(radius);
-    _set(new VisObjSphere(radius), shape, mass);
+    _set(new VisBodySphere(radius), shape, mass);
 }
 
-ObjCylinder::ObjCylinder(Scalar radius, Scalar height, Scalar mass)
-    : Obj()
+BodyCylinder::BodyCylinder(Scalar radius, Scalar height, Scalar mass)
+    : Body()
 {
     Vec3 v(radius, radius, height / 2.);
     btCollisionShape *shape = new btCylinderShape(v.toBullet());
-    _set(new VisObjCylinder(radius, height), shape, mass);
+    _set(new VisBodyCylinder(radius, height), shape, mass);
 }
 
-ObjCylinderX::ObjCylinderX(Scalar radius, Scalar height, Scalar mass)
-    : ObjCylinder(radius, height, mass)
+BodyCylinderX::BodyCylinderX(Scalar radius, Scalar height, Scalar mass)
+    : BodyCylinder(radius, height, mass)
 {
     // parent constructor already created cylinder
     // now it must be correctly rotated
@@ -155,8 +155,8 @@ ObjCylinderX::ObjCylinderX(Scalar radius, Scalar height, Scalar mass)
     setRot(q);
 }
 
-ObjCylinderY::ObjCylinderY(Scalar radius, Scalar height, Scalar mass)
-    : ObjCylinder(radius, height, mass)
+BodyCylinderY::BodyCylinderY(Scalar radius, Scalar height, Scalar mass)
+    : BodyCylinder(radius, height, mass)
 {
     // parent constructor already created cylinder
     // now it must be correctly rotated

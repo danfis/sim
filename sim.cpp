@@ -51,7 +51,7 @@ Sim::Sim()
 
 Sim::~Sim()
 {
-    std::list<Object *>::iterator it, it_end;
+    std::list<Bodyect *>::iterator it, it_end;
 
     if (_viewer)
         delete _viewer;
@@ -72,7 +72,7 @@ Sim::~Sim()
 }
 
 
-void Sim::addObject(Object *o)
+void Sim::addBodyect(Bodyect *o)
 {
     osg::Node *node;
 
@@ -91,7 +91,7 @@ void Sim::run()
 {
     size_t counter = 0, steps = 5, i;
     double stepsize = 0.01, ss;
-    std::list<Object *>::iterator it, it_end;
+    std::list<Bodyect *>::iterator it, it_end;
 
     _viewer->setSceneData(_root);
 

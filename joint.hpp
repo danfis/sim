@@ -3,23 +3,23 @@
 
 #include <BulletDynamics/ConstraintSolver/btTypedConstraint.h>
 
-#include "obj.hpp"
+#include "body.hpp"
 
 namespace sim {
 
 class Joint {
   protected:
-    Obj *_o_a, *_o_b;
+    Body *_o_a, *_o_b;
     btTypedConstraint *_joint;
 
   public:
-    Joint(Obj *oA, Obj *oB);
+    Joint(Body *oA, Body *oB);
     ~Joint();
 
-    Obj *objA() { return _o_a; }
-    const Obj *objA() const { return _o_a; }
-    Obj *objB() { return _o_b; }
-    const Obj *objB() const { return _o_b; }
+    Body *objA() { return _o_a; }
+    const Body *objA() const { return _o_a; }
+    Body *objB() { return _o_b; }
+    const Body *objB() const { return _o_b; }
     btTypedConstraint *joint() { return _joint; }
     const btTypedConstraint *joint() const { return _joint; }
 
@@ -29,22 +29,22 @@ class Joint {
 
 class JointFixed : public Joint {
   public:
-    JointFixed(Obj *oA, Obj *oB);
+    JointFixed(Body *oA, Body *oB);
 };
 
 class JointPoint2Point : public Joint {
   public:
-    JointPoint2Point(Obj *oA, Obj *oB, const Vec3 &pivotA, const Vec3 &pivotB);
+    JointPoint2Point(Body *oA, Body *oB, const Vec3 &pivotA, const Vec3 &pivotB);
 };
 
 class JointHinge : public Joint {
   public:
-    JointHinge(Obj *oA, Obj *oB, const Vec3 &anchor, const Vec3 &axis);
+    JointHinge(Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis);
 };
 
 class JointHinge2 : public Joint {
   public:
-    JointHinge2(Obj *oA, Obj *oB, const Vec3 &anchor, const Vec3 &axis1, const Vec3 &axis2);
+    JointHinge2(Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis1, const Vec3 &axis2);
 };
 
 } /* namespace sim */

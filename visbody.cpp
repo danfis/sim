@@ -3,35 +3,35 @@
 #include <osg/Geometry>
 #include <osg/Array>
 
-#include "visobj.hpp"
+#include "visbody.hpp"
 #include "msg.hpp"
 
 namespace sim {
 
-VisObj::VisObj()
+VisBody::VisBody()
     : _node(0)
 {
     _root = new osg::PositionAttitudeTransform();
 }
 
-void VisObj::setPos(const Vec3 &v)
+void VisBody::setPos(const Vec3 &v)
 {
     _root->setPosition(v);
 }
 
 
-void VisObj::setRot(const Quat &q)
+void VisBody::setRot(const Quat &q)
 {
     _root->setAttitude(q);
 }
 
-void VisObj::setPosRot(const Vec3 &v, const Quat &q)
+void VisBody::setPosRot(const Vec3 &v, const Quat &q)
 {
     setPos(v);
     setRot(q);
 }
 
-void VisObj::pos(Scalar *x, Scalar *y, Scalar *z) const
+void VisBody::pos(Scalar *x, Scalar *y, Scalar *z) const
 {
     Vec3 v = pos();
     *x = v[0];
@@ -40,7 +40,7 @@ void VisObj::pos(Scalar *x, Scalar *y, Scalar *z) const
 }
 
 
-void VisObj::rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const
+void VisBody::rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const
 {
     Quat q = rot();
     *x = q.x();
@@ -49,49 +49,49 @@ void VisObj::rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const
     *w = -q.w();
 }
 
-void VisObj::_setNode(osg::Node *n)
+void VisBody::_setNode(osg::Node *n)
 {
     _node = n;
     _root->addChild(_node);
 }
 
 
-void VisObjShape::setColor(const osg::Vec4 &c)
+void VisBodyShape::setColor(const osg::Vec4 &c)
 {
     osg::ShapeDrawable *draw;
     draw = (osg::ShapeDrawable *)((osg::Geode *)_node)->getDrawable(0);
     draw->setColor(c);
 }
 
-void VisObjShape::_setShape(osg::Shape *shape)
+void VisBodyShape::_setShape(osg::Shape *shape)
 {
     osg::Geode *geode = new osg::Geode();
     geode->addDrawable(new osg::ShapeDrawable(shape));
     _setNode(geode);
 }
 
-VisObjCube::VisObjCube(Scalar width)
-    : VisObjShape()
+VisBodyCube::VisBodyCube(Scalar width)
+    : VisBodyShape()
 {
     _setShape(new osg::Box(Vec3(0., 0., 0.), width));
 }
 
 
-VisObjBox::VisObjBox(Vec3 dim)
-    : VisObjShape()
+VisBodyBox::VisBodyBox(Vec3 dim)
+    : VisBodyShape()
 {
     _setShape(new osg::Box(osg::Vec3(0., 0., 0.), dim.x(), dim.y(), dim.z()));
 }
 
 
-VisObjSphere::VisObjSphere(Scalar radius)
-    : VisObjShape()
+VisBodySphere::VisBodySphere(Scalar radius)
+    : VisBodyShape()
 {
     _setShape(new osg::Sphere(Vec3(0., 0., 0.), radius));
 }
 
-VisObjCylinder::VisObjCylinder(Scalar radius, Scalar height)
-    : VisObjShape()
+VisBodyCylinder::VisBodyCylinder(Scalar radius, Scalar height)
+    : VisBodyShape()
 {
     _setShape(new osg::Cylinder(Vec3(0., 0., 0.), radius, height));
 }

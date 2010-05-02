@@ -25,7 +25,7 @@ class Sim {
     dSpaceID _space;
     dJointGroupID _coll_contacts;
 
-    std::list<Object *> _objs; /*! list of objects */
+    std::list<Bodyect *> _objs; /*! list of objects */
 
     friend void __ode_near_collision(void *data, dGeomID o1, dGeomID o2);
 
@@ -38,7 +38,7 @@ class Sim {
      * This method steals pointer to given object! It means that destructor
      * is called from Sim and _can't_ be called outside.
      */
-    virtual void addObject(Object *o);
+    virtual void addBodyect(Bodyect *o);
 
     /**
      * Run simulation.

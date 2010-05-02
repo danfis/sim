@@ -7,7 +7,7 @@
 #include <BulletDynamics/ConstraintSolver/btConstraintSolver.h>
 #include <BulletDynamics/Dynamics/btDynamicsWorld.h>
 
-#include "obj.hpp"
+#include "body.hpp"
 #include "joint.hpp"
 #include "visworld.hpp"
 
@@ -29,7 +29,7 @@ class World {
     World();
     virtual ~World();
 
-    void addObj(Obj *obj);
+    void addBody(Body *obj);
     void addJoint(Joint *j);
 
     /**

@@ -16,7 +16,7 @@ VisWorld::~VisWorld()
     delete _viewer;
 }
 
-void VisWorld::addObj(VisObj *obj)
+void VisWorld::addBody(VisBody *obj)
 {
     osg::Node *n;
     n = obj->rootNode();

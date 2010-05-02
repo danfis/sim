@@ -7,7 +7,7 @@
 
 namespace sim {
 
-Joint::Joint(Obj *oA, Obj *oB)
+Joint::Joint(Body *oA, Body *oB)
     : _o_a(oA), _o_b(oB), _joint(0)
 {
 }
@@ -19,7 +19,7 @@ Joint::~Joint()
 }
 
 
-JointFixed::JointFixed(Obj *oA, Obj *oB)
+JointFixed::JointFixed(Body *oA, Body *oB)
     : Joint(oA, oB)
 {
    btGeneric6DofConstraint * joint6DOF;
@@ -38,7 +38,7 @@ JointFixed::JointFixed(Obj *oA, Obj *oB)
    _setJoint(joint6DOF);
 }
 
-JointPoint2Point::JointPoint2Point(Obj *oA, Obj *oB,
+JointPoint2Point::JointPoint2Point(Body *oA, Body *oB,
                                    const Vec3 &pivotA, const Vec3 &pivotB)
     : Joint(oA, oB)
 {
@@ -50,7 +50,7 @@ JointPoint2Point::JointPoint2Point(Obj *oA, Obj *oB,
     _setJoint(c);
 }
 
-JointHinge::JointHinge(Obj *oA, Obj *oB, const Vec3 &anchor, const Vec3 &axis)
+JointHinge::JointHinge(Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis)
     : Joint(oA, oB)
 {
     btHingeConstraint *c;
@@ -80,7 +80,7 @@ JointHinge::JointHinge(Obj *oA, Obj *oB, const Vec3 &anchor, const Vec3 &axis)
     _setJoint(c);
 }
 
-JointHinge2::JointHinge2(Obj *oA, Obj *oB, const Vec3 &anchor, const Vec3 &axis1, const Vec3 &axis2)
+JointHinge2::JointHinge2(Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis1, const Vec3 &axis2)
     : Joint(oA, oB)
 {
     btHinge2Constraint *c;

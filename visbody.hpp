@@ -10,14 +10,14 @@ namespace sim {
 /**
  * Visual reprezentation of object.
  */
-class VisObj {
+class VisBody {
   protected:
     osg::PositionAttitudeTransform *_root;
     osg::Node *_node;
 
   public:
-    VisObj();
-    virtual ~VisObj() {}
+    VisBody();
+    virtual ~VisBody() {}
 
     /**
      * Returns root node of osg scene graph.
@@ -56,9 +56,9 @@ class VisObj {
 };
 
 
-class VisObjShape : public VisObj {
+class VisBodyShape : public VisBody {
   public:
-    VisObjShape() : VisObj() {}
+    VisBodyShape() : VisBody() {}
     void setColor(const osg::Vec4 &c);
 
   protected:
@@ -66,24 +66,24 @@ class VisObjShape : public VisObj {
 };
 
 
-class VisObjCube : public VisObjShape {
+class VisBodyCube : public VisBodyShape {
   public:
-    VisObjCube(Scalar width);
+    VisBodyCube(Scalar width);
 };
 
-class VisObjBox : public VisObjShape {
+class VisBodyBox : public VisBodyShape {
   public:
-    VisObjBox(Vec3 dim);
+    VisBodyBox(Vec3 dim);
 };
 
-class VisObjSphere : public VisObjShape {
+class VisBodySphere : public VisBodyShape {
   public:
-    VisObjSphere(Scalar radius);
+    VisBodySphere(Scalar radius);
 };
 
-class VisObjCylinder : public VisObjShape {
+class VisBodyCylinder : public VisBodyShape {
   public:
-    VisObjCylinder(Scalar radius, Scalar height);
+    VisBodyCylinder(Scalar radius, Scalar height);
 };
 
 } /* namespace sim */

@@ -3,7 +3,7 @@
 
 #include <osgViewer/Viewer>
 
-#include "visobj.hpp"
+#include "visbody.hpp"
 
 namespace sim {
 
@@ -22,7 +22,7 @@ class VisWorld {
     /**
      * Adds visualisable object.
      */
-    void addObj(VisObj *obj);
+    void addBody(VisBody *obj);
 
     /**
      * Returns root of scene graph.
