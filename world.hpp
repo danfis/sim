@@ -9,6 +9,7 @@
 
 #include "body.hpp"
 #include "joint.hpp"
+#include "actor.hpp"
 #include "visworld.hpp"
 
 namespace sim {
@@ -31,6 +32,7 @@ class World {
 
     void addBody(Body *obj);
     void addJoint(Joint *j);
+    void addActor(Actor *a);
 
     /**
      * Initializes world.

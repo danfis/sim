@@ -95,8 +95,12 @@ JointHinge2::JointHinge2(Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axi
     DBG("anchor: " << anchor.x() << " " << anchor.y() << " " << anchor.z());
     c = new btHinge2Constraint(*b1, *b2, anch, a1, a2);
 
-    c->setLinearLowerLimit(Vec3::toBullet(0., 0., 0.));
-    c->setLinearUpperLimit(Vec3::toBullet(0., 0., 0.));
+    c->setLimit(0, 0., 0.);
+    c->setLimit(1, 0., 0.);
+    c->setLimit(2, 0., 0.);
+    c->setLimit(3, 0., 0.);
+    c->setLimit(4, 0., 0.);
+    c->setLimit(5, 0., 0.);
 
     DBG(c);
     _setJoint(c);

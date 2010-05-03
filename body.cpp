@@ -39,9 +39,11 @@ Body::~Body()
 void Body::setPos(const Vec3 &v)
 {
     btTransform trans;
+    Vec3 pos = v + _offset;
+
     _motion_state->getWorldTransform(trans);
 
-    trans.setOrigin(v.toBullet());
+    trans.setOrigin(pos.toBullet());
     _motion_state->setWorldTransform(trans);
     _body->setWorldTransform(trans);
 }

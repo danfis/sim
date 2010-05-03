@@ -97,6 +97,9 @@ int main(int argc, char *argv[])
     sim::BodyCylinder *cyl = new sim::BodyCylinder(1., 2., 3.);
     sim::BodyCylinderX *cylx = new sim::BodyCylinderX(.5, 1., 3.);
     sim::BodyCylinderY *cyly = new sim::BodyCylinderY(.5, 1., 3.);
+    sim::Robot1 *r1 = new sim::Robot1();
+
+    r1->setPos(3., 3., -7.);
 
     createRobot(world, sim::Vec3(3., 3., -9.));
     createP2P(world, sim::Vec3(6., 6., -9.));
@@ -121,6 +124,7 @@ int main(int argc, char *argv[])
     world->addBody(cyl);
     world->addBody(cylx);
     world->addBody(cyly);
+    world->addActor(r1);
 
     world->init();
     for (i = 0; i < 300; i++){
