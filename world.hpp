@@ -19,6 +19,7 @@ namespace sim {
  * Physical world.
  */
 class World {
+  protected:
     btCollisionConfiguration *_coll_conf;
     btCollisionDispatcher *_dispatch;
     btBroadphaseInterface *_broadphase;
@@ -26,13 +27,12 @@ class World {
     btDynamicsWorld *_world;
     VisWorld *_vis;
 
+    friend class Body;
+    friend class Joint;
+
   public:
     World();
     virtual ~World();
-
-    void addBody(Body *obj);
-    void addJoint(Joint *j);
-    void addActor(Actor *a);
 
     /**
      * Initializes world.
@@ -50,6 +50,13 @@ class World {
     void step(bool phys = true, bool vis = true);
 
     bool done();
+
+    void addActor(Actor *a);
+
+  protected:
+    void addJoint(Joint *j);
+    void addBody(Body *obj);
+
 };
 
 }

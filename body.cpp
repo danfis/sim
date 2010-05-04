@@ -3,6 +3,7 @@
 #include <BulletCollision/CollisionShapes/btCylinderShape.h>
 
 #include "body.hpp"
+#include "world.hpp"
 #include "msg.hpp"
 
 namespace sim {
@@ -22,6 +23,13 @@ void BodyMotionState::setWorldTransform(const btTransform &world)
     pos = _world.getOrigin();
     rot = _world.getRotation();
     _vis->setPosRot(Vec3::fromBullet(pos), Quat::fromBullet(rot));
+}
+
+Body::Body(World *w)
+    : _body(0), _shape(0), _motion_state(0), _vis(0),
+      _offset(0., 0., 0.),
+      _world(w)
+{
 }
 
 Body::~Body()
@@ -98,6 +106,15 @@ void Body::setPosRot(const Vec3 &v, const Quat &q)
     _body->setWorldTransform(trans);
 }
 
+void Body::activate()
+{
+    _world->addBody(this);
+}
+
+void Body::deactivate()
+{
+    /*TODO: _world->rmBody(this);*/
+}
 
 
 void Body::_set(VisBody *o, btCollisionShape *shape, Scalar mass)
@@ -119,37 +136,37 @@ void Body::_set(VisBody *o, btCollisionShape *shape, Scalar mass)
 
 
 
-BodyCube::BodyCube(Scalar w, Scalar mass)
-    : Body()
+BodyCube::BodyCube(World *world, Scalar w, Scalar mass)
+    : Body(world)
 {
     btCollisionShape *shape = new btBoxShape(btVector3(w / 2., w / 2., w / 2.));
     _set(new VisBodyCube(w), shape, mass);
 }
 
-BodyBox::BodyBox(Vec3 dim, Scalar mass)
-    : Body()
+BodyBox::BodyBox(World *w, Vec3 dim, Scalar mass)
+    : Body(w)
 {
     btCollisionShape *shape = new btBoxShape(Vec3::toBullet(dim / 2.));
     _set(new VisBodyBox(dim), shape, mass);
 }
 
-BodySphere::BodySphere(Scalar radius, Scalar mass)
-    : Body()
+BodySphere::BodySphere(World *w, Scalar radius, Scalar mass)
+    : Body(w)
 {
     btCollisionShape *shape = new btSphereShape(radius);
     _set(new VisBodySphere(radius), shape, mass);
 }
 
-BodyCylinder::BodyCylinder(Scalar radius, Scalar height, Scalar mass)
-    : Body()
+BodyCylinder::BodyCylinder(World *w, Scalar radius, Scalar height, Scalar mass)
+    : Body(w)
 {
     Vec3 v(radius, radius, height / 2.);
     btCollisionShape *shape = new btCylinderShape(v.toBullet());
     _set(new VisBodyCylinder(radius, height), shape, mass);
 }
 
-BodyCylinderX::BodyCylinderX(Scalar radius, Scalar height, Scalar mass)
-    : BodyCylinder(radius, height, mass)
+BodyCylinderX::BodyCylinderX(World *w, Scalar radius, Scalar height, Scalar mass)
+    : BodyCylinder(w, radius, height, mass)
 {
     // parent constructor already created cylinder
     // now it must be correctly rotated
@@ -157,8 +174,8 @@ BodyCylinderX::BodyCylinderX(Scalar radius, Scalar height, Scalar mass)
     setRot(q);
 }
 
-BodyCylinderY::BodyCylinderY(Scalar radius, Scalar height, Scalar mass)
-    : BodyCylinder(radius, height, mass)
+BodyCylinderY::BodyCylinderY(World *w, Scalar radius, Scalar height, Scalar mass)
+    : BodyCylinder(w, radius, height, mass)
 {
     // parent constructor already created cylinder
     // now it must be correctly rotated

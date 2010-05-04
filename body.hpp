@@ -9,6 +9,9 @@
 
 namespace sim {
 
+/** Forward declaration */
+class World;
+
 class BodyMotionState : public btMotionState {
     VisBody *_vis;
     btTransform _world, _offset;
@@ -32,11 +35,17 @@ class Body {
 
     Vec3 _offset;
 
+    World *_world;
+
+    friend class World;
+
   public:
-    Body() : _body(0), _shape(0), _motion_state(0), _vis(0),
-             _offset(0., 0., 0.) {}
+    Body(World *w);
     virtual ~Body();
 
+    /**
+     * Getters for private data.
+     */
     btRigidBody *body() { return _body; }
     const btRigidBody *body() const { return _body; }
     btCollisionShape *shape() { return _shape; }
@@ -45,9 +54,11 @@ class Body {
     const btMotionState *motionState() const { return _motion_state; }
     VisBody *visBody() { return _vis; }
     const VisBody *visBody() const { return _vis; }
+    World *world() { return _world; }
+    const World *world() const { return _world; }
 
     /**
-     * Tranfsforms object in 3D space.
+     * Transforms object in 3D space.
      */
     void setPos(const Scalar x, const Scalar y, const Scalar z)
         { setPos(Vec3(x, y, z)); }
@@ -62,6 +73,9 @@ class Body {
     void setPosRot(const Vec3 *v, const Quat *q) { setPosRot(*v, *q); }
     void setPosRot(const Vec3 &v, const Quat &q);
 
+    /**
+     * Returns position and rotation of object.
+     */
     Vec3 pos() const;
     void pos(Scalar *x, Scalar *y, Scalar *z) const;
 
@@ -76,6 +90,9 @@ class Body {
     const Vec3 &offset() const { return _offset; }
     Vec3 &offset() { return _offset; }
 
+    virtual void activate();
+    virtual void deactivate();
+
   protected:
     void _set(VisBody *o, btCollisionShape *shape, Scalar mass);
 };
@@ -83,17 +100,17 @@ class Body {
 
 class BodyCube : public Body {
   public:
-    BodyCube(Scalar width, Scalar mass);
+    BodyCube(World *w, Scalar width, Scalar mass);
 };
 
 class BodyBox : public Body {
   public:
-    BodyBox(Vec3 dim, Scalar mass);
+    BodyBox(World *w, Vec3 dim, Scalar mass);
 };
 
 class BodySphere : public Body {
   public:
-    BodySphere(Scalar radius, Scalar mass);
+    BodySphere(World *w, Scalar radius, Scalar mass);
 };
 
 /**
@@ -101,7 +118,7 @@ class BodySphere : public Body {
  */
 class BodyCylinder : public Body {
   public:
-    BodyCylinder(Scalar radius, Scalar height, Scalar mass);
+    BodyCylinder(World *w, Scalar radius, Scalar height, Scalar mass);
 };
 
 /**
@@ -109,7 +126,7 @@ class BodyCylinder : public Body {
  */
 class BodyCylinderX : public BodyCylinder {
   public:
-    BodyCylinderX(Scalar radius, Scalar height, Scalar mass);
+    BodyCylinderX(World *w, Scalar radius, Scalar height, Scalar mass);
 };
 
 /**
@@ -117,7 +134,7 @@ class BodyCylinderX : public BodyCylinder {
  */
 class BodyCylinderY : public BodyCylinder {
   public:
-    BodyCylinderY(Scalar radius, Scalar height, Scalar mass);
+    BodyCylinderY(World *w, Scalar radius, Scalar height, Scalar mass);
 };
 
 

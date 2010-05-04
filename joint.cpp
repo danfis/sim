@@ -3,12 +3,13 @@
 #include <BulletDynamics/ConstraintSolver/btPoint2PointConstraint.h>
 
 #include "joint.hpp"
+#include "world.hpp"
 #include "msg.hpp"
 
 namespace sim {
 
-Joint::Joint(Body *oA, Body *oB)
-    : _o_a(oA), _o_b(oB), _joint(0)
+Joint::Joint(World *w, Body *oA, Body *oB)
+    : _world(w), _o_a(oA), _o_b(oB), _joint(0)
 {
 }
 
@@ -19,8 +20,18 @@ Joint::~Joint()
 }
 
 
-JointFixed::JointFixed(Body *oA, Body *oB)
-    : Joint(oA, oB)
+void Joint::activate()
+{
+    _world->addJoint(this);
+}
+
+void Joint::deactivate()
+{
+    /*TODO: _world->rmJoint(this); */
+}
+
+JointFixed::JointFixed(World *w, Body *oA, Body *oB)
+    : Joint(w, oA, oB)
 {
    btGeneric6DofConstraint * joint6DOF;
    btTransform localA, localB;
@@ -38,9 +49,9 @@ JointFixed::JointFixed(Body *oA, Body *oB)
    _setJoint(joint6DOF);
 }
 
-JointPoint2Point::JointPoint2Point(Body *oA, Body *oB,
+JointPoint2Point::JointPoint2Point(World *w, Body *oA, Body *oB,
                                    const Vec3 &pivotA, const Vec3 &pivotB)
-    : Joint(oA, oB)
+    : Joint(w, oA, oB)
 {
     btPoint2PointConstraint *c;
     btVector3 pA = pivotA.toBullet();
@@ -50,8 +61,8 @@ JointPoint2Point::JointPoint2Point(Body *oA, Body *oB,
     _setJoint(c);
 }
 
-JointHinge::JointHinge(Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis)
-    : Joint(oA, oB)
+JointHinge::JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis)
+    : Joint(w, oA, oB)
 {
     btHingeConstraint *c;
     btTransform frameInA, frameInB;
@@ -80,8 +91,8 @@ JointHinge::JointHinge(Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis)
     _setJoint(c);
 }
 
-JointHinge2::JointHinge2(Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis1, const Vec3 &axis2)
-    : Joint(oA, oB)
+JointHinge2::JointHinge2(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis1, const Vec3 &axis2)
+    : Joint(w, oA, oB)
 {
     btHinge2Constraint *c;
     btRigidBody *b1, *b2;

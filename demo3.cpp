@@ -3,18 +3,18 @@
 
 #include "world.hpp"
 #include "joint.hpp"
+#include "actuator.hpp"
 #include "msg.hpp"
 
 void createRobot(sim::World *world, const sim::Vec3 &pos)
 {
     sim::BodyBox *chasis;
-    sim::BodyCylinderX *w[4];
-    sim::JointHinge2 *j[4];
+    sim::ActuatorWheelCylinderX *w[4];
     size_t i;
 
-    chasis = new sim::BodyBox(sim::Vec3(.6, 1., 0.4), 1.);
+    chasis = new sim::BodyBox(world, sim::Vec3(.6, 1., 0.4), 1.);
     for (i = 0; i < 4; i++){
-        w[i] = new sim::BodyCylinderX(0.2, 0.2, 1.);
+        w[i] = new sim::ActuatorWheelCylinderX(world, 0.2, 0.2, 1.);
     }
 
     chasis->setPos(pos);
@@ -24,14 +24,12 @@ void createRobot(sim::World *world, const sim::Vec3 &pos)
     w[3]->setPos(pos.x() - 0.405, pos.y() - 0.4, pos.z() - 0.2);
 
     for (i = 0; i < 4; i++){
-        j[i] = new sim::JointHinge2(chasis, w[i], w[i]->pos(),
-                                    sim::Vec3(0., 0., 1.), sim::Vec3(1., 0., 0.));
+        w[i]->connectToChasis(chasis);
     }
 
-    world->addBody(chasis);
+    chasis->activate();
     for (i = 0; i < 4; i++){
-        world->addBody(w[i]);
-        world->addJoint(j[i]);
+        w[i]->activate();
     }
 }
 
@@ -41,48 +39,48 @@ void createP2P(sim::World *world, const sim::Vec3 &pos)
     sim::BodyCube *c[2];
     sim::JointPoint2Point *j;
 
-    c[0] = new sim::BodyCube(1., 1.);
-    c[1] = new sim::BodyCube(1., 1.);
+    c[0] = new sim::BodyCube(world, 1., 1.);
+    c[1] = new sim::BodyCube(world, 1., 1.);
 
     c[0]->setPos(pos);
     c[1]->setPos(pos + sim::Vec3(2., 2., 2.));
 
-    j = new sim::JointPoint2Point(c[0], c[1], c[0]->pos(), c[0]->pos());
+    j = new sim::JointPoint2Point(world, c[0], c[1], c[0]->pos(), c[0]->pos());
 
-    world->addBody(c[0]);
-    world->addBody(c[1]);
-    world->addJoint(j);
+    c[0]->activate();
+    c[1]->activate();
+    j->activate();
 }
 
 void createHinge(sim::World *world, const sim::Vec3 &pos)
 {
-    sim::BodyCylinder *cy = new sim::BodyCylinder(0.5, 0.5, 1.);
-    sim::BodyCube *cu = new sim::BodyCube(1., 1.);
+    sim::BodyCylinder *cy = new sim::BodyCylinder(world, 0.5, 0.5, 1.);
+    sim::BodyCube *cu = new sim::BodyCube(world, 1., 1.);
     sim::JointHinge *j;
 
     cu->setPos(pos);
     cy->setPos(pos + sim::Vec3(0., 0., 2.));
 
-    j = new sim::JointHinge(cu, cy, pos + sim::Vec3(0., 0., 1.), sim::Vec3(0., 1., 0.));
+    j = new sim::JointHinge(world, cu, cy, pos + sim::Vec3(0., 0., 1.), sim::Vec3(0., 1., 0.));
 
-    world->addBody(cu);
-    world->addBody(cy);
-    world->addJoint(j);
+    cu->activate();
+    cy->activate();
+    j->activate();
 }
 
 void createFixed(sim::World *world, const sim::Vec3 &pos)
 {
-    sim::BodyCube *cu = new sim::BodyCube(1., 1.);
-    sim::BodySphere *s = new sim::BodySphere(0.5, 3.);
+    sim::BodyCube *cu = new sim::BodyCube(world, 1., 1.);
+    sim::BodySphere *s = new sim::BodySphere(world, 0.5, 3.);
     sim::JointFixed *j;
 
     cu->setPos(pos);
     s->setPos(pos + sim::Vec3(0.9, 0., 1.0));
-    j = new sim::JointFixed(cu, s);
+    j = new sim::JointFixed(world, cu, s);
 
-    world->addBody(cu);
-    world->addBody(s);
-    world->addJoint(j);
+    cu->activate();
+    s->activate();
+    j->activate();
 }
 
 
@@ -90,16 +88,15 @@ int main(int argc, char *argv[])
 {
     size_t i;
     sim::World *world = new sim::World();
-    sim::BodyCube *cube = new sim::BodyCube(1., 1.);
-    sim::BodyBox *c2 = new sim::BodyBox(sim::Vec3(20., 20., 1.), 0.);
-    sim::BodySphere *s = new sim::BodySphere(1.3, 2.);
-    sim::BodyCube *c = new sim::BodyCube(1., 1.);
-    sim::BodyCylinder *cyl = new sim::BodyCylinder(1., 2., 3.);
-    sim::BodyCylinderX *cylx = new sim::BodyCylinderX(.5, 1., 3.);
-    sim::BodyCylinderY *cyly = new sim::BodyCylinderY(.5, 1., 3.);
-    sim::Robot1 *r1 = new sim::Robot1();
-
-    r1->setPos(3., 3., -7.);
+    sim::BodyCube *cube = new sim::BodyCube(world, 1., 1.);
+    sim::BodyBox *c2 = new sim::BodyBox(world, sim::Vec3(20., 20., 1.), 0.);
+    sim::BodySphere *s = new sim::BodySphere(world, 1.3, 2.);
+    sim::BodyCube *c = new sim::BodyCube(world, 1., 1.);
+    sim::BodyCylinder *cyl = new sim::BodyCylinder(world, 1., 2., 3.);
+    sim::BodyCylinderX *cylx = new sim::BodyCylinderX(world, .5, 1., 3.);
+    sim::BodyCylinderY *cyly = new sim::BodyCylinderY(world, .5, 1., 3.);
+    //sim::Robot1 *r1 = new sim::Robot1();
+    //r1->setPos(3., 3., -7.);
 
     createRobot(world, sim::Vec3(3., 3., -9.));
     createP2P(world, sim::Vec3(6., 6., -9.));
@@ -117,14 +114,14 @@ int main(int argc, char *argv[])
     cylx->setPos(0., 3., 0.);
     cyly->setPos(0., -3., 0.);
 
-    world->addBody(cube);
-    world->addBody(c2);
-    world->addBody(s);
-    world->addBody(c);
-    world->addBody(cyl);
-    world->addBody(cylx);
-    world->addBody(cyly);
-    world->addActor(r1);
+    cube->activate();
+    c2->activate();
+    s->activate();
+    c->activate();
+    cyl->activate();
+    cylx->activate();
+    cyly->activate();
+    //world->addActor(r1);
 
     world->init();
     for (i = 0; i < 300; i++){

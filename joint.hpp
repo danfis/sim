@@ -7,13 +7,18 @@
 
 namespace sim {
 
+/** Forward declaration */
+class World;
+
 class Joint {
   protected:
+    World *_world;
+
     Body *_o_a, *_o_b;
     btTypedConstraint *_joint;
 
   public:
-    Joint(Body *oA, Body *oB);
+    Joint(World *w, Body *oA, Body *oB);
     ~Joint();
 
     Body *objA() { return _o_a; }
@@ -23,28 +28,31 @@ class Joint {
     btTypedConstraint *joint() { return _joint; }
     const btTypedConstraint *joint() const { return _joint; }
 
+    void activate();
+    void deactivate();
+
   protected:
     void _setJoint(btTypedConstraint *c) { _joint = c; }
 };
 
 class JointFixed : public Joint {
   public:
-    JointFixed(Body *oA, Body *oB);
+    JointFixed(World *w, Body *oA, Body *oB);
 };
 
 class JointPoint2Point : public Joint {
   public:
-    JointPoint2Point(Body *oA, Body *oB, const Vec3 &pivotA, const Vec3 &pivotB);
+    JointPoint2Point(World *w, Body *oA, Body *oB, const Vec3 &pivotA, const Vec3 &pivotB);
 };
 
 class JointHinge : public Joint {
   public:
-    JointHinge(Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis);
+    JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis);
 };
 
 class JointHinge2 : public Joint {
   public:
-    JointHinge2(Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis1, const Vec3 &axis2);
+    JointHinge2(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis1, const Vec3 &axis2);
 };
 
 } /* namespace sim */
