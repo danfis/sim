@@ -24,6 +24,10 @@ void ActuatorWheelCylinderX::connectToChasis(Body *b)
     Vec3 axis2(1., 0., 0.);
 
     _joint = new JointHinge2(_world, b, _wheel, _wheel->pos(), axis1, axis2);
+    _joint->setLimitLinAxis1(-0.01, 0.01);
+    _joint->setLimitLinAxis2(0., 0.);
+    _joint->setLimitAngAxis1(-0.05, 0.05);
+    _joint->setLimitAngAxis2(-10., 10.);
 }
 
 void ActuatorWheelCylinderX::activate()
@@ -39,5 +43,11 @@ void ActuatorWheelCylinderX::deactivate()
 {
     /* TODO: */
 }
+
+void ActuatorWheelCylinderX::applyTorque(const Vec3 &v)
+{
+    _wheel->body()->applyTorque(v.toBullet());
+}
+
 
 }

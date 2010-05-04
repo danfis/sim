@@ -97,10 +97,10 @@ int main(int argc, char *argv[])
     sim::BodyCylinderY *cyly = new sim::BodyCylinderY(world, .5, 1., 3.);
     sim::Robot4Wheels *r1 = new sim::Robot4Wheels(world);
 
-    r1->setPos(3., 5., -7.);
+    r1->setPos(3., 5., -9.);
     r1->activate();
 
-    createRobot(world, sim::Vec3(3., 3., -9.));
+    createRobot(world, sim::Vec3(3., 3., -6.));
     createP2P(world, sim::Vec3(6., 6., -9.));
     createHinge(world, sim::Vec3(-6., 6., -9.));
     createFixed(world, sim::Vec3(-6., -6., -9.));
@@ -124,6 +124,8 @@ int main(int argc, char *argv[])
     cylx->activate();
     cyly->activate();
     //world->addActor(r1);
+
+    world->regActorPreStep(r1);
 
     world->init();
     for (i = 0; i < 300; i++){

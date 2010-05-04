@@ -3,6 +3,8 @@
 #include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h>
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
 
+#include <algorithm>
+
 #include "world.hpp"
 #include "msg.hpp"
 
@@ -64,6 +66,11 @@ void World::addJoint(Joint *j)
 }
 
 
+void World::addActor(Actor *a)
+{
+    _actors.push_back(a);
+}
+
 void World::init()
 {
     if (_vis)
@@ -80,12 +87,16 @@ void World::step(bool phys, bool vis)
 {
     // perform simulation step
     // TODO: Parametrize this
-    if (phys)
+    if (phys){
+        _actorsRunPreStep();
         _world->stepSimulation(1./60., 20);
+        _actorsRunPostStep();
+    }
 
     if (vis && _vis)
         _vis->step();
 }
+
 
 bool World::done()
 {
@@ -93,6 +104,49 @@ bool World::done()
         return _vis->done();
     return false;
 }
+
+void World::regActorPreStep(Actor *a)
+{
+    if (std::find(_pre_step.begin(), _pre_step.end(), a) == _pre_step.end()){
+        _pre_step.push_back(a);
+    }
+}
+
+void World::regActorPostStep(Actor *a)
+{
+    if (std::find(_post_step.begin(), _post_step.end(), a) == _post_step.end()){
+        _post_step.push_back(a);
+    }
+}
+
+void World::_actorsRunPreStep()
+{
+    _act_it it, it_end;
+
+    //DBG("Pre steps");
+
+    it = _pre_step.begin();
+    it_end = _pre_step.end();
+    for (; it != it_end; ++it){
+        //DBG("    " << *it);
+        (*it)->preStep();
+    }
+}
+
+void World::_actorsRunPostStep()
+{
+    _act_it it, it_end;
+
+    //DBG("Pre steps");
+
+    it = _post_step.begin();
+    it_end = _post_step.end();
+    for (; it != it_end; ++it){
+        //DBG("    " << *it);
+        (*it)->postStep();
+    }
+}
+
 
 } /* namespace sim */
 

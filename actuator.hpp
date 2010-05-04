@@ -36,6 +36,8 @@ class ActuatorWheelCylinderX {
 
     Vec3 pos() const { return _wheel->pos(); }
     void pos(Scalar *x, Scalar *y, Scalar *z) const { _wheel->pos(x, y, z); }
+
+    void applyTorque(const Vec3 &v);
 };
 
 } /* namespace sim */

@@ -22,8 +22,11 @@ class Actor {
     World *world() { return _world; }
     const World *world() const { return _world; }
 
-    virtual void activate() = 0;
-    virtual void deactivate() = 0;
+    virtual void activate();
+    virtual void deactivate();
+
+    virtual void preStep() {}
+    virtual void postStep() {}
 };
 
 
@@ -45,6 +48,8 @@ class Robot4Wheels : public Actor {
 
     void activate();
     void deactivate();
+
+    void preStep();
 };
 
 } /* namespace sim */

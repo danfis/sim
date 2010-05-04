@@ -1,7 +1,19 @@
 #include "actor.hpp"
+#include "world.hpp"
 #include "msg.hpp"
 
 namespace sim {
+
+
+void Actor::activate()
+{
+    _world->addActor(this);
+}
+
+void Actor::deactivate()
+{
+    // TODO
+}
 
 Robot4Wheels::Robot4Wheels(World *w)
     : Actor(w)
@@ -44,6 +56,8 @@ void Robot4Wheels::activate()
 {
     size_t i;
 
+    Actor::activate();
+
     _chasis->activate();
     for (i = 0; i < 4; i++){
         _wheels[i]->activate();
@@ -53,6 +67,18 @@ void Robot4Wheels::activate()
 void Robot4Wheels::deactivate()
 {
     /* TODO */
+
+    Actor::deactivate();
+}
+
+
+void Robot4Wheels::preStep()
+{
+    DBG("Pre step");
+    Vec3 torque(.1, 0., 0.);
+
+    _wheels[0]->applyTorque(torque);
+    _wheels[1]->applyTorque(torque);
 }
 
 }

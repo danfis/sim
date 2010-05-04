@@ -105,16 +105,31 @@ JointHinge2::JointHinge2(World *w, Body *oA, Body *oB, const Vec3 &anchor, const
    
     DBG("anchor: " << anchor.x() << " " << anchor.y() << " " << anchor.z());
     c = new btHinge2Constraint(*b1, *b2, anch, a1, a2);
-
-    c->setLimit(0, 0., 0.);
-    c->setLimit(1, 0., 0.);
-    c->setLimit(2, 0., 0.);
-    c->setLimit(3, 0., 0.);
-    c->setLimit(4, 0., 0.);
-    c->setLimit(5, 0., 0.);
-
-    DBG(c);
     _setJoint(c);
+}
+
+void JointHinge2::setLimitLinAxis1(Scalar from, Scalar to)
+{
+    btHinge2Constraint *j = dynamic_cast<btHinge2Constraint *>(_joint);
+    j->setLimit(2, from, to);
+}
+
+void JointHinge2::setLimitLinAxis2(Scalar from, Scalar to)
+{
+    btHinge2Constraint *j = dynamic_cast<btHinge2Constraint *>(_joint);
+    j->setLimit(0, from, to);
+}
+
+void JointHinge2::setLimitAngAxis1(Scalar from, Scalar to)
+{
+    btHinge2Constraint *j = dynamic_cast<btHinge2Constraint *>(_joint);
+    j->setLimit(5, from, to);
+}
+
+void JointHinge2::setLimitAngAxis2(Scalar from, Scalar to)
+{
+    btHinge2Constraint *j = dynamic_cast<btHinge2Constraint *>(_joint);
+    j->setLimit(3, from, to);
 }
 
 }

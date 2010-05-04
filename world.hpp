@@ -27,8 +27,11 @@ class World {
     btDynamicsWorld *_world;
     VisWorld *_vis;
 
-    friend class Body;
-    friend class Joint;
+    std::list<Actor *> _actors;
+    std::list<Actor *> _pre_step;
+    std::list<Actor *> _post_step;
+
+    typedef std::list<Actor *>::iterator _act_it;
 
   public:
     World();
@@ -54,7 +57,14 @@ class World {
 
     void addJoint(Joint *j);
     void addBody(Body *obj);
+    void addActor(Actor *a);
 
+    void regActorPreStep(Actor *a);
+    void regActorPostStep(Actor *a);
+
+  protected:
+    void _actorsRunPreStep();
+    void _actorsRunPostStep();
 };
 
 }
