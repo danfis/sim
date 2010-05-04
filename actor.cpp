@@ -32,7 +32,9 @@ Robot4Wheels::Robot4Wheels(World *w)
 
     for (i = 0; i < 4; i++){
         _wheels[i]->connectToChasis(_chasis);
+        _wheels[i]->wheel()->collSetDontCollideId((unsigned long)this);
     }
+    _chasis->collSetDontCollideId((unsigned long)this);
 
     // set colors
     _chasis->visBody()->setColor(osg::Vec4(0.2, 0.2, 1.0, 1.));
@@ -75,7 +77,8 @@ void Robot4Wheels::deactivate()
 void Robot4Wheels::preStep()
 {
     DBG("Pre step");
-    Vec3 torque(.1, 0., 0.);
+    //Vec3 torque(.1, 0., 0.);
+    Vec3 torque(1., 0., 0.);
 
     _wheels[0]->applyTorque(torque);
     _wheels[1]->applyTorque(torque);

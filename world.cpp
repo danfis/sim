@@ -19,7 +19,7 @@ World::World()
       _vis(0)
 {
     _coll_conf = new btDefaultCollisionConfiguration();
-    _dispatch = new btCollisionDispatcher(_coll_conf);
+    _dispatch = new CollisionDispatcher(_coll_conf);
     _broadphase = new btDbvtBroadphase();
     _solver = new btSequentialImpulseConstraintSolver();
     _world = new btDiscreteDynamicsWorld(_dispatch, _broadphase, _solver, _coll_conf);

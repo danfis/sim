@@ -4,7 +4,8 @@ LDFLAGS += $(OSG_LDFLAGS) $(ODE_LDFLAGS) $(BT_LDFLAGS)
 
 
 TARGETS = libsim.a demo
-OBJS = visbody.o visworld.o body.o world.o joint.o actuator.o actor.o
+OBJS = visbody.o visworld.o body.o world.o joint.o actuator.o actor.o \
+       collision_detection.o
 
 all: $(TARGETS)
 

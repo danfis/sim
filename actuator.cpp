@@ -27,6 +27,7 @@ void ActuatorWheelCylinderX::connectToChasis(Body *b)
     _joint->setLimitLinAxis1(-0.01, 0.01);
     _joint->setLimitLinAxis2(0., 0.);
     _joint->setLimitAngAxis1(-0.05, 0.05);
+    _joint->setLimitAngAxis1(-0.05, 0.05);
     _joint->setLimitAngAxis2(-10., 10.);
 }
 

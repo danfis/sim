@@ -11,6 +11,7 @@
 #include "joint.hpp"
 #include "actor.hpp"
 #include "visworld.hpp"
+#include "collision_detection.hpp"
 
 namespace sim {
 
@@ -21,7 +22,7 @@ namespace sim {
 class World {
   protected:
     btCollisionConfiguration *_coll_conf;
-    btCollisionDispatcher *_dispatch;
+    CollisionDispatcher *_dispatch;
     btBroadphaseInterface *_broadphase;
     btConstraintSolver *_solver;
     btDynamicsWorld *_world;

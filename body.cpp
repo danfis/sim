@@ -128,6 +128,8 @@ void Body::_set(VisBody *o, btCollisionShape *shape, Scalar mass)
 
     _body = new btRigidBody(mass, _motion_state, _shape, local_inertia);
 
+    _body->setUserPointer(this);
+
     // TODO
     _body->setDamping(0.3, 0.2);
 }

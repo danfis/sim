@@ -26,6 +26,12 @@ class BodyMotionState : public btMotionState {
     void setWorldTransform(const btTransform &worldTrans);
 };
 
+struct BodyCollisionInfo {
+    unsigned long dont_collide_id;
+
+    BodyCollisionInfo() : dont_collide_id(0) {}
+};
+
 class Body {
   protected:
     World *_world;
@@ -34,6 +40,8 @@ class Body {
     btCollisionShape *_shape;
     BodyMotionState *_motion_state;
     VisBody *_vis;
+
+    BodyCollisionInfo _collision_info;
 
   public:
     Body(World *w);
@@ -80,6 +88,11 @@ class Body {
 
     virtual void activate();
     virtual void deactivate();
+
+
+    inline const BodyCollisionInfo &collInfo() { return _collision_info; }
+    void collSetDontCollideId(unsigned long id)
+        { _collision_info.dont_collide_id = id; }
 
   protected:
     void _set(VisBody *o, btCollisionShape *shape, Scalar mass);
