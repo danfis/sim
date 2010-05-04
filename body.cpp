@@ -26,9 +26,7 @@ void BodyMotionState::setWorldTransform(const btTransform &world)
 }
 
 Body::Body(World *w)
-    : _body(0), _shape(0), _motion_state(0), _vis(0),
-      _offset(0., 0., 0.),
-      _world(w)
+    : _world(w), _body(0), _shape(0), _motion_state(0), _vis(0)
 {
 }
 
@@ -47,7 +45,7 @@ Body::~Body()
 void Body::setPos(const Vec3 &v)
 {
     btTransform trans;
-    Vec3 pos = v + _offset;
+    Vec3 pos = v;
 
     _motion_state->getWorldTransform(trans);
 

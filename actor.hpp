@@ -5,38 +5,46 @@
 
 #include "body.hpp"
 #include "joint.hpp"
-
+#include "actuator.hpp"
 
 namespace sim {
 
+class World;
+
 class Actor {
   protected:
-    std::list<Body *> _bodies;
-    std::list<Joint *> _joints;
+    World *_world;
 
   public:
-    Actor() {}
-    virtual ~Actor();
+    Actor(World *w) : _world(w) {}
+    virtual ~Actor() {}
 
-    std::list<Body *> &bodies() { return _bodies; }
-    const std::list<Body *> &bodies() const { return _bodies; }
-    std::list<Joint *> &joints() { return _joints; }
-    const std::list<Joint *> &joints() const { return _joints; }
+    World *world() { return _world; }
+    const World *world() const { return _world; }
+
+    virtual void activate() = 0;
+    virtual void deactivate() = 0;
+};
+
+
+class Robot4Wheels : public Actor {
+  protected:
+    BodyBox *_chasis;
+    ActuatorWheelCylinderX *_wheels[4];
+
+  public:
+    Robot4Wheels(World *w);
 
     void setPos(const Scalar x, const Scalar y, const Scalar z)
         { setPos(Vec3(x, y, z)); }
     void setPos(const Vec3 *v) { setPos(*v); }
     void setPos(const Vec3 &v);
 
-  protected:
-    void _addBody(Body *b);
-    void _addJoint(Joint *b);
-};
+    Vec3 pos() const { return _chasis->pos(); }
+    void pos(Scalar *x, Scalar *y, Scalar *z) const { _chasis->pos(x, y, z); }
 
-
-class Robot1 : public Actor {
-  public:
-    Robot1();
+    void activate();
+    void deactivate();
 };
 
 } /* namespace sim */

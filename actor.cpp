@@ -3,77 +3,56 @@
 
 namespace sim {
 
-Actor::~Actor()
+Robot4Wheels::Robot4Wheels(World *w)
+    : Actor(w)
 {
-    std::list<Body *>::iterator bit, bit_end;
-    std::list<Joint *>::iterator jit, jit_end;
-
-    bit = _bodies.begin();
-    bit_end = _bodies.end();
-    for (; bit != bit_end; ++bit){
-        delete *bit;
-    }
-    _bodies.clear();
-
-    jit = _joints.begin();
-    jit_end = _joints.end();
-    for (; jit != jit_end; ++jit){
-        delete *jit;
-    }
-    _joints.clear();
-}
-
-void Actor::setPos(const Vec3 &v)
-{
-    std::list<Body *>::iterator bit, bit_end;
-
-    bit = _bodies.begin();
-    bit_end = _bodies.end();
-    for (; bit != bit_end; ++bit){
-        (*bit)->setPos(v);
-    }
-}
-
-
-void Actor::_addBody(Body *b)
-{
-    _bodies.push_back(b);
-}
-
-void Actor::_addJoint(Joint *b)
-{
-    _joints.push_back(b);
-}
-
-
-Robot1::Robot1()
-    : Actor()
-{
-    sim::BodyBox *chasis;
-    sim::BodyCylinderX *w[4];
-    sim::JointHinge2 *j[4];
     size_t i;
 
-    chasis = new sim::BodyBox(sim::Vec3(.6, 1., 0.4), 1.);
+    _chasis = new sim::BodyBox(_world, sim::Vec3(.6, 1., 0.4), 1.);
     for (i = 0; i < 4; i++){
-        w[i] = new sim::BodyCylinderX(0.2, 0.2, 1.);
+        _wheels[i] = new sim::ActuatorWheelCylinderX(_world, 0.2, 0.2, 1.);
     }
 
-    w[0]->setOffsetPos(0.405, 0.4, -0.2);
-    w[1]->setOffsetPos(-0.405, 0.4, -0.2);
-    w[2]->setOffsetPos(0.405, -0.4, -0.2);
-    w[3]->setOffsetPos(-0.405, -0.4, -0.2);
+    _wheels[0]->setPos(0.405, 0.4, -0.2);
+    _wheels[1]->setPos(-0.405, 0.4, -0.2);
+    _wheels[2]->setPos(0.405, -0.4, -0.2);
+    _wheels[3]->setPos(-0.405, -0.4, -0.2);
 
     for (i = 0; i < 4; i++){
-        j[i] = new sim::JointHinge2(chasis, w[i], w[i]->pos(),
-                                    sim::Vec3(0., 0., 1.), sim::Vec3(1., 0., 0.));
+        _wheels[i]->connectToChasis(_chasis);
     }
 
-    _addBody(chasis);
+    // set colors
+    _chasis->visBody()->setColor(osg::Vec4(0.2, 0.2, 1.0, 1.));
+    _wheels[0]->wheel()->visBody()->setColor(osg::Vec4(1., 0.8, 0.8, 1.));
+    _wheels[1]->wheel()->visBody()->setColor(osg::Vec4(1., 0.8, 0.8, 1.));
+    _wheels[2]->wheel()->visBody()->setColor(osg::Vec4(0.8, 1., 0.8, 1.));
+    _wheels[3]->wheel()->visBody()->setColor(osg::Vec4(0.8, 1., 0.8, 1.));
+}
+
+void Robot4Wheels::setPos(const Vec3 &v)
+{
+    _chasis->setPos(v);
+    _wheels[0]->setPos(v + Vec3(0.405, 0.4, -0.2));
+    _wheels[1]->setPos(v + Vec3(-0.405, 0.4, -0.2));
+    _wheels[2]->setPos(v + Vec3(0.405, -0.4, -0.2));
+    _wheels[3]->setPos(v + Vec3(-0.405, -0.4, -0.2));
+}
+
+
+void Robot4Wheels::activate()
+{
+    size_t i;
+
+    _chasis->activate();
     for (i = 0; i < 4; i++){
-        _addBody(w[i]);
-        _addJoint(j[i]);
+        _wheels[i]->activate();
     }
+}
+
+void Robot4Wheels::deactivate()
+{
+    /* TODO */
 }
 
 }

@@ -3,8 +3,8 @@ CXXFLAGS += $(OSG_CXXFLAGS) $(ODE_CXXFLAGS) $(BT_CXXFLAGS)
 LDFLAGS += $(OSG_LDFLAGS) $(ODE_LDFLAGS) $(BT_LDFLAGS)
 
 
-TARGETS = libsim.a demo3
-OBJS = visbody.o visworld.o body.o world.o joint.o actuator.o #actor.o
+TARGETS = libsim.a demo
+OBJS = visbody.o visworld.o body.o world.o joint.o actuator.o actor.o
 
 all: $(TARGETS)
 
@@ -13,9 +13,6 @@ libsim.a: $(OBJS)
 	ranlib $@
 
 demo: demo.o libsim.a
-	$(CXX) $(CXXFLAGS) -o $@ demo.o -L. -lsim $(LDFLAGS)
-
-demo3: demo3.o libsim.a
 	$(CXX) $(CXXFLAGS) -o $@ $< -L. -lsim $(LDFLAGS)
 
 %.o: %.c %.h

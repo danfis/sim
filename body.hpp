@@ -28,16 +28,12 @@ class BodyMotionState : public btMotionState {
 
 class Body {
   protected:
+    World *_world;
+
     btRigidBody *_body;
     btCollisionShape *_shape;
     BodyMotionState *_motion_state;
     VisBody *_vis;
-
-    Vec3 _offset;
-
-    World *_world;
-
-    friend class World;
 
   public:
     Body(World *w);
@@ -81,14 +77,6 @@ class Body {
 
     Quat rot() const;
     void rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const;
-
-    void setOffset(const Vec3 &off) { _offset = off; }
-    void setOffset(float x, float y, float z) { setOffset(Vec3(x, y, z)); }
-    void setOffsetPos(const Vec3 &off) { setOffset(off); setPos(Vec3(0., 0., 0.)); }
-    void setOffsetPos(float x, float y, float z) { setOffsetPos(Vec3(x, y, z)); }
-
-    const Vec3 &offset() const { return _offset; }
-    Vec3 &offset() { return _offset; }
 
     virtual void activate();
     virtual void deactivate();

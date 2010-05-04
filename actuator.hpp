@@ -19,6 +19,11 @@ class ActuatorWheelCylinderX {
                           Scalar radius, Scalar height, Scalar mass);
     virtual ~ActuatorWheelCylinderX();
 
+    BodyCylinderX *wheel() { return _wheel; }
+    const BodyCylinderX *wheel() const { return _wheel; }
+    JointHinge2 *joint() { return _joint; }
+    const JointHinge2 *joint() const { return _joint; }
+
     void connectToChasis(Body *b);
 
     void activate();

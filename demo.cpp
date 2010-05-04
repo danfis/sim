@@ -95,8 +95,10 @@ int main(int argc, char *argv[])
     sim::BodyCylinder *cyl = new sim::BodyCylinder(world, 1., 2., 3.);
     sim::BodyCylinderX *cylx = new sim::BodyCylinderX(world, .5, 1., 3.);
     sim::BodyCylinderY *cyly = new sim::BodyCylinderY(world, .5, 1., 3.);
-    //sim::Robot1 *r1 = new sim::Robot1();
-    //r1->setPos(3., 3., -7.);
+    sim::Robot4Wheels *r1 = new sim::Robot4Wheels(world);
+
+    r1->setPos(3., 5., -7.);
+    r1->activate();
 
     createRobot(world, sim::Vec3(3., 3., -9.));
     createP2P(world, sim::Vec3(6., 6., -9.));

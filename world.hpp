@@ -51,9 +51,7 @@ class World {
 
     bool done();
 
-    void addActor(Actor *a);
 
-  protected:
     void addJoint(Joint *j);
     void addBody(Body *obj);
 

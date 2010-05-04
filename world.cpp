@@ -63,25 +63,6 @@ void World::addJoint(Joint *j)
         _world->addConstraint(c);
 }
 
-void World::addActor(Actor *a)
-{
-    std::list<Body *>::iterator bit, bit_end;
-    std::list<Body *> &bodies = a->bodies();
-    std::list<Joint *>::iterator jit, jit_end;
-    std::list<Joint *> &joints = a->joints();
-
-    bit = bodies.begin();
-    bit_end = bodies.end();
-    for (; bit != bit_end; ++bit){
-        addBody(*bit);
-    }
-
-    jit = joints.begin();
-    jit_end = joints.end();
-    for (; jit != jit_end; ++jit){
-        addJoint(*jit);
-    }
-}
 
 void World::init()
 {
