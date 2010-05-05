@@ -5,10 +5,13 @@ TARGETS = doxy
 all: $(TARGETS)
 
 doxy: Doxyfile
-	rm -rf doxy
 	$(MAKE) doc
 	
 doc:
+	rm -rf doxy
 	$(DOXYGEN)
+
+clean:
+	rm -rf doxy
 
 .PHONY: all doc
