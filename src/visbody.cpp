@@ -70,12 +70,6 @@ void VisBodyShape::_setShape(osg::Shape *shape)
     _setNode(geode);
 }
 
-VisBodyCube::VisBodyCube(Scalar width)
-    : VisBodyShape()
-{
-    _setShape(new osg::Box(Vec3(0., 0., 0.), width));
-}
-
 
 VisBodyBox::VisBodyBox(Vec3 dim)
     : VisBodyShape()

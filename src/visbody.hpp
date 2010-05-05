@@ -8,7 +8,7 @@
 namespace sim {
 
 /**
- * Visual reprezentation of object.
+ * Visual representation of body.
  */
 class VisBody {
   protected:
@@ -25,62 +25,101 @@ class VisBody {
     osg::Node *rootNode() { return _root; }
     const osg::Node *rootNode() const { return _root; }
 
+    /**
+     * Returns position of root node.
+     */
     Vec3 pos() const { return _root->getPosition(); }
     void pos(Scalar *x, Scalar *y, Scalar *z) const;
+
+    /**
+     * Returns rotation of root node.
+     */
     Quat rot() const { return _root->getAttitude(); }
     void rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const;
 
     /**
-     * Tranfsforms object in 3D space.
+     * Set position of body.
      */
-    void setPos(const Scalar x, const Scalar y, const Scalar z)
-        { setPos(Vec3(x, y, z)); }
     void setPos(const Vec3 *v) { setPos(*v); }
     void setPos(const Vec3 &v);
+    void setPos(const Scalar x, const Scalar y, const Scalar z)
+        { setPos(Vec3(x, y, z)); }
 
+    /**
+     * Set rotation of body.
+     */
+    void setRot(const Quat &v);
+    void setRot(const Quat *v) { setRot(*v); }
     void setRot(const Scalar x, const Scalar y, const Scalar z, const Scalar w)
         { setRot(Quat(x, y, z, w)); }
-    void setRot(const Quat *v) { setRot(*v); }
-    void setRot(const Quat &v);
 
-    void setPosRot(const Vec3 *v, const Quat *q) { setPosRot(*v, *q); }
+    /**
+     * Set position and rotation at once.
+     */
     void setPosRot(const Vec3 &v, const Quat &q);
+    void setPosRot(const Vec3 *v, const Quat *q) { setPosRot(*v, *q); }
 
+    /**
+     * Set color of body.
+     */
     virtual void setColor(const osg::Vec4 &c) {}
 
   protected:
     /**
      * Set top node of scene graph.
+     *
+     * This node will be connected to _root node which is
+     * osg::PositionAttitudeTransform node.
      */
     void _setNode(osg::Node *n);
 };
 
 
+/**
+ * Base class for visual bodies consisting only from single shape.
+ */
 class VisBodyShape : public VisBody {
   public:
     VisBodyShape() : VisBody() {}
     void setColor(const osg::Vec4 &c);
 
   protected:
+    /**
+     * Set up shape. This is easier way to set up node then via _setNode().
+     */
     void _setShape(osg::Shape *shape);
 };
 
 
-class VisBodyCube : public VisBodyShape {
-  public:
-    VisBodyCube(Scalar width);
-};
-
+/**
+ * VisBody with general Box shape.
+ * Takes vector of three lengths of edges.
+ */
 class VisBodyBox : public VisBodyShape {
   public:
     VisBodyBox(Vec3 dim);
 };
 
+/**
+ * VisBody with cube shape.
+ * Takes width of edge as only argument.
+ */
+class VisBodyCube : public VisBodyBox {
+  public:
+    VisBodyCube(Scalar width) : VisBodyBox(Vec3(width, width, width)) {}
+};
+
+/**
+ * Sphere shape. Takes radius as only argument.
+ */
 class VisBodySphere : public VisBodyShape {
   public:
     VisBodySphere(Scalar radius);
 };
 
+/**
+ * Cylinder shape. Takes radius and height as arguments.
+ */
 class VisBodyCylinder : public VisBodyShape {
   public:
     VisBodyCylinder(Scalar radius, Scalar height);

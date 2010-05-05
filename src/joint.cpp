@@ -49,48 +49,6 @@ JointFixed::JointFixed(World *w, Body *oA, Body *oB)
    _setJoint(joint6DOF);
 }
 
-JointPoint2Point::JointPoint2Point(World *w, Body *oA, Body *oB,
-                                   const Vec3 &pivotA, const Vec3 &pivotB)
-    : Joint(w, oA, oB)
-{
-    btPoint2PointConstraint *c;
-    btVector3 pA = pivotA.toBullet();
-    btVector3 pB = pivotB.toBullet();
-
-    c = new btPoint2PointConstraint(*oA->body(), *oB->body(), pA, pB);
-    _setJoint(c);
-}
-
-JointHinge::JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis)
-    : Joint(w, oA, oB)
-{
-    btHingeConstraint *c;
-    btTransform frameInA, frameInB;
-    btRigidBody *bA, *bB;
-    btVector3 anch = anchor.toBullet();
-    btVector3 ax = axis.toBullet();
-
-    bA = oA->body();
-    bB = oB->body();
-
-    frameInA.setIdentity();
-    frameInB.setIdentity();
-
-    frameInA.setOrigin(bA->getCenterOfMassTransform().inverse() * anch);
-    frameInB.setOrigin(bB->getCenterOfMassTransform().inverse() * anch);
-
-    btVector3 zAxis = ax;
-    btVector3 xAxis = btVector3(0,1,0).cross(zAxis);
-    assert (xAxis.normalized());
-    btVector3 yAxis = zAxis.cross(xAxis);
-    btMatrix3x3 basis(xAxis.x(), xAxis.y(), xAxis.z(), yAxis.x(), yAxis.y(), yAxis.z(), zAxis.x(), zAxis.y(), zAxis.z());
-    frameInA.setBasis(bA->getCenterOfMassTransform().getBasis().inverse() * basis);
-    frameInB.setBasis(bB->getCenterOfMassTransform().getBasis().inverse() * basis);
-   
-    c = new btHingeConstraint (*bA, *bB, frameInA, frameInB);
-    _setJoint(c);
-}
-
 JointHinge2::JointHinge2(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis1, const Vec3 &axis2)
     : Joint(w, oA, oB)
 {
@@ -130,6 +88,51 @@ void JointHinge2::setLimitAngAxis2(Scalar from, Scalar to)
 {
     btHinge2Constraint *j = dynamic_cast<btHinge2Constraint *>(_joint);
     j->setLimit(3, from, to);
+}
+
+
+
+JointHinge::JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis)
+    : Joint(w, oA, oB)
+{
+    btHingeConstraint *c;
+    btTransform frameInA, frameInB;
+    btRigidBody *bA, *bB;
+    btVector3 anch = anchor.toBullet();
+    btVector3 ax = axis.toBullet();
+
+    bA = oA->body();
+    bB = oB->body();
+
+    frameInA.setIdentity();
+    frameInB.setIdentity();
+
+    frameInA.setOrigin(bA->getCenterOfMassTransform().inverse() * anch);
+    frameInB.setOrigin(bB->getCenterOfMassTransform().inverse() * anch);
+
+    btVector3 zAxis = ax;
+    btVector3 xAxis = btVector3(0,1,0).cross(zAxis);
+    assert (xAxis.normalized());
+    btVector3 yAxis = zAxis.cross(xAxis);
+    btMatrix3x3 basis(xAxis.x(), xAxis.y(), xAxis.z(), yAxis.x(), yAxis.y(), yAxis.z(), zAxis.x(), zAxis.y(), zAxis.z());
+    frameInA.setBasis(bA->getCenterOfMassTransform().getBasis().inverse() * basis);
+    frameInB.setBasis(bB->getCenterOfMassTransform().getBasis().inverse() * basis);
+   
+    c = new btHingeConstraint (*bA, *bB, frameInA, frameInB);
+    _setJoint(c);
+}
+
+
+JointPoint2Point::JointPoint2Point(World *w, Body *oA, Body *oB,
+                                   const Vec3 &pivotA, const Vec3 &pivotB)
+    : Joint(w, oA, oB)
+{
+    btPoint2PointConstraint *c;
+    btVector3 pA = pivotA.toBullet();
+    btVector3 pB = pivotB.toBullet();
+
+    c = new btPoint2PointConstraint(*oA->body(), *oB->body(), pA, pB);
+    _setJoint(c);
 }
 
 }

@@ -8,7 +8,7 @@
 namespace sim {
 
 /**
- * Visualised world.
+ * Visual representation of world.
  * Based on openscenegraph.
  */
 class VisWorld {

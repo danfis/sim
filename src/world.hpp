@@ -17,7 +17,7 @@ namespace sim {
 
 
 /**
- * Physical world.
+ * Physical representation world.
  */
 class World {
   protected:
@@ -26,13 +26,13 @@ class World {
     btBroadphaseInterface *_broadphase;
     btConstraintSolver *_solver;
     btDynamicsWorld *_world;
-    VisWorld *_vis;
 
+    VisWorld *_vis; //< Reference to visual representation
+
+    typedef std::list<Actor *>::iterator _act_it;
     std::list<Actor *> _actors;
     std::list<Actor *> _pre_step;
     std::list<Actor *> _post_step;
-
-    typedef std::list<Actor *>::iterator _act_it;
 
   public:
     World();
@@ -56,8 +56,22 @@ class World {
     bool done();
 
 
+    /**
+     * Adds joint to world. This function is used by .activate() method of
+     * Joint and should NOT be used directly.
+     */
     void addJoint(Joint *j);
+
+    /**
+     * Adds body to world. This function is used by .activate() method of
+     * Body and should NOT be used directly.
+     */
     void addBody(Body *obj);
+
+    /**
+     * Adds body to world. This function is used by .activate() method of
+     * Actor and should NOT be used directly.
+     */
     void addActor(Actor *a);
 
     void regActorPreStep(Actor *a);
