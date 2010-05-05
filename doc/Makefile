@@ -10,6 +10,7 @@ doxy: Doxyfile
 doc:
 	rm -rf doxy
 	$(DOXYGEN)
+	./open-inheritance.py doxy/html/*.html
 
 clean:
 	rm -rf doxy
