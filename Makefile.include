@@ -3,6 +3,8 @@ CXX  ?= g++
 MOC  ?= moc
 FLEX ?= flex
 DOXYGEN ?= doxygen
+DIA ?= dia
+CONVERT ?= convert
 
 SYSTEM = $(shell uname)
 
