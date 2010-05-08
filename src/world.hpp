@@ -27,7 +27,7 @@ class World {
     btConstraintSolver *_solver;
     btDynamicsWorld *_world;
 
-    VisWorld *_vis; //< Reference to visual representation
+    VisWorld *_vis; //!< Reference to visual representation
 
     typedef std::list<Actor *>::iterator _act_it;
     std::list<Actor *> _actors;

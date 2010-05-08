@@ -67,6 +67,7 @@ class Body {
     Body(World *w);
     virtual ~Body();
 
+    /* \{ */
     btRigidBody *body() { return _body; }
     const btRigidBody *body() const { return _body; }
     btCollisionShape *shape() { return _shape; }
@@ -77,7 +78,9 @@ class Body {
     const VisBody *visBody() const { return _vis; }
     World *world() { return _world; }
     const World *world() const { return _world; }
+    /* \} */
 
+    /* \{ */
     /**
      * Set position of body in 3D space.
      */
@@ -111,7 +114,9 @@ class Body {
      */
     virtual Quat rot() const;
     virtual void rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const;
+    /* \} */
 
+    /* \{ */
     /**
      * Activates body in world - world will realize this body.
      */
@@ -126,6 +131,7 @@ class Body {
     const BodyCollisionInfo &collInfo() { return _collision_info; }
     void collSetDontCollideId(unsigned long id)
         { _collision_info.dont_collide_id = id; }
+    /* \} */
 
   protected:
     /**
