@@ -1,13 +1,12 @@
 -include ../Makefile.include
-CXXFLAGS += $(OSG_CXXFLAGS) $(ODE_CXXFLAGS) $(BT_CXXFLAGS)
+CXXFLAGS += -I. $(OSG_CXXFLAGS) $(ODE_CXXFLAGS) $(BT_CXXFLAGS)
 LDFLAGS += $(OSG_LDFLAGS) $(ODE_LDFLAGS) $(BT_LDFLAGS)
 
 
-TARGETS = libsim.a demo
-OBJS = visbody.o visworld.o body.o world.o joint.o actuator.o actor.o \
-       collision_detection.o
+TARGETS = libsim.a demo2
+OBJS = visbody.o visworld.o body.o joint.o sim.o
 
-all: $(TARGETS)
+all: bullet $(TARGETS)
 
 libsim.a: $(OBJS)
 	ar cr $@ $^
@@ -15,6 +14,14 @@ libsim.a: $(OBJS)
 
 demo: demo.o libsim.a
 	$(CXX) $(CXXFLAGS) -o $@ $< -L. -lsim $(LDFLAGS)
+demo2: demo2.o libsim.a bullet/libsim-bullet.a
+	$(CXX) $(CXXFLAGS) -o $@ $< -Lbullet -lsim-bullet -L. -lsim $(LDFLAGS)
+
+bullet/libsim-bullet.a:
+	$(MAKE) bullet
+
+bullet:
+	$(MAKE) -C bullet
 
 %.o: %.c %.h
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -32,6 +39,7 @@ demo: demo.o libsim.a
 clean:
 	rm -f *.o *~ *.a
 	rm -f $(TARGETS)
+	$(MAKE) -C bullet clean
 	if [ -d testsuites ]; then $(MAKE) -C testsuites clean; fi;
 
 check:
@@ -39,4 +47,4 @@ check:
 check-valgrind:
 	$(MAKE) -C testsuites check-valgrind
 
-.PHONY: all clean help check check-valgrind
+.PHONY: all clean help check check-valgrind bullet

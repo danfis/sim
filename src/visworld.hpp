@@ -35,9 +35,9 @@ class VisWorld {
     void init();
 
     /**
-     * Destroys world.
+     * Finalize world.
      */
-    void destroy();
+    void finish();
 
     /**
      * Performes one step.

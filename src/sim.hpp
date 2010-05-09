@@ -1,44 +1,34 @@
 #ifndef _SIM_SIM_HPP_
 #define _SIM_SIM_HPP_
 
-#include <osgViewer/Viewer>
-#include "object.hpp"
+#include "world.hpp"
+#include "visworld.hpp"
 
 namespace sim {
-
-/**
- * Callback called from Sim::run() function during ODE simulation.
- */
-void __ode_near_collision(void *data, dGeomID o1, dGeomID o2);
 
 /**
  * Simulator.
  */
 class Sim {
-    double _sim_time;
-    dContact _default_contact; /*! default setting of contact */
-
-    osgViewer::Viewer *_viewer;
-    osg::Group *_root; /*! root of scene graph */
-
-    dWorldID _world;
-    dSpaceID _space;
-    dJointGroupID _coll_contacts;
-
-    std::list<Bodyect *> _objs; /*! list of objects */
-
-    friend void __ode_near_collision(void *data, dGeomID o1, dGeomID o2);
+    World *_world;
+    VisWorld *_visworld;
 
   public:
     Sim();
     virtual ~Sim();
 
-    /**
-     * Adds object into internal list of objects.
-     * This method steals pointer to given object! It means that destructor
-     * is called from Sim and _can't_ be called outside.
-     */
-    virtual void addBodyect(Bodyect *o);
+    World *world() { return _world; }
+    const World *world() const { return _world; }
+    VisWorld *visWorld() { return _visworld; }
+    const VisWorld *visWorld() const { return _visworld; }
+
+    void setWorld(World *w);
+    void setVisWorld(VisWorld *w);
+
+    virtual void init();
+    virtual void step();
+    virtual void finish();
+    virtual bool done();
 
     /**
      * Run simulation.

@@ -1,17 +1,10 @@
 #ifndef _SIM_WORLD_HPP_
 #define _SIM_WORLD_HPP_
 
-#include <BulletCollision/CollisionDispatch/btCollisionConfiguration.h>
-#include <BulletCollision/CollisionDispatch/btCollisionDispatcher.h>
-#include <BulletCollision/BroadphaseCollision/btBroadphaseInterface.h>
-#include <BulletDynamics/ConstraintSolver/btConstraintSolver.h>
-#include <BulletDynamics/Dynamics/btDynamicsWorld.h>
-
-#include "body.hpp"
-#include "joint.hpp"
-#include "actor.hpp"
-#include "visworld.hpp"
-#include "collision_detection.hpp"
+#include "sim/body.hpp"
+#include "sim/joint.hpp"
+#include "sim/actuator.hpp"
+#include "sim/visworld.hpp"
 
 namespace sim {
 
@@ -21,68 +14,61 @@ namespace sim {
  */
 class World {
   protected:
-    btCollisionConfiguration *_coll_conf;
-    CollisionDispatcher *_dispatch;
-    btBroadphaseInterface *_broadphase;
-    btConstraintSolver *_solver;
-    btDynamicsWorld *_world;
-
     VisWorld *_vis; //!< Reference to visual representation
 
-    typedef std::list<Actor *>::iterator _act_it;
-    std::list<Actor *> _actors;
-    std::list<Actor *> _pre_step;
-    std::list<Actor *> _post_step;
-
   public:
-    World();
-    virtual ~World();
+    /* \{ */
+    virtual VisWorld *visWorld() { return _vis; }
+    virtual const VisWorld *visWorld() const { return _vis; }
+    virtual void setVisWorld(VisWorld *w) { _vis = w; }
+    /* \} */
 
+    /* \{ */
     /**
      * Initializes world.
      */
-    void init();
+    virtual void init() = 0;
 
     /**
-     * Destroys world.
+     * Finalize world.
      */
-    void destroy();
+    virtual void finish() = 0;
 
     /**
-     * Performes one step.
+     * Performes one simulation step.
      */
-    void step(bool phys = true, bool vis = true);
+    virtual void step() = 0;
 
-    bool done();
+    virtual bool done() = 0;
+    /* \} */
 
+    /* \{ */
+    virtual Body *createBodyCube(Scalar width, Scalar mass) { return 0; }
+    virtual Body *createBodyBox(Vec3 dim, Scalar mass) { return 0; }
+    virtual Body *createBodySphere(Scalar radius, Scalar mass) { return 0; }
+    virtual Body *createBodyCylinderX(Scalar radius, Scalar height, Scalar mass)
+        { return 0; }
+    virtual Body *createBodyCylinderY(Scalar radius, Scalar height, Scalar mass)
+        { return 0; }
+    virtual Body *createBodyCylinderZ(Scalar radius, Scalar height, Scalar mass)
+        { return 0; }
 
-    /**
-     * Adds joint to world. This function is used by .activate() method of
-     * Joint and should NOT be used directly.
-     */
-    void addJoint(Joint *j);
+    virtual Joint *createJointFixed(Body *oA, Body *oB) { return 0; }
+    virtual Joint *createJointHinge(Body *A, Body *oB,
+                                    const Vec3 &anchor, const Vec3 &axis)
+        { return 0; }
+    virtual Joint *createJointHinge2(Body *A, Body *oB, const Vec3 &anchor,
+                                     const Vec3 &axis1, const Vec3 &axis2)
+        { return 0; }
 
-    /**
-     * Adds body to world. This function is used by .activate() method of
-     * Body and should NOT be used directly.
-     */
-    void addBody(Body *obj);
-
-    /**
-     * Adds body to world. This function is used by .activate() method of
-     * Actor and should NOT be used directly.
-     */
-    void addActor(Actor *a);
-
-    void regActorPreStep(Actor *a);
-    void regActorPostStep(Actor *a);
-
-  protected:
-    void _actorsRunPreStep();
-    void _actorsRunPostStep();
+    virtual ActuatorWheelCylinderX *createActuatorWheelCylinderX
+                                        (Scalar radius, Scalar height,
+                                         Scalar mass)
+        { return 0; }
+    /* \} */
 };
 
-}
+} /* namespace sim */
 
 #endif /* _SIM_WORLD_HPP_ */
 

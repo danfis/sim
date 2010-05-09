@@ -39,7 +39,7 @@ void VisWorld::init()
     _viewer->realize();
 }
 
-void VisWorld::destroy()
+void VisWorld::finish()
 {
 }
 

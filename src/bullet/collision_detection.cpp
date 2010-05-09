@@ -1,8 +1,10 @@
-#include "collision_detection.hpp"
-#include "body.hpp"
+#include "sim/bullet/collision_detection.hpp"
+#include "sim/bullet/body.hpp"
 
 
 namespace sim {
+
+namespace bullet {
 
 CollisionDispatcher::CollisionDispatcher(btCollisionConfiguration *conf)
     : btCollisionDispatcher(conf)
@@ -24,5 +26,7 @@ bool CollisionDispatcher::needsCollision(btCollisionObject *c0, btCollisionObjec
 
     return btCollisionDispatcher::needsCollision(c0, c1);
 }
+
+} /* namespace bullet */
 
 } /* namespace sim */

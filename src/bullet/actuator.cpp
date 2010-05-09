@@ -1,6 +1,8 @@
-#include "actuator.hpp"
+#include "sim/bullet/actuator.hpp"
 
 namespace sim {
+
+namespace bullet {
 
 ActuatorWheelCylinderX::ActuatorWheelCylinderX(World *w,
                         Scalar radius, Scalar height, Scalar mass)
@@ -18,8 +20,14 @@ ActuatorWheelCylinderX::~ActuatorWheelCylinderX()
         delete _joint;
 }
 
-void ActuatorWheelCylinderX::connectToChasis(Body *b)
+void ActuatorWheelCylinderX::connectToChasis(sim::Body *_b)
 {
+    Body *b = dynamic_cast<Body *>(_b);
+
+    // TODO: raise exception?
+    if (!b)
+        return;
+
     Vec3 axis1(0., 0., 1.);
     Vec3 axis2(1., 0., 0.);
 
@@ -51,4 +59,6 @@ void ActuatorWheelCylinderX::applyTorque(const Vec3 &v)
 }
 
 
-}
+} /* namespace bullet */
+
+} /* namespace sim */
