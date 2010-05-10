@@ -4,8 +4,59 @@
 #include "world.hpp"
 #include "visworld.hpp"
 #include "component.hpp"
+#include "message.hpp"
 
 namespace sim {
+
+class SimComponentMessageRegistry {
+    typedef std::map<Component *, Component *> _list_t;
+    typedef std::map<unsigned long, _list_t *> _map_t;
+
+    /**
+     * Registry holding what components are registered to what type of
+     * messages.
+     */
+    _map_t _map;
+
+    /**
+     * List of Components with pending Messages.
+     */
+    std::list<Component *> _active[Component::PRIO_MAX];
+
+    /**
+     * List of all messages.
+     */
+    std::list<Message *> _msgs;
+
+  public:
+    SimComponentMessageRegistry();
+    virtual ~SimComponentMessageRegistry();
+
+    /**
+     * Register Component to messages of specified type.
+     * Complexity: O(log(num of all already registered types))
+     */
+    void regComponent(Component *c, unsigned long msg_type);
+    void unregComponent(Component *c, unsigned long msg_type);
+
+    /**
+     * Assign Message to registered Components.
+     * Complexity: O(log(num of all already registered types) + num of
+     * components registered to msg's type)
+     */
+    void assignMessage(Message *m);
+
+    /**
+     * Deliver all Messages.
+     */
+    void deliverMessages();
+
+    /**
+     * Deliver all Messages assigned to specified Component.
+     */
+    void deliverAssignedMessages(Component *c);
+};
+
 
 /**
  * Simulator.
@@ -27,6 +78,8 @@ class Sim {
      * (see Component::cbPostStep()).
      */
     std::list<Component *> _cs_post;
+
+    SimComponentMessageRegistry _reg;
 
   protected:
     typedef std::list<Component *>::iterator cit_t; //!< Component list iterator
@@ -75,16 +128,33 @@ class Sim {
     void rmComponent(Component *c);
 
     /**
+     * Sends message.
+     */
+    void sendMessage(Message *msg);
+
+    /**
      * Registers Component for cbPreStep() callback.
      * Component is registered only if it is already added using
      * addComponent() method.
      */
     void regPreStep(Component *c);
+    void unregPreStep(Component *c);
 
     /**
      * Register Component for cbPostStep() callback.
      */
     void regPostStep(Component *c);
+    void unregPostStep(Component *c);
+
+    /**
+     * Registers Component to receive messages with specified type.
+     */
+    void regMessage(Component *c, unsigned long msg_type);
+
+    /**
+     * Oposite of regMessage().
+     */
+    void unregMessage(Component *c, unsigned long msg_type);
 
   protected:
     /**
@@ -119,6 +189,11 @@ class Sim {
      * components.
      */
     void _cbPostStep();
+
+    /**
+     * Deliver all messages to Components.
+     */
+    void _cbMessages();
 };
 
 }

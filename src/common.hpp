@@ -13,9 +13,9 @@
  *    }
  */
 #define for_each(it_type, list) \
-    for (it_type it = list.begin(), \
-                 it_end = list.end(); \
+    for (it_type it = (list).begin(), \
+                 it_end = (list).end(); \
          it != it_end; \
-         ++it_end)
+         ++it)
 
 #endif /* _SIM_COMMON_HPP_ */

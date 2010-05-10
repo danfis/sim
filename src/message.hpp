@@ -53,15 +53,6 @@ class Message {
     SIM_MESSAGE_INIT2(1, 0)
 
   public:
-    enum {
-        PRIORITY_LOW = 0,
-        PRIORITY_NORMAL,
-        PRIORITY_HIGH,
-        PRIOTITY_HIGHEST,
-        PRIORITY_MAX
-    };
-
-  public:
     Message() {}
     virtual ~Message();
 
