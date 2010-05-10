@@ -21,7 +21,7 @@ class SimComponentMessageRegistry {
     /**
      * List of Components with pending Messages.
      */
-    std::list<Component *> _active[Component::PRIO_MAX];
+    std::list<Component *> _active[Component::PRIO_MAX][Message::PRIO_MAX];
 
     /**
      * List of all messages.
@@ -54,7 +54,7 @@ class SimComponentMessageRegistry {
     /**
      * Deliver all Messages assigned to specified Component.
      */
-    void deliverAssignedMessages(Component *c);
+    void deliverAssignedMessages(Component *c, Message::Priority prio);
 };
 
 

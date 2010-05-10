@@ -70,24 +70,29 @@ TEST(compPrePostStep)
 
 class M1 : public sim::Message {
     SIM_MESSAGE_INIT(10)
+  public:
+    M1() : sim::Message(sim::Message::PRIO_LOWEST) {}
 };
 
 class M2 : public sim::Message {
     SIM_MESSAGE_INIT(11)
+  public:
+    M2() : sim::Message(sim::Message::PRIO_NORMAL) {}
 };
 
 class M3 : public sim::Message {
     SIM_MESSAGE_INIT(12)
   public:
     std::string msg;
-    M3(const std::string &m = "") : msg(m) {}
+    M3(const std::string &m = "") : sim::Message(sim::Message::PRIO_HIGHEST), msg(m) {}
 };
 
 class C1 : public sim::Component {
   public:
     void processMessage(const sim::Message &msg)
     {
-        cout << "C1::processMessage - prio:" << prio() << " type: " << msg.type() << endl;
+        cout << "C1::processMessage - prio:" << prio();
+        cout << " M(prio: " << msg.prio() << ", type: " << msg.type() << ")" << endl;
         if (msg.type() == M3::Type){
             cout << "    M3::msg: " << ((const M3 &)msg).msg << endl;
         }
@@ -105,7 +110,8 @@ class C2 : public sim::Component {
 
     void processMessage(const sim::Message &msg)
     {
-        cout << "C2::processMessage - prio:" << prio() << " type: " << msg.type() << endl;
+        cout << "C2::processMessage - prio:" << prio();
+        cout << " M(prio: " << msg.prio() << ", type: " << msg.type() << ")" << endl;
         if (msg.type() == M3::Type){
             cout << "    M3::msg: " << ((const M3 &)msg).msg << endl;
         }
@@ -123,7 +129,8 @@ class C3 : public sim::Component {
 
     void processMessage(const sim::Message &msg)
     {
-        cout << "C3::processMessage - prio:" << prio() << " type: " << msg.type() << endl;
+        cout << "C3::processMessage - prio:" << prio();
+        cout << " M(prio: " << msg.prio() << ", type: " << msg.type() << ")" << endl;
         if (msg.type() == M3::Type){
             cout << "    M3::msg: " << ((const M3 &)msg).msg << endl;
         }
@@ -183,6 +190,16 @@ TEST(compMsg)
     s.sendMessage(new M3("1"));
     s.sendMessage(new M3("2"));
     s.sendMessage(new M1());
+
+    s.step();
+    cout << endl;
+
+    s.regMessage(c2, M2::Type);
+    s.regMessage(c2, M1::Type);
+    s.sendMessage(new M3("1"));
+    s.sendMessage(new M1());
+    s.sendMessage(new M2());
+    s.sendMessage(new M3("2"));
 
     s.step();
     cout << endl;

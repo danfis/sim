@@ -90,13 +90,13 @@ void SimComponentMessageRegistry::assignMessage(Message *m)
             // Component isn't (for sure) in list of active Components
             // because all Components are removed from _active list during
             // deliverMessages() method.
-            if (c->__msgs_to_deliver.size() == 0){
-                DBG(" -> _activate[" << c->prio() << "]");
-                _active[c->prio()].push_back(it->second);
+            if (c->__msgs_to_deliver[m->prio()].size() == 0){
+                DBG(" -> _activate[" << c->prio() << "][" << m->prio() << "]");
+                _active[c->prio()][m->prio()].push_back(it->second);
             }
 
             // append message to be delivered to Component
-            c->__msgs_to_deliver.push_back(m);
+            c->__msgs_to_deliver[m->prio()].push_back(m);
         }
     }
 
@@ -110,16 +110,18 @@ void SimComponentMessageRegistry::deliverMessages()
 
     // first deliver to Components with highest priority - O(1)
     for (int i = Component::PRIO_MAX - 1; i >= 0; i--){
-        // check if there is any Component with pending messages - O(1)
-        if (_active[i].size() > 0){
-            // deliver all messages to Components
-            //  O(num of active comps) * O(deliverAssignedMessages())
-            for_each(std::list<Component *>::iterator, _active[i]){
-                deliverAssignedMessages(*it);
-            }
+        for (int j = Message::PRIO_MAX - 1; j >= 0; j--){
+            // check if there is any Component with pending messages - O(1)
+            if (_active[i][j].size() > 0){
+                // deliver all messages to Components
+                //  O(num of active comps) * O(deliverAssignedMessages())
+                for_each(std::list<Component *>::iterator, _active[i][j]){
+                    deliverAssignedMessages(*it, (Message::Priority)j);
+                }
 
-            // all Components processed - clear list
-            _active[i].clear();
+                // all Components processed - clear list
+                _active[i][j].clear();
+            }
         }
     }
 
@@ -130,19 +132,20 @@ void SimComponentMessageRegistry::deliverMessages()
     _msgs.clear();
 }
 
-void SimComponentMessageRegistry::deliverAssignedMessages(Component *c)
+void SimComponentMessageRegistry::deliverAssignedMessages(Component *c,
+                                                          Message::Priority prio)
 {
     DBG(c);
 
     // call processMessage() on each message in assigned to Component
     //  O(num of assigned messages)
     for_each(std::list<const Message *>::iterator,
-             c->__msgs_to_deliver){
+            c->__msgs_to_deliver[prio]){
         c->processMessage(**it);
     }
 
     // all messages delivered - clear list
-    c->__msgs_to_deliver.clear();
+    c->__msgs_to_deliver[prio].clear();
 }
 
 

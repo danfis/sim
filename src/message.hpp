@@ -53,8 +53,22 @@ class Message {
     SIM_MESSAGE_INIT2(1, 0)
 
   public:
-    Message() {}
+    enum Priority {
+        PRIO_LOWEST = 0,
+        PRIO_LOWER,
+        PRIO_NORMAL,
+        PRIO_HIGH,
+        PRIO_HIGHEST,
+        PRIO_MAX
+    };
+
+  protected:
+    Priority _prio;
+  public:
+    Message(Priority prio = PRIO_NORMAL) : _prio(prio) {}
     virtual ~Message();
+
+    Priority prio() const { return _prio; }
 
     /* final */ unsigned long typeMajor() const { return type() >> 16UL; }
     /* final */ unsigned long typeMinor() const { return type() & 0xffffUL; }
