@@ -33,11 +33,6 @@ class Sim {
     typedef std::list<Component *>::const_iterator const_cit_t;
 
   public:
-    enum WorldTypes {
-        WorldTypeBullet
-    };
-
-  public:
     Sim(World *world = 0, VisWorld *visworld = 0);
     virtual ~Sim();
 

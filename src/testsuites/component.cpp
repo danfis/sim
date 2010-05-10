@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <iostream>
 
 #include "cu.h"
 #include "sim/sim.hpp"

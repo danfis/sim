@@ -7,7 +7,7 @@ LDFLAGS += $(OSG_LDFLAGS) $(ODE_LDFLAGS) $(BT_LDFLAGS)
 
 CHECK_REG=cu/check-regressions
 
-OBJS = component.o
+OBJS = component.o message.o
 
 
 all: test

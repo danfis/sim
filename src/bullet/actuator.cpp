@@ -22,11 +22,7 @@ ActuatorWheelCylinderX::~ActuatorWheelCylinderX()
 
 void ActuatorWheelCylinderX::connectToChasis(sim::Body *_b)
 {
-    Body *b = dynamic_cast<Body *>(_b);
-
-    // TODO: raise exception?
-    if (!b)
-        return;
+    Body *b = (Body *)_b;
 
     Vec3 axis1(0., 0., 1.);
     Vec3 axis2(1., 0., 0.);

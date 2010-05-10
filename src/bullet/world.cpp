@@ -121,37 +121,19 @@ sim::Body *World::createBodyCylinderZ(Scalar radius, Scalar height, Scalar mass)
 
 sim::Joint *World::createJointFixed(sim::Body *oA, sim::Body *oB)
 {
-    Body *A = dynamic_cast<Body *>(oA);
-    Body *B = dynamic_cast<Body *>(oB);
-
-    if (!A || !B)
-        return 0;
-
-    return new JointFixed(this, A, B);
+    return new JointFixed(this, (Body *)oA, (Body *)oB);
 }
 
 sim::Joint *World::createJointHinge(sim::Body *oA, sim::Body *oB,
                                     const Vec3 &anchor, const Vec3 &axis)
 {
-    Body *A = dynamic_cast<Body *>(oA);
-    Body *B = dynamic_cast<Body *>(oB);
-
-    if (!A || !B)
-        return 0;
-
-    return new JointHinge(this, A, B, anchor, axis);
+    return new JointHinge(this, (Body *)oA, (Body *)oB, anchor, axis);
 }
 
 sim::Joint *World::createJointHinge2(sim::Body *oA, sim::Body *oB, const Vec3 &anchor,
                                      const Vec3 &axis1, const Vec3 &axis2)
 {
-    Body *A = dynamic_cast<Body *>(oA);
-    Body *B = dynamic_cast<Body *>(oB);
-
-    if (!A || !B)
-        return 0;
-
-    return new JointHinge2(this, A, B, anchor, axis1, axis2);
+    return new JointHinge2(this, (Body *)oA, (Body *)oB, anchor, axis1, axis2);
 }
 
 

@@ -1,10 +1,12 @@
 #include "cu.h"
 
 #include "component.hpp"
+#include "message.hpp"
 
 
 TEST_SUITES{
     TEST_SUITE_ADD(TSComponent),
+    TEST_SUITE_ADD(TSMessage),
 
     TEST_SUITES_CLOSURE
 };
