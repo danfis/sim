@@ -1,13 +1,3 @@
-#ifndef _SIM_SIM_HPP_
-#define _SIM_SIM_HPP_
-
-#include "world.hpp"
-#include "visworld.hpp"
-#include "component.hpp"
-#include "message.hpp"
-
-namespace sim {
-
 /*!
 \page dev_messaging Messaging Internals
 \section dev_messaging_overview General Overview
@@ -165,6 +155,17 @@ and
 \ref sim::SimComponentMessageRegistry::deliverAssignedMessages "deliverAssignedMessages"
 methods.
 */
+
+
+#ifndef _SIM_SIM_HPP_
+#define _SIM_SIM_HPP_
+
+#include "world.hpp"
+#include "visworld.hpp"
+#include "component.hpp"
+#include "message.hpp"
+
+namespace sim {
 
 /**
  * Registry connecting Messages and Components - this class is responsible

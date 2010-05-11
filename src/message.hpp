@@ -1,3 +1,101 @@
+/*!
+\page man_message How to define new Message
+
+Message is one method Components can comunicate with each other or how to
+send any information to Components from outside.
+
+Every new Message must be declared as child of
+\ref sim::Message class.
+
+Every new Message must have assigned type ID that distinguish messages from
+each other. Message has also assigned priority that controls order of
+processing Messages.
+
+\section man_message_new Creating new Message
+Let start with simple example:
+\code
+#include <sim/message.hpp>
+
+class MBase : public sim::Message {
+    SIM_MESSAGE_INIT(1)
+  public:
+    MBase(sim::Message::Priority prio)
+        : sim::Message(prio) {}
+};
+
+class M1 : public MBase {
+    SIM_MESSAGE_INIT(2)
+  public:
+    M1() : MBase(sim::Message::PRIO_HIGHER) {}
+};
+
+class M2 : public MBase {
+    SIM_MESSAGE_INIT(3)
+
+  private:
+    std::string _msg;
+
+  public:
+    M2(const std::string &msg)
+        : MBase(sim::Message::PRIO_NORMAL),
+          _msg(msg)
+        {}
+
+    const std::string &msg() const { return _msg; }
+};
+
+\endcode
+
+Example above defines three Messages with different type ID and priorities.
+ID of Message is defined using SIM_MESSAGE_INIT() macro (ID 0 is reserved
+for system messages, so don't use it) and priority is set
+using sim::Message contructor. Type of Message can be lately obtained by
+method .type() or by class's static member ::Type and you can use them to
+register Component or to dispatch Messages in Component's
+\ref sim::Component::processMessage "processMessage()" method:
+\code
+// create new simulator
+Sim *sim = new Sim();
+
+// create new Component
+Comp *c = new Comp();
+
+// register component to M1 and M2 message
+sim->regMessage(c, M1::Type);
+sim->regMessage(c, M2::Type);
+\endcode
+
+\code
+// Dispatching messages in processMessage() method:
+void Comp::processMessage(const sim::Message &msg)
+{
+    if (msg.type() == M1::Type){
+        std::cout << "Hooray, I got M1 message!" << std::endl;
+    }else if (msg.type() == M2::Type){
+        std::cout << "Oh no, M2 again..." << std::endl;
+
+        // lets look at M2's message:
+        const M2 &m2 = (const M2 &)msg;
+        // you can also use dynamic_cast through ::cast() static method:
+        // const M2 *m2 = msg.cast<const M2>(&msg);
+        std::cout << "  M2's msg is " << M2.msg() << std::endl;
+    }
+}
+\endcode
+
+Messages can be sent to registered Components:
+\code
+sim->sendMessage(new M1());
+sim->sendMessage(new M2("Some message"));
+\endcode
+
+You can also change priority using sendMessage() method:
+\code
+sim->sendMessage(new M1(), sim::Message::PRIO_HIGHEST);
+\endcode
+*/
+
+
 #ifndef _SIM_MESSAGE_HPP_
 #define _SIM_MESSAGE_HPP_
 
@@ -49,6 +147,11 @@ namespace sim {
         static const unsigned long TypeMinor = SIM_MESSAGE_MAKE_MINOR(MINOR);
 
 
+/**
+ * Class representing Message that can be sent by Sim::sendMessage() method
+ * to registered Components.
+ * See \ref man_message for more info.
+ */
 class Message {
     SIM_MESSAGE_INIT2(1, 0)
 
@@ -57,7 +160,7 @@ class Message {
         PRIO_LOWEST = 0,
         PRIO_LOWER,
         PRIO_NORMAL,
-        PRIO_HIGH,
+        PRIO_HIGHER,
         PRIO_HIGHEST,
         PRIO_MAX
     };

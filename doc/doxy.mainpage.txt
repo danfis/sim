@@ -1,6 +1,9 @@
 /**
 \mainpage
 
+\section man_section Manuals and Tutorials
+- \subpage man_message
+
 \section dev_section Internals Description.
 - \subpage dev_messaging
 */
