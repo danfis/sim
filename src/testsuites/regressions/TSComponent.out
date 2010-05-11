@@ -5,4 +5,157 @@ Comp::cbPreStep
 Comp::cbPostStep
 Comp::cbPreStep
 Comp::cbPostStep
+Comp::cbPostStep
+Comp::cbPostStep
+Comp::cbPreStep
+Comp::cbPreStep
 Comp::finish
+
+
+--- compMsg() ---
+Sending M1
+C2::preStep()
+C3::postStep()
+
+C2::preStep()
+C2::processMessage - prio:4 M(prio: 0, type: 655360)
+C1::processMessage - prio:2 M(prio: 0, type: 655360)
+C3::postStep()
+
+Sending M2 M1
+C2::preStep()
+C3::postStep()
+
+Sending M2, M1
+C2::preStep()
+C2::processMessage - prio:4 M(prio: 0, type: 655360)
+C1::processMessage - prio:2 M(prio: 0, type: 655360)
+C3::postStep()
+
+C2::preStep()
+C2::processMessage - prio:4 M(prio: 2, type: 720896)
+C1::processMessage - prio:2 M(prio: 0, type: 655360)
+C3::processMessage - prio:1 M(prio: 2, type: 720896)
+C3::postStep()
+
+Sending M3
+C2::preStep()
+C3::postStep()
+
+Sending M3(1), M3(2), M1
+C2::preStep()
+C3::postStep()
+
+Sending M3(1), M1, M2, M3(2)
+C2::preStep()
+C2::processMessage - prio:4 M(prio: 4, type: 786432)
+    M3::msg: 1
+C2::processMessage - prio:4 M(prio: 4, type: 786432)
+    M3::msg: 2
+C1::processMessage - prio:2 M(prio: 4, type: 786432)
+    M3::msg: 1
+C1::processMessage - prio:2 M(prio: 4, type: 786432)
+    M3::msg: 2
+C1::processMessage - prio:2 M(prio: 0, type: 655360)
+C3::processMessage - prio:1 M(prio: 4, type: 786432)
+    M3::msg: 1
+C3::processMessage - prio:1 M(prio: 4, type: 786432)
+    M3::msg: 2
+C3::postStep()
+
+Sending M3(1)
+C2::processMessage - prio:4 M(prio: 4, type: 786432)
+    M3::msg: 1
+C2::processMessage - prio:4 M(prio: 4, type: 786432)
+    M3::msg: 2
+C2::processMessage - prio:4 M(prio: 2, type: 720896)
+C2::processMessage - prio:4 M(prio: 0, type: 655360)
+C1::processMessage - prio:2 M(prio: 4, type: 786432)
+    M3::msg: 1
+C1::processMessage - prio:2 M(prio: 4, type: 786432)
+    M3::msg: 2
+C1::processMessage - prio:2 M(prio: 0, type: 655360)
+C3::processMessage - prio:1 M(prio: 4, type: 786432)
+    M3::msg: 1
+C3::processMessage - prio:1 M(prio: 4, type: 786432)
+    M3::msg: 2
+C3::processMessage - prio:1 M(prio: 2, type: 720896)
+C3::postStep()
+
+Sending M3(1), M2, M3(3)
+C1::processMessage - prio:2 M(prio: 4, type: 786432)
+    M3::msg: 1
+C3::processMessage - prio:1 M(prio: 4, type: 786432)
+    M3::msg: 1
+C3::postStep()
+
+Sending M3(1)
+C2::processMessage - prio:4 M(prio: 4, type: 786432)
+    M3::msg: 1
+C2::processMessage - prio:4 M(prio: 4, type: 786432)
+    M3::msg: 3
+C22::processMessage - prio:4 M(prio: 4, type: 786432)
+    M3::msg: 1
+C22::processMessage - prio:4 M(prio: 4, type: 786432)
+    M3::msg: 3
+C2::processMessage - prio:4 M(prio: 2, type: 720896)
+C22::processMessage - prio:4 M(prio: 2, type: 720896)
+C1::processMessage - prio:2 M(prio: 4, type: 786432)
+    M3::msg: 1
+C1::processMessage - prio:2 M(prio: 4, type: 786432)
+    M3::msg: 3
+C3::processMessage - prio:1 M(prio: 4, type: 786432)
+    M3::msg: 1
+C3::processMessage - prio:1 M(prio: 4, type: 786432)
+    M3::msg: 3
+C3::processMessage - prio:1 M(prio: 2, type: 720896)
+C3::postStep()
+
+Sending M3(C22 send)
+C2::processMessage - prio:4 M(prio: 4, type: 786432)
+    M3::msg: 1
+C22::processMessage - prio:4 M(prio: 4, type: 786432)
+    M3::msg: 1
+C1::processMessage - prio:2 M(prio: 4, type: 786432)
+    M3::msg: 1
+C3::processMessage - prio:1 M(prio: 4, type: 786432)
+    M3::msg: 1
+C3::postStep()
+
+C2::processMessage - prio:4 M(prio: 4, type: 786432)
+    M3::msg: C22 send
+C22::processMessage - prio:4 M(prio: 4, type: 786432)
+    M3::msg: C22 send
+  C22 -> sending M1
+C1::processMessage - prio:2 M(prio: 4, type: 786432)
+    M3::msg: C22 send
+C3::processMessage - prio:1 M(prio: 4, type: 786432)
+    M3::msg: C22 send
+C3::postStep()
+
+C1::processMessage - prio:2 M(prio: 0, type: 655360)
+C3::postStep()
+
+C3::postStep()
+
+Sending M1 with highest, M2
+C3::postStep()
+
+C2::processMessage - prio:4 M(prio: 4, type: 655360)
+C2::processMessage - prio:4 M(prio: 4, type: 786432)
+    M3::msg: 
+C22::processMessage - prio:4 M(prio: 4, type: 655360)
+C22::processMessage - prio:4 M(prio: 4, type: 786432)
+    M3::msg: 
+C2::processMessage - prio:4 M(prio: 2, type: 720896)
+C22::processMessage - prio:4 M(prio: 2, type: 720896)
+C1::processMessage - prio:2 M(prio: 4, type: 655360)
+C1::processMessage - prio:2 M(prio: 4, type: 786432)
+    M3::msg: 
+C3::processMessage - prio:1 M(prio: 4, type: 786432)
+    M3::msg: 
+C3::processMessage - prio:1 M(prio: 2, type: 720896)
+C3::postStep()
+
+--- compMsg() ---
+

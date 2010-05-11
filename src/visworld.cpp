@@ -6,6 +6,7 @@ namespace sim {
 
 
 VisWorld::VisWorld()
+    : _window(true)
 {
     _viewer = new osgViewer::Viewer();
     _root = new osg::Group();
@@ -28,15 +29,16 @@ void VisWorld::addBody(VisBody *obj)
 
 void VisWorld::init()
 {
-    _viewer->setUpViewInWindow(0, 0, 1200, 800);
-
     _viewer->setSceneData(_root);
 
-    if (!_viewer->getCameraManipulator()){
-        _viewer->setCameraManipulator(new osgGA::TrackballManipulator());
-    }
+    if (_window){
+        if (!_viewer->getCameraManipulator()){
+            _viewer->setCameraManipulator(new osgGA::TrackballManipulator());
+        }
 
-    _viewer->realize();
+        _viewer->setUpViewInWindow(0, 0, 1200, 800);
+        _viewer->realize();
+    }
 }
 
 void VisWorld::finish()
@@ -45,7 +47,9 @@ void VisWorld::finish()
 
 void VisWorld::step()
 {
-    _viewer->frame(0.);
+    if (_window){
+        _viewer->frame(0.);
+    }
 }
 
 bool VisWorld::done()

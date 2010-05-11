@@ -13,21 +13,25 @@ namespace sim {
  */
 class VisWorld {
     osgViewer::Viewer *_viewer;
-    osg::Group *_root; /*! root of scene graph */
+    osg::Group *_root; /*!< Root of scene graph */
+    bool _window; /*!< Show a window? */
 
   public:
     VisWorld();
     virtual ~VisWorld();
 
-    /**
-     * Adds visualisable object.
-     */
-    void addBody(VisBody *obj);
+    bool window() const { return _window; }
+    void setWindow(bool yes = true) { _window = yes; }
 
     /**
      * Returns root of scene graph.
      */
     osg::Node *sceneRoot() { return _root; }
+
+    /**
+     * Adds visualisable object.
+     */
+    void addBody(VisBody *obj);
 
     /**
      * Initializes world.

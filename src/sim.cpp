@@ -26,39 +26,45 @@ bool SimKeyboard::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 */
 
 SimComponentMessageRegistry::SimComponentMessageRegistry()
+    : _counter(0)
 {
 }
 
 SimComponentMessageRegistry::~SimComponentMessageRegistry()
 {
+    // delete all allocated maps of components
     for_each(_map_t::iterator, _map){
         delete it->second;
     }
     _map.clear();
 
-    for_each(std::list<Message *>::iterator, _msgs){
+    // delete all remaining Messages
+    for_each(std::list<Message *>::iterator, _msgs[0]){
         delete *it;
     }
-    _msgs.clear();
+    for_each(std::list<Message *>::iterator, _msgs[1]){
+        delete *it;
+    }
+    _msgs[0].clear();
+    _msgs[1].clear();
 }
 
 void SimComponentMessageRegistry::regComponent(Component *c, unsigned long type)
 {
-    DBG(c << " " << type);
-
     _list_t *cs;
     _map_t::iterator it = _map.find(type);
 
     // Create new list if does not exist
     if (it == _map.end()){
         cs = new _list_t;
-        DBG("new: " << cs);
         _map.insert(_map_t::value_type(type, cs));
     }else{
         cs = it->second;
-        DBG(cs);
     }
 
+    // cs is std::map - it prevents from adding duplicate values (i.e. two
+    // same components can't be registered to on msg type). For more info
+    // see man for std::map::insert().
     cs->insert(_list_t::value_type(c, c));
 }
 
@@ -70,13 +76,19 @@ void SimComponentMessageRegistry::unregComponent(Component *c, unsigned long typ
         it->second->erase(c);
     }
 }
+void SimComponentMessageRegistry::unregComponentFromAll(Component *c)
+{
+    for_each(_map_t::iterator, _map){
+        it->second->erase(c);
+    }
+}
 
 void SimComponentMessageRegistry::assignMessage(Message *m)
 {
-    DBG(m);
-
     // get list of Components registered to this message type
     _map_t::iterator cur = _map.find(m->type());
+    // compute index of next step
+    unsigned char count = (_counter + 1) % 2;
 
     if (cur != _map.end()){
         Component *c;
@@ -84,68 +96,64 @@ void SimComponentMessageRegistry::assignMessage(Message *m)
 
         for_each(_list_t::iterator, l){
             c = it->second;
-            DBG(c);
 
             // if this is first message to deliver to this Component
             // Component isn't (for sure) in list of active Components
             // because all Components are removed from _active list during
             // deliverMessages() method.
-            if (c->__msgs_to_deliver[m->prio()].size() == 0){
-                DBG(" -> _activate[" << c->prio() << "][" << m->prio() << "]");
-                _active[c->prio()][m->prio()].push_back(it->second);
+            if (c->__msgs_to_deliver[count][m->prio()].size() == 0){
+                _active[count][c->prio()][m->prio()].push_back(it->second);
             }
 
             // append message to be delivered to Component
-            c->__msgs_to_deliver[m->prio()].push_back(m);
+            c->__msgs_to_deliver[count][m->prio()].push_back(m);
         }
     }
 
     // store message in list of messages - to be able to delete it later
-    _msgs.push_back(m);
+    _msgs[count].push_back(m);
 }
 
 void SimComponentMessageRegistry::deliverMessages()
 {
-    DBG("");
-
     // first deliver to Components with highest priority - O(1)
     for (int i = Component::PRIO_MAX - 1; i >= 0; i--){
         for (int j = Message::PRIO_MAX - 1; j >= 0; j--){
             // check if there is any Component with pending messages - O(1)
-            if (_active[i][j].size() > 0){
+            if (_active[_counter][i][j].size() > 0){
                 // deliver all messages to Components
                 //  O(num of active comps) * O(deliverAssignedMessages())
-                for_each(std::list<Component *>::iterator, _active[i][j]){
+                for_each(std::list<Component *>::iterator, _active[_counter][i][j]){
                     deliverAssignedMessages(*it, (Message::Priority)j);
                 }
 
                 // all Components processed - clear list
-                _active[i][j].clear();
+                _active[_counter][i][j].clear();
             }
         }
     }
 
     // all messages delivered - delete them all
-    for_each(std::list<Message *>::iterator, _msgs){
+    for_each(std::list<Message *>::iterator, _msgs[_counter]){
         delete *it;
     }
-    _msgs.clear();
+    _msgs[_counter].clear();
+
+    _counter = (_counter + 1) % 2;
 }
 
 void SimComponentMessageRegistry::deliverAssignedMessages(Component *c,
                                                           Message::Priority prio)
 {
-    DBG(c);
-
     // call processMessage() on each message in assigned to Component
     //  O(num of assigned messages)
     for_each(std::list<const Message *>::iterator,
-            c->__msgs_to_deliver[prio]){
+            c->__msgs_to_deliver[_counter][prio]){
         c->processMessage(**it);
     }
 
     // all messages delivered - clear list
-    c->__msgs_to_deliver[prio].clear();
+    c->__msgs_to_deliver[_counter][prio].clear();
 }
 
 
@@ -264,12 +272,19 @@ void Sim::rmComponent(Component *c)
         // remove it also from callback lists
         _cs_pre.remove(c);
         _cs_post.remove(c);
+        _reg.unregComponentFromAll(c);
     }
 }
 
 void Sim::sendMessage(Message *msg)
 {
     _reg.assignMessage(msg);
+}
+
+void Sim::sendMessage(Message *msg, Message::Priority prio)
+{
+    msg->setPrio(prio);
+    sendMessage(msg);
 }
 
 void Sim::regPreStep(Component *c)
@@ -302,7 +317,6 @@ void Sim::unregPostStep(Component *c)
 
 void Sim::regMessage(Component *c, unsigned long msg_type)
 {
-    DBG("");
     if (_hasComponent(c)){
         _reg.regComponent(c, msg_type);
     }
