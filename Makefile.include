@@ -41,12 +41,45 @@ CXXFLAGS += $(SYSTEM_CXXFLAGS)
 
 LDFLAGS =
 
-ODE_CXXFLAGS = $(shell pkg-config ode --cflags)
-ODE_LDFLAGS  = $(shell pkg-config ode --libs)
-OSG_CXXFLAGS = $(shell pkg-config openscenegraph --cflags)
-OSG_LDFLAGS  = $(shell pkg-config openscenegraph --libs)
-BT_CXXFLAGS  = $(shell pkg-config bullet --cflags)
-BT_LDFLAGS   = $(shell pkg-config bullet --libs)
+# ODE
+HAS_ODE = 0
+ifeq '$(shell if pkg-config ode --exists; then echo "1"; fi;)' '1'
+  HAS_ODE = 1
+  ODE_CXXFLAGS = $(shell pkg-config ode --cflags)
+  ODE_LDFLAGS  = $(shell pkg-config ode --libs)
+endif
+
+# OSG
+HAS_OSG = 0
+ifeq '$(shell if pkg-config openscenegraph --exists; then echo "1"; fi;)' '1'
+  HAS_OSG = 1
+  OSG_CXXFLAGS = $(shell pkg-config openscenegraph --cflags)
+  OSG_LDFLAGS  = $(shell pkg-config openscenegraph --libs)
+endif
+
+# Bullet
+HAS_BT = 0
+ifeq '$(shell if pkg-config bullet --exists; then echo "1"; fi;)' '1'
+  HAS_BT = 1
+  BT_CXXFLAGS  = $(shell pkg-config bullet --cflags)
+  BT_LDFLAGS   = $(shell pkg-config bullet --libs)
+endif
+
+check-dep-osg:
+	@echo "Checking Openscenegraph..."
+	@if [ "$(HAS_OSG)" != "1" ]; then echo "Dependecy error: pkg-config can't find openscenegraph package"; exit 1; fi;
+	@echo "Openscenegraph found:"
+	@echo "  OSG_CXXFLAGS = $(OSG_CXXFLAGS)"
+	@echo "  OSG_LDFLAGS  = $(OSG_LDFLAGS)"
+
+check-dep-bt:
+	@echo "Checking Bullet..."
+	@if [ "$(HAS_BT)" != "1" ]; then echo "Dependecy error: pkg-config can't find bullet package"; exit 1; fi;
+	@echo "Bullet found"
+	@echo "  BT_CXXFLAGS = $(BT_CXXFLAGS)"
+	@echo "  BT_LDFLAGS  = $(BT_LDFLAGS)"
+	
+check-dep: check-dep-osg check-dep-bt
 
 showvars:
 	@echo "SYSTEM = "$(SYSTEM)
@@ -67,3 +100,4 @@ showvars:
 	@echo "OSG_LDFLAGS  = $(OSG_LDFLAGS)"
 
 .DEFAULT_GOAL := all
+.PHONY: showvars check-dep-osg check-dep-bt check-dep
