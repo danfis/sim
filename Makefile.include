@@ -8,9 +8,12 @@ CONVERT ?= convert
 
 SYSTEM = $(shell uname)
 
+SYSTEM_CXXFLAGS =
+
 ifeq '$(SYSTEM)' 'FreeBSD'
   AWK ?= gawk
   SED ?= gsed
+  SYSTEM_CXXFLAGS = -Wno-long-long
 else
   AWK ?= awk
   SED ?= sed
@@ -34,6 +37,7 @@ endif
 
 CFLAGS   += -Wall -pedantic -std=gnu99
 CXXFLAGS += -Wall -pedantic
+CXXFLAGS += $(SYSTEM_CXXFLAGS)
 
 LDFLAGS =
 
