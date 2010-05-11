@@ -4,7 +4,8 @@ LDFLAGS += $(OSG_LDFLAGS) $(ODE_LDFLAGS) $(BT_LDFLAGS)
 
 
 TARGETS = libsim.a demo2
-OBJS = visbody.o visworld.o body.o joint.o sim.o component.o message.o
+OBJS = visbody.o visworld.o body.o joint.o sim.o component.o message.o \
+       time.o
 
 all: bullet $(TARGETS)
 
