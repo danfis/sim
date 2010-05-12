@@ -1,9 +1,11 @@
+#include <iomanip>
+
 #include "time.hpp"
 #include "msg.hpp"
 
 namespace sim {
 
-Time Time::diff(const Time &l, const Time &h) const
+void Time::diff(const Time &l, const Time &h, Time *diff)
 {
     struct timespec t;
 
@@ -14,7 +16,16 @@ Time Time::diff(const Time &l, const Time &h) const
         t.tv_nsec = h._t.tv_nsec + 1000000000L - l._t.tv_nsec;
         t.tv_sec = h._t.tv_sec - 1 - l._t.tv_sec;
     }
-
-    return Time(t);
+    *diff = t;
 }
+
+std::ostream& operator<<(std::ostream &out, const Time &t)
+{
+    out << t.h() << ":" << t.m() << ":" << t.s()
+        << "." << std::setfill('0') << std::setw(3) << t.ms()
+        << "." << std::setfill('0') << std::setw(2) << t.us()
+        << "." << std::setfill('0') << std::setw(3) << t.ns();
+    return out;
+}
+
 }
