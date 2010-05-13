@@ -25,8 +25,6 @@ World::World()
     _broadphase = new btDbvtBroadphase();
     _solver = new btSequentialImpulseConstraintSolver();
     _world = new btDiscreteDynamicsWorld(_dispatch, _broadphase, _solver, _coll_conf);
-
-    _world->setGravity(btVector3(0, -9.81, 0));
 }
 
 World::~World()
@@ -69,6 +67,7 @@ void World::addJoint(Joint *j)
 
 void World::init()
 {
+    _world->setGravity(_gravity.toBullet());
 }
 
 void World::finish()

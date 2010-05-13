@@ -57,7 +57,7 @@ class JointFixed : public Joint {
  * For more info see:
  *  http://opende.sourceforge.net/wiki/index.php/Manual_(All)#Hinge-2
  */
-class JointHinge2 : public Joint {
+class JointHinge2 : public Joint, sim::JointHinge2 {
   public:
     JointHinge2(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis1, const Vec3 &axis2);
 
@@ -76,12 +76,6 @@ class JointHinge : public Joint {
   public:
     JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis);
 };
-
-class JointPoint2Point : public Joint {
-  public:
-    JointPoint2Point(World *w, Body *oA, Body *oB, const Vec3 &pivotA, const Vec3 &pivotB);
-};
-
 
 } /* namespace bullet */
 

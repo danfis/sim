@@ -24,7 +24,7 @@ class S : public sim::Sim {
         b->activate();
 
         b = world->createBodyCube(1., 1.);
-        b->setPos(-6., 6., -5.);
+        b->setPos(-6.5, 6.5, -5.);
         b->activate();
 
         b = world->createBodySphere(1.3, 2.);
@@ -81,6 +81,8 @@ class S : public sim::Sim {
         cu->activate();
         s->activate();
         j->activate();
+
+        cu->visBody()->setText("Fixed", 1., osg::Vec4(0.9, 0.6, 0.3, 1.));
     }
 
     void createHinge()
@@ -98,6 +100,8 @@ class S : public sim::Sim {
         cu->activate();
         cy->activate();
         j->activate();
+
+        cu->visBody()->setText("Hinge", 1., osg::Vec4(0.7, 0.6, 0.3, 1.));
     }
 
     void createRobot()
@@ -126,6 +130,8 @@ class S : public sim::Sim {
         for (i = 0; i < 4; i++){
             w[i]->activate();
         }
+
+        chasis->visBody()->setText("Robot", 1., osg::Vec4(0.5, 0.6, 0.3, 1.));
     }
 };
 

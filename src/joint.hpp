@@ -37,14 +37,12 @@ class Joint {
 };
 
 /**
- * ODE's hinge2 joint.
+ * ODE's hinge2 joint interface.
  * For more info see:
  *  http://opende.sourceforge.net/wiki/index.php/Manual_(All)#Hinge-2
  */
-class JointHinge2 : public Joint {
+class JointHinge2 {
   public:
-    JointHinge2(Body *oA, Body *oB) : Joint(oA, oB) {}
-
     virtual void setLimitLinAxis1(Scalar from, Scalar to) = 0;
     virtual void setLimitLinAxis2(Scalar from, Scalar to) = 0;
     virtual void setLimitAngAxis1(Scalar from, Scalar to) = 0;

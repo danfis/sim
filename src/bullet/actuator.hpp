@@ -56,6 +56,7 @@ class ActuatorWheelCylinderX : public sim::ActuatorWheelCylinderX {
      * Applies torque on wheel.
      */
     void applyTorque(const Vec3 &v);
+    void applyTorqueImpulse(const Vec3 &v);
 };
 
 } /* namespace bullet */

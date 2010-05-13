@@ -17,12 +17,19 @@ class World {
   protected:
     VisWorld *_vis; //!< Reference to visual representation
 
+    Vec3 _gravity;
+
   public:
+    World() : _vis(0), _gravity(0., 0., -9.81){}
+
     /* \{ */
     virtual VisWorld *visWorld() { return _vis; }
     virtual const VisWorld *visWorld() const { return _vis; }
     virtual void setVisWorld(VisWorld *w) { _vis = w; }
     /* \} */
+
+    const Vec3 &gravity() const { return _gravity; }
+    void setGravity(const Vec3 &g) { _gravity = g; }
 
     /* \{ */
     /**

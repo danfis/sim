@@ -28,7 +28,8 @@ void BodyMotionState::setWorldTransform(const btTransform &world)
 }
 
 Body::Body(World *w)
-    : _world(w), _body(0), _shape(0), _motion_state(0), _vis(0)
+    : _world(w), _body(0), _shape(0), _motion_state(0), _vis(0),
+      _damping_lin(0.2), _damping_ang(0.2)
 {
 }
 
@@ -108,6 +109,7 @@ void Body::setPosRot(const Vec3 &v, const Quat &q)
 
 void Body::activate()
 {
+    _body->setDamping(_damping_lin, _damping_ang);
     _world->addBody(this);
 }
 
@@ -132,9 +134,6 @@ void Body::_set(VisBody *o, btCollisionShape *shape, Scalar mass)
     _body = new btRigidBody(mass, _motion_state, _shape, local_inertia);
 
     _body->setUserPointer(this);
-
-    // TODO
-    _body->setDamping(0.3, 0.2);
 }
 
 

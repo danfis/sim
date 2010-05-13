@@ -1,9 +1,9 @@
 #include <osgGA/TrackballManipulator>
 
 #include "visworld.hpp"
+#include "msg.hpp"
 
 namespace sim {
-
 
 VisWorld::VisWorld()
     : _window(true)
@@ -14,7 +14,6 @@ VisWorld::VisWorld()
 
 VisWorld::~VisWorld()
 {
-    delete _viewer;
 }
 
 void VisWorld::addBody(VisBody *obj)

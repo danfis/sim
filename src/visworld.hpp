@@ -2,6 +2,7 @@
 #define _SIM_VIS_WORLD_HPP_
 
 #include <osgViewer/Viewer>
+#include <osgGA/TrackballManipulator>
 
 #include "visbody.hpp"
 
@@ -12,8 +13,8 @@ namespace sim {
  * Based on openscenegraph.
  */
 class VisWorld {
-    osgViewer::Viewer *_viewer;
-    osg::Group *_root; /*!< Root of scene graph */
+    osg::ref_ptr<osgViewer::Viewer> _viewer;
+    osg::ref_ptr<osg::Group> _root; /*!< Root of scene graph */
     bool _window; /*!< Show a window? */
 
   public:

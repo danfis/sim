@@ -3,7 +3,7 @@ CXXFLAGS += -I. $(OSG_CXXFLAGS) $(ODE_CXXFLAGS) $(BT_CXXFLAGS)
 LDFLAGS += $(OSG_LDFLAGS) $(ODE_LDFLAGS) $(BT_LDFLAGS)
 
 
-TARGETS = libsim.a demo2
+TARGETS = libsim.a
 OBJS = visbody.o visworld.o body.o joint.o sim.o component.o message.o \
        time.o
 
@@ -13,21 +13,8 @@ libsim.a: $(OBJS)
 	ar cr $@ $^
 	ranlib $@
 
-demo: demo.o libsim.a
-	$(CXX) $(CXXFLAGS) -o $@ $< -L. -lsim $(LDFLAGS)
-demo2: demo2.o libsim.a bullet/libsim-bullet.a
-	$(CXX) $(CXXFLAGS) -o $@ $< -Lbullet -lsim-bullet -L. -lsim $(LDFLAGS)
-
-bullet/libsim-bullet.a:
-	$(MAKE) bullet
-
 bullet:
 	$(MAKE) -C bullet
-
-%.o: %.c %.h
-	$(CC) $(CFLAGS) -c -o $@ $<
-%.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
 
 %.o: %.cpp %.hpp math.hpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<

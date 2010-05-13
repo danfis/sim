@@ -63,7 +63,6 @@ JointHinge2::JointHinge2(World *w, Body *oA, Body *oB, const Vec3 &anchor, const
     b1 = oA->body();
     b2 = oB->body();
    
-    DBG("anchor: " << anchor.x() << " " << anchor.y() << " " << anchor.z());
     c = new btHinge2Constraint(*b1, *b2, anch, a1, a2);
     _setJoint(c);
 }
@@ -121,19 +120,6 @@ JointHinge::JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const V
     frameInB.setBasis(bB->getCenterOfMassTransform().getBasis().inverse() * basis);
    
     c = new btHingeConstraint (*bA, *bB, frameInA, frameInB);
-    _setJoint(c);
-}
-
-
-JointPoint2Point::JointPoint2Point(World *w, Body *oA, Body *oB,
-                                   const Vec3 &pivotA, const Vec3 &pivotB)
-    : Joint(w, oA, oB)
-{
-    btPoint2PointConstraint *c;
-    btVector3 pA = pivotA.toBullet();
-    btVector3 pB = pivotB.toBullet();
-
-    c = new btPoint2PointConstraint(*oA->body(), *oB->body(), pA, pB);
     _setJoint(c);
 }
 

@@ -2,6 +2,8 @@
 #define _VIS_OBJ_HPP_
 
 #include <osg/PositionAttitudeTransform>
+#include <osg/Geode>
+#include <osgText/TextBase>
 
 #include "math.hpp"
 
@@ -12,8 +14,10 @@ namespace sim {
  */
 class VisBody {
   protected:
-    osg::PositionAttitudeTransform *_root;
-    osg::Node *_node;
+    osg::ref_ptr<osg::PositionAttitudeTransform> _root;
+    osg::ref_ptr<osg::Group> _group;
+    osg::ref_ptr<osg::Geode> _text;
+    osg::ref_ptr<osg::Node> _node;
 
   public:
     VisBody();
@@ -64,6 +68,10 @@ class VisBody {
      */
     virtual void setColor(const osg::Vec4 &c) {}
 
+    virtual void setOsgText(osg::ref_ptr<osgText::TextBase> t);
+    virtual void setText(const char *text, float size = 1.,
+                         const osg::Vec4 &color = osg::Vec4(0., 0., 0., 1.)) = 0;
+
   protected:
     /**
      * Set top node of scene graph.
@@ -82,6 +90,8 @@ class VisBodyShape : public VisBody {
   public:
     VisBodyShape() : VisBody() {}
     void setColor(const osg::Vec4 &c);
+    void setText(const char *text, float size = 1.,
+                 const osg::Vec4 &color = osg::Vec4(0., 0., 0., 1.));
 
   protected:
     /**

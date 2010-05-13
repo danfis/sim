@@ -31,7 +31,6 @@ void ActuatorWheelCylinderX::connectToChasis(sim::Body *_b)
     _joint->setLimitLinAxis1(-0.01, 0.01);
     _joint->setLimitLinAxis2(0., 0.);
     _joint->setLimitAngAxis1(-0.05, 0.05);
-    _joint->setLimitAngAxis1(-0.05, 0.05);
     _joint->setLimitAngAxis2(-10., 10.);
 }
 
@@ -52,6 +51,11 @@ void ActuatorWheelCylinderX::deactivate()
 void ActuatorWheelCylinderX::applyTorque(const Vec3 &v)
 {
     _wheel->body()->applyTorque(v.toBullet());
+}
+
+void ActuatorWheelCylinderX::applyTorqueImpulse(const Vec3 &v)
+{
+    _wheel->body()->applyTorqueImpulse(v.toBullet());
 }
 
 

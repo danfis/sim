@@ -34,6 +34,7 @@ class ActuatorWheelCylinderX {
      * Applies torque on wheel.
      */
     virtual void applyTorque(const Vec3 &v) = 0;
+    virtual void applyTorqueImpulse(const Vec3 &v) = 0;
 };
 
 } /* namespace sim */

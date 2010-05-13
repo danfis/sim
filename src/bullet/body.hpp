@@ -46,6 +46,8 @@ class Body : public sim::Body {
     BodyMotionState *_motion_state;
     VisBody *_vis;
 
+    Scalar _damping_lin, _damping_ang;
+
   public:
     Body(World *w);
     virtual ~Body();
@@ -60,6 +62,11 @@ class Body : public sim::Body {
     World *world() { return _world; }
     const World *world() const { return _world; }
     /* \} */
+
+    const Scalar &dampingLin() const { return _damping_lin; }
+    const Scalar &dampingAng() const { return _damping_ang; }
+    void setDampingLin(Scalar v) { _damping_lin = v; }
+    void setDampingAng(Scalar v) { _damping_ang = v; }
 
     /* \{ */
     /**
