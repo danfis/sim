@@ -75,11 +75,10 @@ void World::finish()
 {
 }
 
-void World::step()
+void World::step(const sim::Time &time, unsigned int substeps)
 {
-    // perform simulation step
-    // TODO: Parametrize this
-    _world->stepSimulation(1./60., 20);
+    btScalar fixed = time.inSF() / (double)substeps;
+    _world->stepSimulation(time.inSF(), substeps, fixed);
 }
 
 

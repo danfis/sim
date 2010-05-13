@@ -4,10 +4,11 @@ CXXFLAGS += -I./ -I../ -Icu/
 CXXFLAGS += $(OSG_CXXFLAGS) $(ODE_CXXFLAGS) $(BT_CXXFLAGS)
 LDFLAGS = -L./ -Lcu/ -lcu -lm -L../ -lsim
 LDFLAGS += $(OSG_LDFLAGS) $(ODE_LDFLAGS) $(BT_LDFLAGS)
+LDFLAGS += -lrt
 
 CHECK_REG=cu/check-regressions
 
-OBJS = component.o message.o
+OBJS = component.o message.o time.o
 
 
 all: test

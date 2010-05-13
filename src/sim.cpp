@@ -158,10 +158,13 @@ void SimComponentMessageRegistry::deliverAssignedMessages(Component *c,
 
 
 Sim::Sim(World *world, VisWorld *visworld)
-    : _world(world), _visworld(visworld)
+    : _world(world), _visworld(visworld),
+      _time_step(0, 20000000), _time_substeps(10)
 {
     if (!_visworld)
         _visworld = new VisWorld();
+
+    _timer_real.start();
 }
 
 Sim::~Sim()
@@ -218,14 +221,27 @@ void Sim::step()
 
     _cbMessages();
 
-    if (_world)
-        _world->step();
+    timeRealNow();
+
+    if (_world){
+        _world->step(_time_step, _time_substeps);
+        _time_simulated += _time_step;
+    }
+
     if (_visworld)
         _visworld->step();
 
+    timeRealNow();
+
     _cbPostStep();
 
-    usleep(10000);
+    std::cerr << "Real time:      " << timeReal() << std::endl;
+    std::cerr << "Simulated time: " << timeSimulated() << std::endl;
+
+    if (timeSimulated() > timeReal()){
+        Time tdiff = Time::diff(timeReal(), timeSimulated());
+        Time::sleep(tdiff);
+    }
 }
 
 bool Sim::done()
