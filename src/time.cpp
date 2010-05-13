@@ -23,7 +23,7 @@ std::ostream& operator<<(std::ostream &out, const Time &t)
 {
     out << t.h() << ":" << t.m() << ":" << t.s()
         << "." << std::setfill('0') << std::setw(3) << t.ms()
-        << "." << std::setfill('0') << std::setw(2) << t.us()
+        << "." << std::setfill('0') << std::setw(3) << t.us()
         << "." << std::setfill('0') << std::setw(3) << t.ns();
     return out;
 }

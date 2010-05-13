@@ -164,6 +164,7 @@ methods.
 #include "visworld.hpp"
 #include "component.hpp"
 #include "message.hpp"
+#include "time.hpp"
 
 namespace sim {
 
@@ -254,6 +255,11 @@ class Sim {
 
     SimComponentMessageRegistry _reg;
 
+    Timer _timer_real;
+    Time _time_simulated;
+    Time _time_step;
+    unsigned int _time_substeps;
+
   protected:
     typedef std::list<Component *>::iterator cit_t; //!< Component list iterator
     typedef std::list<Component *>::const_iterator const_cit_t;
@@ -269,6 +275,11 @@ class Sim {
 
     void setWorld(World *w);
     void setVisWorld(VisWorld *w);
+
+    const Time &timeStep() const { return _time_step; }
+    unsigned int timeSubSteps() const { return _time_substeps; }
+    void setTimeStep(const Time &t) { _time_step = t; }
+    void setTimeSubStep(unsigned int ss) { _time_substeps = ss; }
 
     virtual void init();
     virtual void step();
@@ -335,6 +346,11 @@ class Sim {
      * Oposite of regMessage().
      */
     void unregMessage(Component *c, unsigned long msg_type);
+
+    void timeRealRestart() { _timer_real.start(); }
+    const Time &timeReal() const { return _timer_real.elapsedTime(); }
+    const Time &timeRealNow() { return _timer_real.stop(); }
+    const Time &timeSimulated() const { return _time_simulated; }
 
   protected:
     /**

@@ -5,6 +5,7 @@
 
 using namespace std;
 using sim::Time;
+using sim::Timer;
 
 TEST(timeSetUp)
 {
@@ -92,5 +93,50 @@ TEST(timeClock)
     assertTrue(t3.ms() == 0);
     assertTrue(t3.us() >= 100);
     assertTrue(t3.inUs() >= 100);
+
+    Timer timer;
+
+    for (size_t i = 0; i < 3; i++){
+        timer.start();
+        assertTrue(timer.elapsedTime().inNs() == 0);
+        usleep(100);
+        t2 = timer.stop();
+        assertTrue(t2.inUs() >= 100);
+        assertTrue(timer.elapsedTime().inUs() >= 100);
+
+        usleep(100);
+        t2 = timer.stop();
+        assertTrue(t2.inUs() >= 200);
+        assertTrue(timer.elapsedTime().inUs() >= 200);
+
+        usleep(500);
+        t2 = timer.stop();
+        assertTrue(t2.inUs() >= 700);
+        assertTrue(timer.elapsedTime().inUs() >= 700);
+    }
 }
 
+TEST(timeFrom)
+{
+    Time t;
+
+    t = Time::fromMs(1000);
+    assertTrue(t.inMs() == 1000);
+    assertTrue(t.inS() == 1);
+
+    t = Time::fromMs(5010);
+    assertEquals(t.inMs(), 5010);
+    assertEquals(t.inS(), 5);
+    assertEquals(t.ms(), 10);
+    assertEquals(t.s(), 5);
+
+    t = Time(1, 12);
+    t += Time(1, 12);
+    assertEquals(t.ns(), 24);
+    assertEquals(t.s(), 2);
+
+    t = Time::fromMs(2300);
+    t += Time::fromMs(12345);
+    assertEquals(t.inMs(), 14645);
+    assertEquals(t.inS(), 14);
+}

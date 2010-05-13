@@ -5,6 +5,7 @@
 #include "sim/joint.hpp"
 #include "sim/actuator.hpp"
 #include "sim/visworld.hpp"
+#include "sim/time.hpp"
 
 namespace sim {
 
@@ -37,7 +38,7 @@ class World {
     /**
      * Performes one simulation step.
      */
-    virtual void step() = 0;
+    virtual void step(const Time &time, unsigned int substeps = 1) = 0;
 
     virtual bool done() = 0;
     /* \} */

@@ -47,7 +47,7 @@ class World : public sim::World {
     /**
      * Performes one step.
      */
-    void step();
+    void step(const sim::Time &time, unsigned int substeps = 1);
 
     bool done();
 

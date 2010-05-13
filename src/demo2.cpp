@@ -62,6 +62,8 @@ class S : public sim::Sim {
             usleep(10000);
         }
         std::cerr << std::endl;
+
+        timeRealRestart();
     }
 
   protected:
