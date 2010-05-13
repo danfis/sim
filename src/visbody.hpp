@@ -29,6 +29,9 @@ class VisBody {
     osg::Node *rootNode() { return _root; }
     const osg::Node *rootNode() const { return _root; }
 
+    osg::Node *node() { return _node; }
+    const osg::Node *node() const { return _node; }
+
     /**
      * Returns position of root node.
      */
@@ -70,7 +73,7 @@ class VisBody {
 
     virtual void setOsgText(osg::ref_ptr<osgText::TextBase> t);
     virtual void setText(const char *text, float size = 1.,
-                         const osg::Vec4 &color = osg::Vec4(0., 0., 0., 1.)) = 0;
+                         const osg::Vec4 &color = osg::Vec4(0., 0., 0., 1.)) {}
 
   protected:
     /**
@@ -133,6 +136,14 @@ class VisBodySphere : public VisBodyShape {
 class VisBodyCylinder : public VisBodyShape {
   public:
     VisBodyCylinder(Scalar radius, Scalar height);
+};
+
+
+
+class VisBodyTriMesh : public VisBody {
+  public:
+    VisBodyTriMesh(const sim::Vec3 *coords, size_t coords_len,
+                   const unsigned int *indices, size_t indices_len);
 };
 
 } /* namespace sim */

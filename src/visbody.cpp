@@ -131,4 +131,35 @@ VisBodyCylinder::VisBodyCylinder(Scalar radius, Scalar height)
     _setShape(new osg::Cylinder(Vec3(0., 0., 0.), radius, height));
 }
 
+
+
+VisBodyTriMesh::VisBodyTriMesh(const sim::Vec3 *coords, size_t coords_len,
+                               const unsigned int *indices, size_t indices_len)
+    : VisBody()
+{
+    size_t i;
+    osg::ref_ptr<osg::Geode> g = new osg::Geode;
+    osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
+    osg::ref_ptr<osg::TriangleMesh> mesh = new osg::TriangleMesh;
+    osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;
+    osg::ref_ptr<osg::DrawElementsUInt> faces;
+
+    for (i = 0; i < coords_len; i++){
+        vert->push_back(coords[i].toOsg());
+    }
+    geom->setVertexArray(vert);
+
+    for (i = 0; i < indices_len; i += 3){
+        faces = new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES, 0);
+        faces->push_back(indices[i]);
+        faces->push_back(indices[i + 1]);
+        faces->push_back(indices[i + 2]);
+        geom->addPrimitiveSet(faces);
+    }
+
+    g->addDrawable(geom);
+    _setNode(g);
+}
+
+
 }

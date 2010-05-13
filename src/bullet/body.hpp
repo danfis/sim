@@ -3,6 +3,7 @@
 
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
+#include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <LinearMath/btMotionState.h>
 
 #include "sim/body.hpp"
@@ -184,6 +185,23 @@ class BodyCylinderY : public BodyCylinder {
   public:
     BodyCylinderY(World *w, Scalar radius, Scalar height, Scalar mass);
 };
+
+class BodyTriMesh : public Body {
+  public:
+    BodyTriMesh(World *w, const sim::Vec3 *coords, size_t coords_len,
+                const unsigned int *indices, size_t indices_len);
+};
+
+/*
+class BodyTerrain : public Body {
+  public:
+    BodyTerrain(World *w, float dx, float dy,
+                size_t cols, size_t rows, float *heights);
+
+  protected:
+    btBvhTriangleMeshShape *_fromVisBodyTerrain(sim::VisBodyTerrain *vis);
+};
+*/
 
 } /* namespace bullet */
 

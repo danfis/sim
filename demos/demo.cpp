@@ -6,51 +6,77 @@
 #include "msg.hpp"
 
 using namespace sim::bullet;
+using sim::Vec3;
 
 class S : public sim::Sim {
   public:
     S()
         : Sim()
     {
-        World *world = new World();
-        sim::VisWorld *visworld = new sim::VisWorld();
+        World *w = new World();
         sim::Body *b;
 
-        setWorld(world);
-        setVisWorld(visworld);
+        setWorld(w);
     
-        b = world->createBodyBox(sim::Vec3(20., 20., 1.), 0.);
+        /*
+        b = w->createBodyBox(sim::Vec3(20., 20., 1.), 0.);
         b->setPos(0., 0., -10.);
         b->activate();
+        */
 
-        b = world->createBodyCube(1., 1.);
+        b = w->createBodyCube(1., 1.);
         b->setPos(-6.5, 6.5, -5.);
         b->activate();
 
-        b = world->createBodySphere(1.3, 2.);
+        b = w->createBodySphere(1.3, 2.);
         b->setPos(-3., 0., 0.);
         b->activate();
 
-        b = world->createBodyCube(1., 1.);
+        b = w->createBodyCube(1., 1.);
         b->visBody()->setColor(osg::Vec4(0., 0., 0., 1.));
         b->setPos(-3., 0.2, 3.);
         b->activate();
 
-        b = world->createBodyCylinderZ(.5, 1., 3.);
+        b = w->createBodyCylinderZ(.5, 1., 3.);
         b->setPos(3., 0., 0.);
         b->activate();
 
-        b = world->createBodyCylinderX(.5, 1., 3.);
+        b = w->createBodyCylinderX(.5, 1., 3.);
         b->setPos(0., 3., 0.);
         b->activate();
 
-        b = world->createBodyCylinderY(.5, 1., 3.);
+        b = w->createBodyCylinderY(.5, 1., 3.);
         b->setPos(0., -3., 0.);
         b->activate();
 
         createFixed();
         createHinge();
         createRobot();
+
+        /*
+        float heights[] = { 1.6, 1.2, 1.1,
+                            1.1, 1.9, 1.9,
+                            1.6, 2.4, 1.5 };
+        sim::VisBodyTerrain *t = new sim::VisBodyTerrain(20, 20, 3, 3, heights);
+        t->setColor(osg::Vec4(0.9, 0.3, 0.2, 1.));
+        t->setPos(0., 0., -10.);
+        visWorld()->addBody(t);
+        */
+
+        Vec3 verts[] = { Vec3(0., 0., -0.2),
+                         Vec3(10., 0., 0.),
+                         Vec3(10., 10., -0.2),
+                         Vec3(0., 10., 0.) };
+        unsigned int ind[] = { 2, 1, 0,
+                               0, 2, 3 };
+        /*
+        sim::VisBodyTriMesh *tri = new sim::VisBodyTriMesh(verts, 4, ind, 6);
+        visWorld()->addBody(tri);
+        */
+
+        b = (Body *)new BodyTriMesh((sim::bullet::World *)world(), verts, 4, ind, 6);
+        b->setPos(-5., -5., -10.);
+        b->activate();
     }
 
     void init()
@@ -82,7 +108,7 @@ class S : public sim::Sim {
         s->activate();
         j->activate();
 
-        cu->visBody()->setText("Fixed", 1., osg::Vec4(0.9, 0.6, 0.3, 1.));
+        //cu->visBody()->setText("Fixed", 1., osg::Vec4(0.9, 0.6, 0.3, 1.));
     }
 
     void createHinge()
@@ -101,7 +127,7 @@ class S : public sim::Sim {
         cy->activate();
         j->activate();
 
-        cu->visBody()->setText("Hinge", 1., osg::Vec4(0.7, 0.6, 0.3, 1.));
+        //cu->visBody()->setText("Hinge", 1., osg::Vec4(0.7, 0.6, 0.3, 1.));
     }
 
     void createRobot()
@@ -131,7 +157,7 @@ class S : public sim::Sim {
             w[i]->activate();
         }
 
-        chasis->visBody()->setText("Robot", 1., osg::Vec4(0.5, 0.6, 0.3, 1.));
+        //chasis->visBody()->setText("Robot", 1., osg::Vec4(0.5, 0.6, 0.3, 1.));
     }
 };
 

@@ -1,6 +1,8 @@
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
 #include <BulletCollision/CollisionShapes/btCylinderShape.h>
+#include <BulletCollision/CollisionShapes/btTriangleMesh.h>
+#include <osg/ShapeDrawable>
 
 #include "sim/bullet/body.hpp"
 #include "sim/bullet/world.hpp"
@@ -150,6 +152,15 @@ BodyBox::BodyBox(World *w, Vec3 dim, Scalar mass)
 {
     btCollisionShape *shape = new btBoxShape(Vec3::toBullet(dim / 2.));
     _set(new VisBodyBox(dim), shape, mass);
+
+    /*
+    float heights[] = { 1.6, 1.2, 1.1,
+                        1.1, 1.9, 1.9,
+                        1.6, 2.4, 1.5 };
+    sim::VisBodyTerrain *t = new sim::VisBodyTerrain(dim.x(), dim.y(), 3, 3, heights);
+    t->setColor(osg::Vec4(0.9, 0.3, 0.2, 1.));
+    _set(t, shape, mass);
+    */
 }
 
 BodySphere::BodySphere(World *w, Scalar radius, Scalar mass)
@@ -183,6 +194,23 @@ BodyCylinderY::BodyCylinderY(World *w, Scalar radius, Scalar height, Scalar mass
     // now it must be correctly rotated
     Quat q(Vec3(1., 0., 0.), M_PI * .5);
     setRot(q);
+}
+
+BodyTriMesh::BodyTriMesh(World *w, const sim::Vec3 *coords, size_t coords_len,
+                         const unsigned int *indices, size_t indices_len)
+    : Body(w)
+{
+    sim::VisBodyTriMesh *vis = new sim::VisBodyTriMesh(coords, coords_len, indices, indices_len);
+    btTriangleMesh *tris = new btTriangleMesh();
+
+    for (size_t i = 0; i < indices_len; i += 3){
+        tris->addTriangle(coords[indices[i]].toBullet(),
+                          coords[indices[i + 1]].toBullet(),
+                          coords[indices[i + 2]].toBullet());
+    }
+
+    btBvhTriangleMeshShape *shape = new btBvhTriangleMeshShape(tris, true);
+    _set(vis, shape, 0.);
 }
 
 } /* namespace bullet */
