@@ -3,6 +3,8 @@
 #include <osg/Geometry>
 #include <osg/Array>
 #include <osgText/Text>
+#include <osgUtil/SmoothingVisitor>
+#include <osg/Material>
 
 #include "visbody.hpp"
 #include "msg.hpp"
@@ -78,6 +80,18 @@ void VisBodyShape::setColor(const osg::Vec4 &c)
 {
     osg::ShapeDrawable *draw;
     draw = (osg::ShapeDrawable *)((osg::Geode *)_node.get())->getDrawable(0);
+
+    /*
+    osg::StateSet *state_set;
+    state_set = draw->getOrCreateStateSet();
+    osg::ref_ptr<osg::Material> material = new osg::Material;
+    material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+    //material->setAmbient(osg::Material::FRONT_AND_BACK, c);
+    material->setDiffuse(osg::Material::FRONT_AND_BACK, c);
+    state_set->setAttributeAndModes(material, osg::StateAttribute::ON);
+    draw->setStateSet(state_set);
+    */
+
     draw->setColor(c);
 }
 
@@ -109,6 +123,8 @@ void VisBodyShape::_setShape(osg::Shape *shape)
     osg::Geode *geode = new osg::Geode();
     geode->addDrawable(new osg::ShapeDrawable(shape));
     _setNode(geode);
+
+    setColor(osg::Vec4(0.5, 0.5, 0.5, 1.));
 }
 
 
@@ -143,6 +159,7 @@ VisBodyTriMesh::VisBodyTriMesh(const sim::Vec3 *coords, size_t coords_len,
     osg::ref_ptr<osg::TriangleMesh> mesh = new osg::TriangleMesh;
     osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;
     osg::ref_ptr<osg::DrawElementsUInt> faces;
+    osg::Vec4Array* colors = new osg::Vec4Array;
 
     for (i = 0; i < coords_len; i++){
         vert->push_back(coords[i].toOsg());
@@ -155,7 +172,12 @@ VisBodyTriMesh::VisBodyTriMesh(const sim::Vec3 *coords, size_t coords_len,
         faces->push_back(indices[i + 1]);
         faces->push_back(indices[i + 2]);
         geom->addPrimitiveSet(faces);
+        colors->push_back(osg::Vec4(0.9, 0.6, 0.3, 1.));
     }
+
+    geom->setColorArray(colors);
+    geom->setColorBinding(osg::Geometry::BIND_OVERALL);
+    osgUtil::SmoothingVisitor::smooth(*geom.get());
 
     g->addDrawable(geom);
     _setNode(g);

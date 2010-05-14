@@ -189,19 +189,9 @@ class BodyCylinderY : public BodyCylinder {
 class BodyTriMesh : public Body {
   public:
     BodyTriMesh(World *w, const sim::Vec3 *coords, size_t coords_len,
-                const unsigned int *indices, size_t indices_len);
+                const unsigned int *indices, size_t indices_len,
+                Scalar mass);
 };
-
-/*
-class BodyTerrain : public Body {
-  public:
-    BodyTerrain(World *w, float dx, float dy,
-                size_t cols, size_t rows, float *heights);
-
-  protected:
-    btBvhTriangleMeshShape *_fromVisBodyTerrain(sim::VisBodyTerrain *vis);
-};
-*/
 
 } /* namespace bullet */
 

@@ -14,7 +14,9 @@ namespace sim {
  */
 class VisWorld {
     osg::ref_ptr<osgViewer::Viewer> _viewer;
+    osg::ref_ptr<osg::StateSet> _state_set;
     osg::ref_ptr<osg::Group> _root; /*!< Root of scene graph */
+    osg::ref_ptr<osg::Group> _lights;
     bool _window; /*!< Show a window? */
 
   public:
@@ -50,6 +52,10 @@ class VisWorld {
     void step();
 
     bool done();
+
+  protected:
+    void _setUpStateSet();
+    void _setUpLights();
 };
 
 }

@@ -57,6 +57,9 @@ class World : public sim::World {
     sim::Body *createBodyCylinderX(Scalar radius, Scalar height, Scalar mass);
     sim::Body *createBodyCylinderY(Scalar radius, Scalar height, Scalar mass);
     sim::Body *createBodyCylinderZ(Scalar radius, Scalar height, Scalar mass);
+    sim::Body *createBodyTriMesh(const Vec3 *coords, size_t coords_len,
+                                 const unsigned int *indices, size_t indices_len,
+                                 Scalar mass);
 
     sim::Joint *createJointFixed(sim::Body *oA, sim::Body *oB);
     sim::Joint *createJointHinge(sim::Body *A, sim::Body *oB,
