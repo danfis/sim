@@ -4,7 +4,6 @@
 
 namespace sim {
 
-    /*
 class SimKeyboard : public osgGA::GUIEventHandler {
     Sim *_sim;
   public:
@@ -23,7 +22,6 @@ bool SimKeyboard::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
     }
     return false;
 }
-*/
 
 SimComponentMessageRegistry::SimComponentMessageRegistry()
     : _counter(0)
@@ -159,7 +157,8 @@ void SimComponentMessageRegistry::deliverAssignedMessages(Component *c,
 
 Sim::Sim(World *world, VisWorld *visworld)
     : _world(world), _visworld(visworld),
-      _time_step(0, 20000000), _time_substeps(10)
+      _time_step(0, 20000000), _time_substeps(10),
+      _simulate(true)
 {
     if (!_visworld)
         _visworld = new VisWorld();
@@ -213,6 +212,13 @@ void Sim::init()
         _world->init();
     if (_visworld)
         _visworld->init();
+    if (_visworld && _visworld->window()){
+        _visworld->viewer()->addEventHandler(new SimKeyboard(this));
+    }
+
+
+
+    std::cerr << "Real time / Simulated time: " << std::endl;
 }
 
 void Sim::step()
@@ -223,7 +229,7 @@ void Sim::step()
 
     timeRealNow();
 
-    if (_world){
+    if (_world && _simulate){
         _world->step(_time_step, _time_substeps);
         _time_simulated += _time_step;
     }
@@ -235,8 +241,7 @@ void Sim::step()
 
     _cbPostStep();
 
-    std::cerr << "Real time:      " << timeReal() << std::endl;
-    std::cerr << "Simulated time: " << timeSimulated() << std::endl;
+    std::cerr << timeReal() << " / " << timeSimulated() << "\r";
 
     if (timeSimulated() > timeReal()){
         Time tdiff = Time::diff(timeReal(), timeSimulated());
@@ -255,6 +260,8 @@ bool Sim::done()
 
 void Sim::finish()
 {
+    std::cerr << std::endl;
+
     if (_world)
         _world->finish();
     if (_visworld)
@@ -268,6 +275,20 @@ void Sim::run()
         step();
     }
     finish();
+}
+
+bool Sim::pressedKey(int key)
+{
+    DBG("Pressed key: " << key << " " << (char)key);
+
+    if (key == 'w'){
+        if (_visworld)
+            _visworld->toggleWireframe();
+    }else if (key == 'p'){
+        toggleSimulation();
+    }
+
+    return false;
 }
 
 

@@ -55,9 +55,9 @@ class S : public sim::Sim {
         createHinge();
         createRobot();
 
-        Vec3 verts[] = { Vec3(-10., 10., 0.5),
-                         Vec3(0., 10., 0.1),
-                         Vec3(10., 10., 0.5),
+        Vec3 verts[] = { Vec3(-10., 10., -0.5),
+                         Vec3(0., 10., -0.8),
+                         Vec3(10., 10., -0.5),
                          Vec3(-10., 0., 0.5),
                          Vec3(0., 0., 0.),
                          Vec3(10., 0., 0.7),

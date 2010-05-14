@@ -259,6 +259,7 @@ class Sim {
     Time _time_simulated;
     Time _time_step;
     unsigned int _time_substeps;
+    bool _simulate;
 
   protected:
     typedef std::list<Component *>::iterator cit_t; //!< Component list iterator
@@ -295,7 +296,7 @@ class Sim {
      * Is called when key is pressed.
      * Overload this method if you need to.
      */
-    virtual bool pressedKey(int key) { return false; }
+    virtual bool pressedKey(int key);
 
     /**
      * Adds component to simulator if it wasn't already added.
@@ -351,6 +352,10 @@ class Sim {
     const Time &timeReal() const { return _timer_real.elapsedTime(); }
     const Time &timeRealNow() { return _timer_real.stop(); }
     const Time &timeSimulated() const { return _time_simulated; }
+
+    void pauseSimulation() { _simulate = false; }
+    void continueSimulation() { _simulate = true; }
+    void toggleSimulation() { _simulate = !_simulate; }
 
   protected:
     /**

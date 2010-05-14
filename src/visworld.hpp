@@ -23,6 +23,8 @@ class VisWorld {
     VisWorld();
     virtual ~VisWorld();
 
+    osgViewer::Viewer *viewer() { return _viewer.get(); }
+    const osgViewer::Viewer *viewer() const { return _viewer.get(); }
     bool window() const { return _window; }
     void setWindow(bool yes = true) { _window = yes; }
 
@@ -52,6 +54,8 @@ class VisWorld {
     void step();
 
     bool done();
+
+    void toggleWireframe();
 
   protected:
     void _setUpStateSet();

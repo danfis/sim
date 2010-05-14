@@ -1,8 +1,7 @@
-#include <osgGA/TrackballManipulator>
-#include <osg/AlphaFunc>
-#include <osg/LightModel>
+#include <osg/PolygonMode>
 
 #include "visworld.hpp"
+#include "visworldmanip.hpp"
 #include "msg.hpp"
 
 namespace sim {
@@ -44,7 +43,8 @@ void VisWorld::init()
 
     if (_window){
         if (!_viewer->getCameraManipulator()){
-            _viewer->setCameraManipulator(new osgGA::TrackballManipulator());
+            //_viewer->setCameraManipulator(new osgGA::TrackballManipulator());
+            _viewer->setCameraManipulator(new VisWorldManip());
         }
 
         _viewer->setUpViewInWindow(0, 0, 1200, 800);
@@ -120,6 +120,22 @@ void VisWorld::_setUpStateSet()
     _state_set->setMode(GL_LIGHT1, osg::StateAttribute::OFF);
     //_state_set->setMode(GL_DITHER, osg::StateAttribute::ON);
     //_state_set->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+
+    osg::ref_ptr<osg::PolygonMode> polymode = new osg::PolygonMode();
+    //polymode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
+    //polymode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::POINT);
+    polymode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
+    _state_set->setAttributeAndModes(polymode, osg::StateAttribute::ON);
+}
+
+void VisWorld::toggleWireframe()
+{
+    osg::PolygonMode *pm = (osg::PolygonMode *)_state_set->getAttribute(osg::StateAttribute::POLYGONMODE);
+    if (pm->getMode(osg::PolygonMode::FRONT_AND_BACK) == osg::PolygonMode::LINE){
+        pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
+    }else{
+        pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
+    }
 }
 
 }
