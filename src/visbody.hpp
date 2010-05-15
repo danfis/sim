@@ -18,6 +18,7 @@ class VisBody {
     osg::ref_ptr<osg::Group> _group;
     osg::ref_ptr<osg::Geode> _text;
     osg::ref_ptr<osg::Node> _node;
+    Vec3 _offset;
 
   public:
     VisBody();
@@ -43,6 +44,10 @@ class VisBody {
      */
     Quat rot() const { return _root->getAttitude(); }
     void rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const;
+
+    Vec3 &offset() { return _offset; }
+    const Vec3 &offset() const { return _offset; }
+    void setOffset(const Vec3 &o) { _offset = o; }
 
     /**
      * Set position of body.
@@ -70,6 +75,8 @@ class VisBody {
      * Set color of body.
      */
     virtual void setColor(const osg::Vec4 &c) {}
+    virtual void setColor(float r, float g, float b, float a)
+        { setColor(osg::Vec4(r, g, b, a)); }
 
     virtual void setOsgText(osg::ref_ptr<osgText::TextBase> t);
     virtual void setText(const char *text, float size = 1.,

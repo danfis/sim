@@ -12,7 +12,7 @@
 namespace sim {
 
 VisBody::VisBody()
-    : _node(0)
+    : _node(0), _offset(0., 0., 0.)
 {
     _root = new osg::PositionAttitudeTransform();
     _group = new osg::Group();
@@ -20,11 +20,20 @@ VisBody::VisBody()
 
     _text = new osg::Geode();
     _group->addChild(_text);
+
+    /* for debugging
+    {
+        osg::ShapeDrawable *draw = new osg::ShapeDrawable(new osg::Box(osg::Vec3(0., 0., 0.), .1, .1, .1));
+        osg::Geode *g = new osg::Geode;
+        g->addDrawable(draw);
+        _group->addChild(g);
+    }
+    */
 }
 
 void VisBody::setPos(const Vec3 &v)
 {
-    _root->setPosition(v);
+    _root->setPosition(v + _offset);
 }
 
 

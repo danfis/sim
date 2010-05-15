@@ -87,39 +87,43 @@ bool World::done()
 }
 
 
-sim::Body *World::createBodyCube(Scalar width, Scalar mass)
+sim::Body *World::createBodyCube(Scalar width, Scalar mass, VisBody *vis)
 {
-    return new BodyCube(this, width, mass);
+    return new BodyCube(this, width, mass, vis);
 }
 
-sim::Body *World::createBodyBox(Vec3 dim, Scalar mass)
+sim::Body *World::createBodyBox(Vec3 dim, Scalar mass, VisBody *vis)
 {
-    return new BodyBox(this, dim, mass);
+    return new BodyBox(this, dim, mass, vis);
 }
 
-sim::Body *World::createBodySphere(Scalar radius, Scalar mass)
+sim::Body *World::createBodySphere(Scalar radius, Scalar mass, VisBody *vis)
 {
-    return new BodySphere(this, radius, mass);
+    return new BodySphere(this, radius, mass, vis);
 }
 
-sim::Body *World::createBodyCylinderX(Scalar radius, Scalar height, Scalar mass)
+sim::Body *World::createBodyCylinderX(Scalar radius, Scalar height, Scalar mass,
+                                      VisBody *vis)
 {
-    return new BodyCylinderX(this, radius, height, mass);
+    return new BodyCylinderX(this, radius, height, mass, vis);
 }
 
-sim::Body *World::createBodyCylinderY(Scalar radius, Scalar height, Scalar mass)
+sim::Body *World::createBodyCylinderY(Scalar radius, Scalar height, Scalar mass,
+                                      VisBody *vis)
 {
-    return new BodyCylinderY(this, radius, height, mass);
+    return new BodyCylinderY(this, radius, height, mass, vis);
 }
 
-sim::Body *World::createBodyCylinderZ(Scalar radius, Scalar height, Scalar mass)
+sim::Body *World::createBodyCylinderZ(Scalar radius, Scalar height, Scalar mass,
+                                      VisBody *vis)
 {
-    return new BodyCylinder(this, radius, height, mass);
+    return new BodyCylinder(this, radius, height, mass, vis);
 }
 sim::Body *World::createBodyTriMesh(const Vec3 *coords, size_t coords_len,
-                                    const unsigned int *indices, size_t indices_len)
+                                    const unsigned int *indices, size_t indices_len,
+                                    VisBody *vis)
 {
-    return new BodyTriMesh(this, coords, coords_len, indices, indices_len);
+    return new BodyTriMesh(this, coords, coords_len, indices, indices_len, vis);
 }
 
 sim::Joint *World::createJointFixed(sim::Body *oA, sim::Body *oB)

@@ -139,7 +139,7 @@ class Body : public sim::Body {
  */
 class BodyCube : public Body {
   public:
-    BodyCube(World *w, Scalar width, Scalar mass);
+    BodyCube(World *w, Scalar width, Scalar mass, VisBody *vis = 0);
 };
 
 /**
@@ -149,7 +149,7 @@ class BodyCube : public Body {
  */
 class BodyBox : public Body {
   public:
-    BodyBox(World *w, Vec3 dim, Scalar mass);
+    BodyBox(World *w, Vec3 dim, Scalar mass, VisBody *vis = 0);
 };
 
 /**
@@ -158,7 +158,7 @@ class BodyBox : public Body {
  */
 class BodySphere : public Body {
   public:
-    BodySphere(World *w, Scalar radius, Scalar mass);
+    BodySphere(World *w, Scalar radius, Scalar mass, VisBody *vis = 0);
 };
 
 /**
@@ -167,7 +167,8 @@ class BodySphere : public Body {
  */
 class BodyCylinder : public Body {
   public:
-    BodyCylinder(World *w, Scalar radius, Scalar height, Scalar mass);
+    BodyCylinder(World *w, Scalar radius, Scalar height, Scalar mass,
+                 VisBody *vis = 0);
 };
 
 /**
@@ -175,7 +176,8 @@ class BodyCylinder : public Body {
  */
 class BodyCylinderX : public BodyCylinder {
   public:
-    BodyCylinderX(World *w, Scalar radius, Scalar height, Scalar mass);
+    BodyCylinderX(World *w, Scalar radius, Scalar height, Scalar mass,
+                 VisBody *vis = 0);
 };
 
 /**
@@ -183,15 +185,27 @@ class BodyCylinderX : public BodyCylinder {
  */
 class BodyCylinderY : public BodyCylinder {
   public:
-    BodyCylinderY(World *w, Scalar radius, Scalar height, Scalar mass);
+    BodyCylinderY(World *w, Scalar radius, Scalar height, Scalar mass,
+                 VisBody *vis = 0);
 };
 
+/**
+ * Body represented by triangular mesh. This Body is static and thus can't
+ * have any mass.
+ */
 class BodyTriMesh : public Body {
   public:
     BodyTriMesh(World *w, const sim::Vec3 *coords, size_t coords_len,
-                const unsigned int *indices, size_t indices_len);
+                const unsigned int *indices, size_t indices_len,
+                VisBody *vis = 0);
 };
 
+
+class BodyConvexHull : public Body {
+  public:
+    BodyConvexHull(World *w, const sim::Vec3 *points, size_t points_len,
+                   Scalar mass, VisBody *vis = 0);
+};
 } /* namespace bullet */
 
 } /* namespace sim */
