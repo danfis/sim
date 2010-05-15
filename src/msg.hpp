@@ -27,8 +27,11 @@
 # define DBG(str) \
     std::cerr << DBG_PREFIX << str << std::endl; \
     std::cerr.flush()
+# define DBGV(v) \
+    (v).x() << " " << (v).y() << " " << (v).z()
 #else
 # define DBG(str)
+# define DBGV(v)
 #endif
 
 /**

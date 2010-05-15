@@ -197,8 +197,7 @@ BodyCylinderY::BodyCylinderY(World *w, Scalar radius, Scalar height, Scalar mass
 }
 
 BodyTriMesh::BodyTriMesh(World *w, const sim::Vec3 *coords, size_t coords_len,
-                         const unsigned int *indices, size_t indices_len,
-                         Scalar mass)
+                         const unsigned int *indices, size_t indices_len)
     : Body(w)
 {
     sim::VisBodyTriMesh *vis = new sim::VisBodyTriMesh(coords, coords_len, indices, indices_len);
@@ -211,7 +210,7 @@ BodyTriMesh::BodyTriMesh(World *w, const sim::Vec3 *coords, size_t coords_len,
     }
 
     btBvhTriangleMeshShape *shape = new btBvhTriangleMeshShape(tris, true);
-    _set(vis, shape, mass);
+    _set(vis, shape, 0.);
 }
 
 } /* namespace bullet */

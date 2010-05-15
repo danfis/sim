@@ -72,7 +72,7 @@ class S : public sim::Sim {
                                4, 5, 8,
                                3, 7, 6,
                                4, 8, 7 };
-        b = w->createBodyTriMesh(verts, 9, ind, 24, 0.);
+        b = w->createBodyTriMesh(verts, 9, ind, 24);
         b->setPos(0., 0., -10.3);
         b->activate();
     }

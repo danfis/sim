@@ -156,10 +156,8 @@ VisBodyTriMesh::VisBodyTriMesh(const sim::Vec3 *coords, size_t coords_len,
     size_t i;
     osg::ref_ptr<osg::Geode> g = new osg::Geode;
     osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
-    osg::ref_ptr<osg::TriangleMesh> mesh = new osg::TriangleMesh;
     osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;
     osg::ref_ptr<osg::DrawElementsUInt> faces;
-    osg::Vec4Array* colors = new osg::Vec4Array;
 
     for (i = 0; i < coords_len; i++){
         vert->push_back(coords[i].toOsg());
@@ -172,16 +170,21 @@ VisBodyTriMesh::VisBodyTriMesh(const sim::Vec3 *coords, size_t coords_len,
         faces->push_back(indices[i + 1]);
         faces->push_back(indices[i + 2]);
         geom->addPrimitiveSet(faces);
-        colors->push_back(osg::Vec4(0.9, 0.6, 0.3, 1.));
     }
 
-    geom->setColorArray(colors);
-    geom->setColorBinding(osg::Geometry::BIND_OVERALL);
     osgUtil::SmoothingVisitor::smooth(*geom.get());
 
     g->addDrawable(geom);
     _setNode(g);
 }
 
+void VisBodyTriMesh::setColor(const osg::Vec4 &c)
+{
+    osg::Geometry *g = (osg::Geometry *)((osg::Geode *)_node.get())->getDrawable(0);
+    osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
+    color->push_back(c);
+    g->setColorArray(color);
+    g->setColorBinding(osg::Geometry::BIND_OVERALL);
+}
 
 }

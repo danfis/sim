@@ -117,10 +117,9 @@ sim::Body *World::createBodyCylinderZ(Scalar radius, Scalar height, Scalar mass)
     return new BodyCylinder(this, radius, height, mass);
 }
 sim::Body *World::createBodyTriMesh(const Vec3 *coords, size_t coords_len,
-                                    const unsigned int *indices, size_t indices_len,
-                                    Scalar mass)
+                                    const unsigned int *indices, size_t indices_len)
 {
-    return new BodyTriMesh(this, coords, coords_len, indices, indices_len, mass);
+    return new BodyTriMesh(this, coords, coords_len, indices, indices_len);
 }
 
 sim::Joint *World::createJointFixed(sim::Body *oA, sim::Body *oB)

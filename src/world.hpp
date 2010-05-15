@@ -61,8 +61,8 @@ class World {
     virtual Body *createBodyCylinderZ(Scalar radius, Scalar height, Scalar mass)
         { return 0; }
     virtual Body *createBodyTriMesh(const Vec3 *coords, size_t coords_len,
-                                    const unsigned int *indices, size_t indices_len,
-                                    Scalar mass) { return 0; }
+                                    const unsigned int *indices, size_t indices_len)
+        { return 0; }
 
     virtual Joint *createJointFixed(Body *oA, Body *oB) { return 0; }
     virtual Joint *createJointHinge(Body *A, Body *oB,

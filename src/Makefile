@@ -1,6 +1,5 @@
 -include ../Makefile.include
-CXXFLAGS += -I. $(OSG_CXXFLAGS) $(ODE_CXXFLAGS) $(BT_CXXFLAGS)
-LDFLAGS += $(OSG_LDFLAGS) $(ODE_LDFLAGS) $(BT_LDFLAGS)
+CXXFLAGS += -I. $(OSG_CXXFLAGS) $(BT_CXXFLAGS)
 
 
 TARGETS = libsim.a

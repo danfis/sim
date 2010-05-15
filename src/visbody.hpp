@@ -144,6 +144,7 @@ class VisBodyTriMesh : public VisBody {
   public:
     VisBodyTriMesh(const sim::Vec3 *coords, size_t coords_len,
                    const unsigned int *indices, size_t indices_len);
+    void setColor(const osg::Vec4 &c);
 };
 
 } /* namespace sim */
