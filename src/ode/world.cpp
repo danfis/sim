@@ -68,10 +68,10 @@ World::World()
     _coll_contacts = dJointGroupCreate(0);
    
     // TODO: move to init
-    dWorldSetERP(_world, 0.5);
+    //dWorldSetERP(_world, 0.5);
     //dWorldSetCFM(_world, 0.001);
-    //dWorldSetCFM(_world, 1e-5);
-    dWorldSetCFM(_world, 0.01);
+    dWorldSetCFM(_world, 1e-5);
+    //dWorldSetCFM(_world, 0.01);
    
     /*
     _default_contact.surface.slip1 = 0.7;
@@ -88,7 +88,7 @@ World::World()
     _default_contact.surface.mu2 = 0;
     _default_contact.surface.bounce = 0.1;
     _default_contact.surface.bounce_vel = 0.1;
-    _default_contact.surface.soft_cfm = 0.01;
+    _default_contact.surface.soft_cfm = 0.001;
 }
 
 World::~World()
@@ -119,6 +119,7 @@ void World::step(const sim::Time &time, unsigned int substeps)
     for (size_t i = 0; i < substeps; i++){
         dSpaceCollide(_space, this, __collision);
         dWorldStep(_world, fixed);
+        //dWorldStepFast1(_world, fixed, 5);
         dJointGroupEmpty(_coll_contacts);
     }
 }

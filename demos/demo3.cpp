@@ -13,10 +13,10 @@ class S : public sim::Sim {
     S()
         : Sim()
     {
-        //_time_step = sim::Time(0, 10000000);
-        //_time_substeps = 5;
-        _time_step = sim::Time(0, 50000000);
-        _time_substeps = 1;
+        _time_step = sim::Time(0, 10000000);
+        _time_substeps = 3;
+        //_time_step = sim::Time(0, 50000000);
+        //_time_substeps = 1;
 
         World *w = new World();
         sim::Body *b;
@@ -63,7 +63,6 @@ class S : public sim::Sim {
         createRobot();
         */
 
-        /*
         Vec3 verts[] = { Vec3(-10., 10., -0.5),
                          Vec3(0., 10., -0.8),
                          Vec3(10., 10., -0.5),
@@ -73,21 +72,41 @@ class S : public sim::Sim {
                          Vec3(-10., -10., 0.4),
                          Vec3(0., -10., 1.),
                          Vec3(10., -10., 0.8) };
-        unsigned int ind[] = { 0, 1, 4,
-                               1, 2, 5,
-                               0, 4, 3,
-                               1, 5, 4,
-                               3, 4, 7,
-                               4, 5, 8,
-                               3, 7, 6,
-                               4, 8, 7 };
+        unsigned int ind[] = { 0, 4, 1,
+                               1, 5, 2,
+                               0, 3, 4,
+                               1, 4, 5,
+                               3, 7, 4,
+                               4, 8, 5,
+                               3, 6, 7,
+                               4, 7, 8 };
         b = w->createBodyTriMesh(verts, 9, ind, 24, 0.);
-        b->setPos(0., 0., -10.3);
+        b->visBody()->setColor(0.9, 0.6, 0.3, 1.);
+        b->setPos(0., 0., -5.3);
         b->activate();
-        */
+        /*
         b = w->createBodyBox(Vec3(20, 20, 2), 0.);
         b->setPos(0., 0., -10);
         b->activate();
+        */
+
+        {
+            Vec3 verts[] = { Vec3(-5, -5, 2.5),
+                             Vec3(5, -5, 2.5),
+                             Vec3(5, 5, 2.5),
+                             Vec3(-5, 5, 2.5),
+                             Vec3(0, 0, 0) };
+
+            unsigned int ind[] = { 0, 1, 4,
+                                   1, 2, 4,
+                                   2, 3, 4,
+                                   3, 0, 4 };
+            b = w->createBodyTriMesh(verts, 5, ind, 4 * 3, 0.);
+            b->setPos(0., 0., -10);
+            b->visBody()->setColor(0.9, 0.6, 0.3, 1.);
+            b->activate();
+
+        }
     }
 
     void init()

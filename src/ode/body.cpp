@@ -266,7 +266,7 @@ BodyTriMesh::BodyTriMesh(World *w, const sim::Vec3 *coords, size_t coords_len,
 
     dGeomTriMeshDataBuildSingle(data, vertices, 3 * sizeof(float), coords_len,
                                       indices, ids_len, 3 * sizeof(dTriIndex));
-    dGeomTriMeshDataPreprocess(data);
+    //dGeomTriMeshDataPreprocess(data);
 
     shape = dCreateTriMesh(_world->space(), data, 0, 0, 0);
 
