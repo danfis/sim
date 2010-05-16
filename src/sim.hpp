@@ -257,6 +257,7 @@ class Sim {
 
     Timer _timer_real;
     Time _time_simulated;
+  protected:
     Time _time_step;
     unsigned int _time_substeps;
     bool _simulate;

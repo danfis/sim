@@ -3,12 +3,15 @@ CXXFLAGS += -I../src $(OSG_CXXFLAGS) $(ODE_CXXFLAGS) $(BT_CXXFLAGS)
 LDFLAGS += $(OSG_LDFLAGS) $(ODE_LDFLAGS) $(BT_LDFLAGS)
 
 
-TARGETS = demo demo2
+TARGETS = demo demo2 demo3
 
 all: $(TARGETS)
 
 demo: demo.o
 	$(CXX) $(CXXFLAGS) -o $@ $< -L../src/bullet -lsim-bullet -L../src -lsim $(LDFLAGS)
+demo3: demo3.o
+	$(CXX) $(CXXFLAGS) -o $@ $< -L../src/ode -lsim-ode -L../src -lsim $(LDFLAGS)
+
 demo%: demo%.o
 	$(CXX) $(CXXFLAGS) -o $@ $< -L../src/bullet -lsim-bullet -L../src -lsim $(LDFLAGS)
 

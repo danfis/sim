@@ -6,7 +6,7 @@ TARGETS = libsim.a
 OBJS = visbody.o visworld.o body.o joint.o sim.o component.o message.o \
        time.o visworldmanip.o
 
-all: bullet $(TARGETS)
+all: $(TARGETS) bullet ode
 
 libsim.a: $(OBJS)
 	ar cr $@ $^
@@ -14,6 +14,8 @@ libsim.a: $(OBJS)
 
 bullet:
 	$(MAKE) -C bullet
+ode:
+	$(MAKE) -C ode
 
 %.o: %.cpp %.hpp math.hpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
@@ -27,6 +29,7 @@ clean:
 	rm -f *.o *~ *.a
 	rm -f $(TARGETS)
 	$(MAKE) -C bullet clean
+	$(MAKE) -C ode clean
 	if [ -d testsuites ]; then $(MAKE) -C testsuites clean; fi;
 
 check:
@@ -34,4 +37,4 @@ check:
 check-valgrind:
 	$(MAKE) -C testsuites check-valgrind
 
-.PHONY: all clean help check check-valgrind bullet
+.PHONY: all clean help check check-valgrind bullet ode

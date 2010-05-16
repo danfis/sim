@@ -3,6 +3,7 @@
 
 #include <LinearMath/btVector3.h>
 #include <LinearMath/btQuaternion.h>
+#include <ode/ode.h>
 
 #include <osg/Vec3>
 #include <osg/Quat>
@@ -53,10 +54,16 @@ class Quat : public osg::Quat {
     Quat(const osg::Quat &q) : osg::Quat(q){}
 
     btQuaternion toBullet() const { return btQuaternion(x(), z(), y(), -w()); }
+    void toODE(dQuaternion q) const
+        { q[0] = w(); q[1] = x(); q[2] = y(); q[3] = z(); }
 
     static Quat fromBullet(const btQuaternion &q)
         { return Quat(q.x(), q.z(), q.y(), -q.w()); }
 };
+
+
+// TODO: parametrize epsilon
+inline bool isZero(Scalar f) { return fabs(f) < 1E-6; }
 
 } /* namespace sim */
 

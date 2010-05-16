@@ -3,6 +3,8 @@
 
 #include "visbody.hpp"
 
+#define SIM_BODY_DEFAULT_VIS ((sim::VisBody *)(0x1))
+
 namespace sim {
 
 

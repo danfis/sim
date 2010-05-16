@@ -68,7 +68,7 @@ class World {
         { return 0; }
     virtual Body *createBodyTriMesh(const Vec3 *coords, size_t coords_len,
                                     const unsigned int *indices, size_t indices_len,
-                                    VisBody *vis = 0)
+                                    Scalar mass, VisBody *vis = 0)
         { return 0; }
 
     virtual Joint *createJointFixed(Body *oA, Body *oB) { return 0; }
