@@ -66,7 +66,7 @@ World::World()
     _world = dWorldCreate();
     _space = dHashSpaceCreate(0);
     _coll_contacts = dJointGroupCreate(0);
-   
+
     // set default parameters
     dWorldSetERP(_world, 0.2);
     dWorldSetCFM(_world, 1e-5);

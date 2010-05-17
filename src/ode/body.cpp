@@ -143,7 +143,6 @@ void Body::_setOnlyShape(VisBody *vis, dGeomID shape)
 BodyCube::BodyCube(World *world, Scalar w, Scalar mass, VisBody *vis)
     : Body(world)
 {
-    dMass m;
     dGeomID shape;
 
     shape = dCreateBox(_world->space(), w, w, w);
@@ -154,6 +153,7 @@ BodyCube::BodyCube(World *world, Scalar w, Scalar mass, VisBody *vis)
     if (isZero(mass)){
         _setOnlyShape(vis, shape);
     }else{
+        dMass m;
         dMassSetBoxTotal(&m, mass, w, w, w);
         _set(vis, shape, &m);
     }
@@ -162,7 +162,6 @@ BodyCube::BodyCube(World *world, Scalar w, Scalar mass, VisBody *vis)
 BodyBox::BodyBox(World *w, Vec3 dim, Scalar mass, VisBody *vis)
     : Body(w)
 {
-    dMass m;
     dGeomID shape;
 
     shape = dCreateBox(_world->space(), dim.x(), dim.y(), dim.z());
@@ -173,6 +172,7 @@ BodyBox::BodyBox(World *w, Vec3 dim, Scalar mass, VisBody *vis)
     if (isZero(mass)){
         _setOnlyShape(vis, shape);
     }else{
+        dMass m;
         dMassSetBoxTotal(&m, mass, dim.x(), dim.y(), dim.z());
         _set(vis, shape, &m);
     }
@@ -181,7 +181,6 @@ BodyBox::BodyBox(World *w, Vec3 dim, Scalar mass, VisBody *vis)
 BodySphere::BodySphere(World *w, Scalar radius, Scalar mass, VisBody *vis)
     : Body(w)
 {
-    dMass m;
     dGeomID shape;
 
     shape = dCreateSphere(_world->space(), radius);
@@ -192,6 +191,7 @@ BodySphere::BodySphere(World *w, Scalar radius, Scalar mass, VisBody *vis)
     if (isZero(mass)){
         _setOnlyShape(vis, shape);
     }else{
+        dMass m;
         dMassSetSphereTotal(&m, mass, radius);
         _set(vis, shape, &m);
     }
@@ -201,7 +201,6 @@ BodyCylinder::BodyCylinder(World *w, Scalar radius, Scalar height, Scalar mass,
                            VisBody *vis)
     : Body(w)
 {
-    dMass m;
     dGeomID shape;
 
     shape = dCreateCylinder(_world->space(), radius, height);
@@ -212,6 +211,7 @@ BodyCylinder::BodyCylinder(World *w, Scalar radius, Scalar height, Scalar mass,
     if (isZero(mass)){
         _setOnlyShape(vis, shape);
     }else{
+        dMass m;
         dMassSetCylinderTotal(&m, mass, 3, radius, height);
         _set(vis, shape, &m);
     }
@@ -245,7 +245,6 @@ BodyTriMesh::BodyTriMesh(World *w, const sim::Vec3 *coords, size_t coords_len,
     size_t i;
     dTriMeshDataID data;
     dGeomID shape;
-    dMass m;
    
     data = dGeomTriMeshDataCreate();
 
@@ -274,6 +273,7 @@ BodyTriMesh::BodyTriMesh(World *w, const sim::Vec3 *coords, size_t coords_len,
     if (isZero(mass)){
         _setOnlyShape(vis, shape);
     }else{
+        dMass m;
         dMassSetTrimeshTotal(&m, mass, shape);
         _set(vis, shape, &m);
     }
