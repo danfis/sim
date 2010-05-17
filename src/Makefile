@@ -2,29 +2,35 @@
 -include ../Makefile.include
 CXXFLAGS += -I. $(OSG_CXXFLAGS)
 
+SUBTARGETS =
+
+ifeq '$(WANT_ODE)' 'yes'
+  SUBTARGETS += ode
+endif
+
+ifeq '$(WANT_BT)' 'yes'
+  SUBTARGETS += bullet
+endif
 
 TARGETS = libsim.a
 OBJS = visbody.o visworld.o body.o joint.o sim.o component.o message.o \
        time.o visworldmanip.o
 
-all: $(TARGETS) bullet ode
+all: $(TARGETS) $(SUBTARGETS)
 
 libsim.a: $(OBJS)
 	ar cr $@ $^
 	ranlib $@
 
-bullet:
-	$(MAKE) -C bullet
-ode:
+ode: libsim.a
 	$(MAKE) -C ode
+bullet: libsim.a
+	$(MAKE) -C bullet
 
-%.o: %.cpp %.hpp math.hpp
+%.o: %.cpp %.hpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
-
-%.moc: %.hpp
-	$(MOC) -p'.' $< > $@
 
 clean:
 	rm -f *.o *~ *.a

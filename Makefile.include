@@ -50,25 +50,44 @@ CXXFLAGS += $(SYSTEM_CXXFLAGS)
 
 LDFLAGS =
 
-# ODE
-HAS_ODE := $(shell if pkg-config ode --exists; then echo "yes"; else echo "no"; fi;)
-ifeq '$(HAS_ODE)' 'yes'
-  ODE_CXXFLAGS = $(shell pkg-config ode --cflags)
-  ODE_LDFLAGS  = $(shell pkg-config ode --libs)
+HAS_ODE ?= no
+HAS_BT  ?= no
+HAS_OSG ?= no
+WANT_ODE ?= yes
+WANT_BT  ?= yes
+WANT_OSG ?= yes
+
+# Try to find ODE
+ifeq '$(WANT_ODE)' 'yes'
+  ifeq '$(HAS_ODE)' 'no'
+    HAS_ODE := $(shell if pkg-config ode --exists; then echo "yes"; else echo "no"; fi;)
+    ifeq '$(HAS_ODE)' 'yes'
+      ODE_CXXFLAGS = $(shell pkg-config ode --cflags)
+      ODE_LDFLAGS  = $(shell pkg-config ode --libs)
+    endif
+  endif
 endif
 
-# OSG
-HAS_OSG = $(shell if pkg-config openscenegraph --exists; then echo "yes"; else echo "no"; fi;)
-ifeq '$(HAS_OSG)' 'yes'
-  OSG_CXXFLAGS = $(shell pkg-config openscenegraph --cflags)
-  OSG_LDFLAGS  = $(shell pkg-config openscenegraph --libs)
+# Try to find OSG
+ifeq '$(WANT_OSG)' 'yes'
+  ifeq '$(HAS_OSG)' 'no'
+    HAS_OSG = $(shell if pkg-config openscenegraph --exists; then echo "yes"; else echo "no"; fi;)
+    ifeq '$(HAS_OSG)' 'yes'
+      OSG_CXXFLAGS = $(shell pkg-config openscenegraph --cflags)
+      OSG_LDFLAGS  = $(shell pkg-config openscenegraph --libs)
+    endif
+  endif
 endif
 
-# Bullet
-HAS_BT = $(shell if pkg-config bullet --exists; then echo "yes"; else echo "no"; fi;)
-ifeq '$(HAS_BT)' 'yes'
-  BT_CXXFLAGS  = $(shell pkg-config bullet --cflags)
-  BT_LDFLAGS   = $(shell pkg-config bullet --libs)
+# Try to find Bullet
+ifeq '$(WANT_BT)' 'yes'
+  ifeq '$(HAS_BT)' 'no'
+    HAS_BT = $(shell if pkg-config bullet --exists; then echo "yes"; else echo "no"; fi;)
+    ifeq '$(HAS_BT)' 'yes'
+      BT_CXXFLAGS  = $(shell pkg-config bullet --cflags)
+      BT_LDFLAGS   = $(shell pkg-config bullet --libs)
+    endif
+  endif
 endif
 
 check-dep-osg:
@@ -116,12 +135,15 @@ showvars:
 	@echo "CXXFLAGS = $(CXXFLAGS)"
 	@echo "LDFLAGS  = $(LDFLAGS)"
 	@echo ""
+	@echo "WANT_ODE     = $(WANT_ODE)"
 	@echo "HAS_ODE      = $(HAS_ODE)"
 	@echo "ODE_CXXFLAGS = $(ODE_CXXFLAGS)"
 	@echo "ODE_LDFLAGS  = $(ODE_LDFLAGS)"
+	@echo "WANT_BT      = $(WANT_BT)"
 	@echo "HAS_BT       = $(HAS_BT)"
 	@echo "BT_CXXFLAGS  = $(BT_CXXFLAGS)"
 	@echo "BT_LDFLAGS   = $(BT_LDFLAGS)"
+	@echo "WANT_OSG     = $(WANT_ODE)"
 	@echo "HAS_OSG      = $(HAS_OSG)"
 	@echo "OSG_CXXFLAGS = $(OSG_CXXFLAGS)"
 	@echo "OSG_LDFLAGS  = $(OSG_LDFLAGS)"

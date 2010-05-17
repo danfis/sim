@@ -12,7 +12,15 @@ LIBDEPS_BT = ../src/libsim.a ../src/bullet/libsim-bullet.a
 LIBDEPS_ODE = ../src/libsim.a ../src/ode/libsim-ode.a
 
 
-TARGETS = demo_base_bt demo_base_ode
+TARGETS =
+
+ifeq '$(WANT_BT)' 'yes'
+  TARGETS += demo_base_bt
+endif
+
+ifeq '$(WANT_ODE)' 'yes'
+  TARGETS += demo_base_ode
+endif
 
 all: $(TARGETS)
 

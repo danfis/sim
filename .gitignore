@@ -2,6 +2,4 @@
 *.so
 *.a
 *.log
-demo
-demo[0-9]
 Makefile.local
