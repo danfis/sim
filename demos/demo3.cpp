@@ -7,6 +7,7 @@
 
 using namespace sim::ode;
 using sim::Vec3;
+using namespace std;
 
 class S : public sim::Sim {
   public:
@@ -21,7 +22,8 @@ class S : public sim::Sim {
 
         setWorld(w);
         w->setCFM(1e-10);
-        //w->setERP(0.5);
+        w->setCFM(0.001);
+        w->setERP(0.5);
         //w->setContactSoftCFM(0.01);
         //w->setContactApprox1(false);
         //w->setContactApprox2(false);
@@ -32,11 +34,6 @@ class S : public sim::Sim {
         b->setPos(0., 0., -10.);
         b->activate();
         */
-
-        b = w->createBodyCube(1., 1.);
-        b->visBody()->setColor(osg::Vec4(0.5, 0.5, 0.5, 0.5));
-        b->setPos(-6.5, 6.5, -5.);
-        b->activate();
 
         b = w->createBodySphere(1.3, 2.);
         b->visBody()->setColor(osg::Vec4(0.5, 0.1, 0.8, 0.3));
@@ -61,21 +58,22 @@ class S : public sim::Sim {
         b->setPos(0., -3., 0.);
         b->activate();
 
-        /*
         createFixed();
         createHinge();
-        createRobot();
-        */
+        createHingeLim();
+        createHinge2();
+        createHinge2Lim();
+        //createRobot();
 
         Vec3 verts[] = { Vec3(-10., 10., -0.5),
                          Vec3(0., 10., -0.8),
                          Vec3(10., 10., -0.5),
                          Vec3(-10., 0., 0.5),
                          Vec3(0., 0., 0.),
-                         Vec3(10., 0., 0.7),
+                         Vec3(20., 0., 0.),
                          Vec3(-10., -10., 0.4),
-                         Vec3(0., -10., 1.),
-                         Vec3(10., -10., 0.8) };
+                         Vec3(0., -20., 0.),
+                         Vec3(20., -20., 0.) };
         unsigned int ind[] = { 0, 4, 1,
                                1, 5, 2,
                                0, 3, 4,
@@ -109,14 +107,15 @@ class S : public sim::Sim {
     }
 
   protected:
-    /*
     void createFixed()
     {
-        sim::Vec3 pos(-6., -6., -9.);
+        sim::Vec3 pos(-6., -6., -3.);
         sim::Body *cu = world()->createBodyCube(1., 1.);
         sim::Body *s = world()->createBodySphere(0.5, 3.);
         sim::Joint *j;
 
+        DBG(cu);
+        DBG(cu->visBody());
         cu->setPos(pos);
         s->setPos(pos + sim::Vec3(0.9, 0., 1.0));
         j = world()->createJointFixed(cu, s);
@@ -130,8 +129,8 @@ class S : public sim::Sim {
 
     void createHinge()
     {
-        sim::Vec3 pos(-6., 6., -9.);
-        sim::Body *cy = world()->createBodyCylinderZ(0.5, 0.5, 1.);
+        sim::Vec3 pos(10., -2., -4.6);
+        sim::Body *cy = world()->createBodyCylinderZ(0.5, 0.5, .2);
         sim::Body *cu = world()->createBodyCube(1., 1.);
         sim::Joint *j;
 
@@ -145,11 +144,93 @@ class S : public sim::Sim {
         j->activate();
 
         cu->visBody()->setText("Hinge", 1., osg::Vec4(0.7, 0.6, 0.3, 1.));
+
+        sim::Body *b2 = world()->createBodyBox(Vec3(.5, 2.0, 0.5), 2.);
+        b2->visBody()->setColor(osg::Vec4(0.5, 0.5, 0.5, 0.5));
+        b2->setPos(pos + Vec3(-0.5, -1.0, 2.7));
+        b2->activate();
     }
 
+    void createHingeLim()
+    {
+        sim::Vec3 pos(10., -4., -4.6);
+        sim::Body *cy = world()->createBodyCylinderZ(0.5, 0.5, .2);
+        sim::Body *cu = world()->createBodyCube(1., 1.);
+        sim::Joint *j;
+
+        cu->setPos(pos);
+        cy->setPos(pos + sim::Vec3(0., 0., 2.));
+
+        j = world()->createJointHinge(cu, cy, pos + sim::Vec3(0., 0., 1.), sim::Vec3(0., 1., 0.));
+        ((JointHinge *)j)->setLimitAngAxis(-M_PI / 2., 0.);
+
+        cu->activate();
+        cy->activate();
+        j->activate();
+
+        cu->visBody()->setText("Hinge lim.", 1., osg::Vec4(0.7, 0.6, 0.3, 1.));
+    }
+
+    void createHinge2()
+    {
+        sim::Vec3 pos(6., -6., -3.76);
+        sim::Body *s = world()->createBodyCylinderY(0.5, 0.5, 0.5);
+        sim::Body *b = world()->createBodyBox(Vec3(1.5, 1.5, 3.), 10.);
+        sim::Joint *j;
+
+        b->setPos(pos);
+        s->setPos(pos + sim::Vec3(2.0, 0., 1.));
+
+        j = world()->createJointHinge2(b, s, pos + Vec3(0., 0., 1.),
+                                       Vec3(0., 0., 1.), Vec3(1., 0., 0.));
+
+        b->activate();
+        s->activate();
+        j->activate();
+
+        b->visBody()->setColor(0.5, 0.7, 0.3, 0.3);
+        b->visBody()->setText("Hinge2", 1., osg::Vec4(0.5, 0.7, 0.3, 1.));
+        s->visBody()->setColor(0., 1., 0., 1.);
+
+        sim::Body *b2 = world()->createBodyCube(0.5, 1.);
+        b2->visBody()->setColor(1., 0., 0., 0.3);
+        b2->setPos(pos + Vec3(2.1, -0.3, 2.5));
+        b2->activate();
+    }
+
+    void createHinge2Lim()
+    {
+        sim::Vec3 pos(6., -11., -3.76);
+        sim::Body *s = world()->createBodyCylinderY(0.5, 0.5, 1.5);
+        sim::Body *b = world()->createBodyBox(Vec3(1.5, 1.5, 3.), 10.);
+        sim::Joint *j;
+
+        b->setPos(pos);
+        s->setPos(pos + sim::Vec3(2.0, 0., 1.));
+
+        j = world()->createJointHinge2(b, s, pos + Vec3(0., 0., 1.),
+                                       Vec3(0., 0., 1.), Vec3(1., 0., 0.));
+
+        ((JointHinge2 *)j)->setLimitAngAxis1(-M_PI / 4., M_PI / 4.);
+
+        b->activate();
+        s->activate();
+        j->activate();
+
+        b->visBody()->setColor(0.5, 0.7, 0.3, 0.3);
+        b->visBody()->setText("Hinge2 lim.", 1., osg::Vec4(0.5, 0.7, 0.3, 1.));
+        s->visBody()->setColor(0., 1., 0., 1.);
+
+        sim::Body *b2 = world()->createBodyCube(0.5, 2.);
+        b2->visBody()->setColor(1., 0., 0., 0.3);
+        b2->setPos(pos + Vec3(2.1, -0.3, 2.5));
+        b2->activate();
+    }
+
+    /*
     void createRobot()
     {
-        sim::Vec3 pos(3., 3., -6.);
+        sim::Vec3 pos(3., 3., -5.);
         sim::Body *chasis;
         sim::ActuatorWheelCylinderX *w[4];
         size_t i;

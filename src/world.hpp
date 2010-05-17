@@ -51,24 +51,24 @@ class World {
     /* \} */
 
     /* \{ */
-    virtual Body *createBodyCube(Scalar width, Scalar mass, VisBody *vis = 0)
+    virtual Body *createBodyCube(Scalar width, Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS)
         { return 0; }
-    virtual Body *createBodyBox(Vec3 dim, Scalar mass, VisBody *vis = 0)
+    virtual Body *createBodyBox(Vec3 dim, Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS)
         { return 0; }
-    virtual Body *createBodySphere(Scalar radius, Scalar mass, VisBody *vis = 0)
+    virtual Body *createBodySphere(Scalar radius, Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS)
         { return 0; }
     virtual Body *createBodyCylinderX(Scalar radius, Scalar height, Scalar mass,
-                                      VisBody *vis = 0)
+                                      VisBody *vis = SIM_BODY_DEFAULT_VIS)
         { return 0; }
     virtual Body *createBodyCylinderY(Scalar radius, Scalar height, Scalar mass,
-                                      VisBody *vis = 0)
+                                      VisBody *vis = SIM_BODY_DEFAULT_VIS)
         { return 0; }
     virtual Body *createBodyCylinderZ(Scalar radius, Scalar height, Scalar mass,
-                                      VisBody *vis = 0)
+                                      VisBody *vis = SIM_BODY_DEFAULT_VIS)
         { return 0; }
     virtual Body *createBodyTriMesh(const Vec3 *coords, size_t coords_len,
                                     const unsigned int *indices, size_t indices_len,
-                                    Scalar mass, VisBody *vis = 0)
+                                    Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS)
         { return 0; }
 
     virtual Joint *createJointFixed(Body *oA, Body *oB) { return 0; }

@@ -6,8 +6,8 @@
 #include "sim/visworld.hpp"
 #include "sim/world.hpp"
 #include "sim/ode/body.hpp"
-/*
 #include "sim/ode/joint.hpp"
+/*
 #include "sim/ode/actuator.hpp"
 #include "sim/ode/collision_detection.hpp"
 */
@@ -194,13 +194,13 @@ class World : public sim::World {
                                  const unsigned int *indices, size_t indices_len,
                                  Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS);
 
-    /*
     sim::Joint *createJointFixed(sim::Body *oA, sim::Body *oB);
     sim::Joint *createJointHinge(sim::Body *A, sim::Body *oB,
                                  const Vec3 &anchor, const Vec3 &axis);
     sim::Joint *createJointHinge2(sim::Body *A, sim::Body *oB, const Vec3 &anchor,
                                   const Vec3 &axis1, const Vec3 &axis2);
 
+    /*
     sim::ActuatorWheelCylinderX *createActuatorWheelCylinderX
                                     (Scalar radius, Scalar height, Scalar mass);
                                     */

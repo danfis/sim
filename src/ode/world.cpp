@@ -393,7 +393,6 @@ sim::Body *World::createBodyTriMesh(const Vec3 *coords, size_t coords_len,
     return new BodyTriMesh(this, coords, coords_len, indices, indices_len, mass, vis);
 }
 
-/*
 sim::Joint *World::createJointFixed(sim::Body *oA, sim::Body *oB)
 {
     return new JointFixed(this, (Body *)oA, (Body *)oB);
@@ -412,6 +411,7 @@ sim::Joint *World::createJointHinge2(sim::Body *oA, sim::Body *oB, const Vec3 &a
 }
 
 
+/*
 sim::ActuatorWheelCylinderX *World::createActuatorWheelCylinderX
                                 (Scalar radius, Scalar height, Scalar mass)
 {

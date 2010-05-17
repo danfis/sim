@@ -3,7 +3,7 @@ CXXFLAGS += -I../ $(OSG_CXXFLAGS) $(ODE_CXXFLAGS) $(BT_CXXFLAGS)
 
 
 TARGETS = libsim-ode.a
-OBJS = world.o body.o
+OBJS = world.o body.o joint.o
 #body.o joint.o actuator.o world.o collision_detection.o sim.o
 
 all: $(TARGETS)
