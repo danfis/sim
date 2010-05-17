@@ -1,3 +1,4 @@
+-include ../../Makefile.local
 -include ../../Makefile.include
 CXXFLAGS = -g -Wall -pedantic
 CXXFLAGS += -I./ -I../ -Icu/

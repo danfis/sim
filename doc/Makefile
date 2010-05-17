@@ -1,3 +1,4 @@
+-include ../Makefile.local
 -include ../Makefile.include
 
 TARGETS = doxy sim-design.png

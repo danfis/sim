@@ -1,3 +1,4 @@
+-include ../../Makefile.local
 -include ../../Makefile.include
 CXXFLAGS += -I../ $(OSG_CXXFLAGS) $(BT_CXXFLAGS)
 

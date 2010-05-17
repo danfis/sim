@@ -19,6 +19,8 @@ else
   SED ?= sed
 endif
 
+NOWALL ?= no
+NOPEDANTIC ?= no
 DEBUG ?= yes
 PROFIL ?= no
 
@@ -35,67 +37,92 @@ ifeq '$(PROFIL)' 'yes'
   CXXFLAGS += -pg
 endif
 
-CFLAGS   += -Wall -pedantic -std=gnu99
-CXXFLAGS += -Wall -pedantic
+ifneq '$(NOWALL)' 'yes'
+  CFLAGS += -Wall
+  CXXFLAGS += -Wall
+endif
+ifneq '$(NOPEDANTIC)' 'yes'
+  CFLAGS += -pedantic
+  CXXFLAGS += -pedantic
+endif
+
 CXXFLAGS += $(SYSTEM_CXXFLAGS)
 
 LDFLAGS =
 
 # ODE
-HAS_ODE = 0
-ifeq '$(shell if pkg-config ode --exists; then echo "1"; fi;)' '1'
-  HAS_ODE = 1
+HAS_ODE := $(shell if pkg-config ode --exists; then echo "yes"; else echo "no"; fi;)
+ifeq '$(HAS_ODE)' 'yes'
   ODE_CXXFLAGS = $(shell pkg-config ode --cflags)
   ODE_LDFLAGS  = $(shell pkg-config ode --libs)
 endif
 
 # OSG
-HAS_OSG = 0
-ifeq '$(shell if pkg-config openscenegraph --exists; then echo "1"; fi;)' '1'
-  HAS_OSG = 1
+HAS_OSG = $(shell if pkg-config openscenegraph --exists; then echo "yes"; else echo "no"; fi;)
+ifeq '$(HAS_OSG)' 'yes'
   OSG_CXXFLAGS = $(shell pkg-config openscenegraph --cflags)
   OSG_LDFLAGS  = $(shell pkg-config openscenegraph --libs)
 endif
 
 # Bullet
-HAS_BT = 0
-ifeq '$(shell if pkg-config bullet --exists; then echo "1"; fi;)' '1'
-  HAS_BT = 1
+HAS_BT = $(shell if pkg-config bullet --exists; then echo "yes"; else echo "no"; fi;)
+ifeq '$(HAS_BT)' 'yes'
   BT_CXXFLAGS  = $(shell pkg-config bullet --cflags)
   BT_LDFLAGS   = $(shell pkg-config bullet --libs)
 endif
 
 check-dep-osg:
 	@echo "Checking Openscenegraph..."
-	@if [ "$(HAS_OSG)" != "1" ]; then echo "Dependecy error: pkg-config can't find openscenegraph package"; exit 1; fi;
+	@if [ "$(HAS_OSG)" != "yes" ]; then echo "Dependecy error: pkg-config can't find openscenegraph package"; exit 1; fi;
 	@echo "Openscenegraph found:"
 	@echo "  OSG_CXXFLAGS = $(OSG_CXXFLAGS)"
 	@echo "  OSG_LDFLAGS  = $(OSG_LDFLAGS)"
 
 check-dep-bt:
 	@echo "Checking Bullet..."
-	@if [ "$(HAS_BT)" != "1" ]; then echo "Dependecy error: pkg-config can't find bullet package"; exit 1; fi;
+	@if [ "$(HAS_BT)" != "yes" ]; then echo "Dependecy error: pkg-config can't find bullet package"; exit 1; fi;
 	@echo "Bullet found"
 	@echo "  BT_CXXFLAGS = $(BT_CXXFLAGS)"
 	@echo "  BT_LDFLAGS  = $(BT_LDFLAGS)"
+
+check-dep-ode:
+	@echo "Checking ODE..."
+	@if [ "$(HAS_ODE)" != "yes" ]; then echo "Dependecy error: pkg-config can't find ode package"; exit 1; fi;
+	@echo "ODE found"
+	@echo "  ODE_CXXFLAGS = $(ODE_CXXFLAGS)"
+	@echo "  ODE_LDFLAGS  = $(ODE_LDFLAGS)"
 	
-check-dep: check-dep-osg check-dep-bt
+check-dep: check-dep-osg check-dep-bt check-dep-ode
 
 showvars:
 	@echo "SYSTEM = "$(SYSTEM)
-	@if [ "$(CC)" != "" ];   then echo "CC   = "$(CC); fi;
-	@if [ "$(CXX)" != "" ];  then echo "CXX  = "$(CXX); fi;
-	@if [ "$(MOC)" != "" ];  then echo "MOC  = $(MOC)"; fi;
-	@if [ "$(FLEX)" != "" ]; then echo "FLEX = "$(FLEX); fi;
-	@if [ "$(AWK)" != "" ];  then echo "AWK  = "$(AWK); fi;
-	@if [ "$(SED)" != "" ];  then echo "SED  = "$(SED); fi;
-	@if [ "$(CFLAGS)" != "" ];   then echo "CFLAGS   = "$(CFLAGS); fi;
-	@if [ "$(CXXFLAGS)" != "" ]; then echo "CXXFLAGS = "$(CXXFLAGS); fi;
-	@if [ "$(LDFLAGS)" != "" ];  then echo "LDFLAGS  = "$(LDFLAGS); fi;
+	@echo ""
+	@echo "CC      = $(CC)"
+	@echo "CXX     = $(CXX)"
+	@echo "MOC     = $(MOC)"
+	@echo "FLEX    = $(FLEX)"
+	@echo "AWK     = $(AWK)"
+	@echo "SED     = $(SED)"
+	@echo "DOXYGEN = $(DOXYGEN)"
+	@echo "SED     = $(SED)"
+	@echo "DIA     = $(DIA)"
+	@echo ""
+	@echo "DEBUG      = $(DEBUG)"
+	@echo "PROFIL     = $(PROFIL)"
+	@echo "NOWALL     = $(NOWALL)"
+	@echo "NOPEDANTIC = $(NOPEDANTIC)"
+	@echo ""
+	@echo "CFLAGS   = $(CFLAGS)"
+	@echo "CXXFLAGS = $(CXXFLAGS)"
+	@echo "LDFLAGS  = $(LDFLAGS)"
+	@echo ""
+	@echo "HAS_ODE      = $(HAS_ODE)"
 	@echo "ODE_CXXFLAGS = $(ODE_CXXFLAGS)"
 	@echo "ODE_LDFLAGS  = $(ODE_LDFLAGS)"
+	@echo "HAS_BT       = $(HAS_BT)"
 	@echo "BT_CXXFLAGS  = $(BT_CXXFLAGS)"
 	@echo "BT_LDFLAGS   = $(BT_LDFLAGS)"
+	@echo "HAS_OSG      = $(HAS_OSG)"
 	@echo "OSG_CXXFLAGS = $(OSG_CXXFLAGS)"
 	@echo "OSG_LDFLAGS  = $(OSG_LDFLAGS)"
 
