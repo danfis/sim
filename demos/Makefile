@@ -1,30 +1,29 @@
 -include ../Makefile.include
-CXXFLAGS += -I../src $(OSG_CXXFLAGS) $(ODE_CXXFLAGS) $(BT_CXXFLAGS)
-LDFLAGS += $(OSG_LDFLAGS) $(ODE_LDFLAGS) $(BT_LDFLAGS)
+CXXFLAGS += -I../src
+CXXFLAGS_BT = $(CXXFLAGS) $(OSG_CXXFLAGS) $(BT_CXXFLAGS)
+CXXFLAGS_ODE = $(CXXFLAGS) $(OSG_CXXFLAGS) $(ODE_CXXFLAGS)
 
-LIBDEPS = ../src/libsim.a ../src/bullet/libsim-bullet.a \
-          ../src/ode/libsim-ode.a
+LDFLAGS += -L../src -lsim
+LDFLAGS_BT = -L../src/bullet -lsim-bullet $(LDFLAGS) $(OSG_LDFLAGS) $(BT_LDFLAGS)
+LDFLAGS_ODE = -L../src/ode -lsim-ode $(LDFLAGS) $(OSG_LDFLAGS) $(ODE_LDFLAGS)
+
+LIBDEPS_BT = ../src/libsim.a ../src/bullet/libsim-bullet.a
+LIBDEPS_ODE = ../src/libsim.a ../src/ode/libsim-ode.a
 
 
-TARGETS = demo demo2 demo3
+TARGETS = demo_base_bt demo_base_ode
 
 all: $(TARGETS)
 
-demo: demo.o $(LIBDEPS)
-	$(CXX) $(CXXFLAGS) -o $@ $< -L../src/bullet -lsim-bullet -L../src -lsim $(LDFLAGS)
-demo3: demo3.o $(LIBDEPS)
-	$(CXX) $(CXXFLAGS) -o $@ $< -L../src/ode -lsim-ode -L../src -lsim $(LDFLAGS)
+demo_base_bt: demo_base_bt.cpp $(LIBDEPS_BT)
+	$(CXX) $(CXXFLAGS_BT) -o $@ $< $(LDFLAGS_BT)
 
-demo%: demo%.o $(LIBDEPS)
-	$(CXX) $(CXXFLAGS) -o $@ $< -L../src/bullet -lsim-bullet -L../src -lsim $(LDFLAGS)
+demo2: demo2.cpp $(LIBDEPS_BT)
+	$(CXX) $(CXXFLAGS_BT) -o $@ $< $(LDFLAGS_BT)
 
-%.o: %.cpp %.hpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
-%.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+demo_base_ode: demo_base_ode.cpp $(LIBDEPS_ODE)
+	$(CXX) $(CXXFLAGS_ODE) -o $@ $< $(LDFLAGS_ODE)
 
-%.moc: %.hpp
-	$(MOC) -p'.' $< > $@
 
 clean:
 	rm -f *.o *~ *.a

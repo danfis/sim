@@ -7,6 +7,7 @@
 
 #include "sim/bullet/body.hpp"
 #include "sim/bullet/world.hpp"
+#include "sim/bullet/math.hpp"
 #include "sim/msg.hpp"
 
 namespace sim {
@@ -27,8 +28,8 @@ void BodyMotionState::setWorldTransform(const btTransform &world)
 
     pos = _world.getOrigin();
     rot = _world.getRotation();
-    DBG("pos: " << DBGV(Vec3::fromBullet(pos)));
-    _vis->setPosRot(Vec3::fromBullet(pos), Quat::fromBullet(rot));
+    DBG("pos: " << DBGV(vFromBt(pos)));
+    _vis->setPosRot(vFromBt(pos), qFromBt(rot));
 }
 
 Body::Body(World *w)
@@ -56,7 +57,7 @@ void Body::setPos(const Vec3 &v)
 
     _motion_state->getWorldTransform(trans);
 
-    trans.setOrigin(pos.toBullet());
+    trans.setOrigin(vToBt(pos));
     _motion_state->setWorldTransform(trans);
     _body->setWorldTransform(trans);
 }
@@ -66,7 +67,7 @@ void Body::setRot(const Quat &q)
     btTransform trans;
     _motion_state->getWorldTransform(trans);
 
-    trans.setRotation(q.toBullet());
+    trans.setRotation(qToBt(q));
     _motion_state->setWorldTransform(trans);
     _body->setWorldTransform(trans);
 }
@@ -82,7 +83,7 @@ Vec3 Body::pos() const
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
-    return Vec3::fromBullet(trans.getOrigin());
+    return vFromBt(trans.getOrigin());
 }
 
 void Body::rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const
@@ -98,15 +99,15 @@ Quat Body::rot() const
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
-    return Quat::fromBullet(trans.getRotation());
+    return qFromBt(trans.getRotation());
 }
 
 void Body::setPosRot(const Vec3 &v, const Quat &q)
 {
     btTransform trans;
     _motion_state->getWorldTransform(trans);
-    trans.setOrigin(v.toBullet());
-    trans.setRotation(q.toBullet());
+    trans.setOrigin(vToBt(v));
+    trans.setRotation(qToBt(q));
     _motion_state->setWorldTransform(trans);
     _body->setWorldTransform(trans);
 }
@@ -148,7 +149,7 @@ BodyCube::BodyCube(World *world, Scalar w, Scalar mass, VisBody *vis)
 {
     btCollisionShape *shape = new btBoxShape(btVector3(w / 2., w / 2., w / 2.));
 
-    if (!vis)
+    if (vis == SIM_BODY_DEFAULT_VIS)
         vis = new VisBodyCube(w);
 
     _set(vis, shape, mass);
@@ -157,9 +158,9 @@ BodyCube::BodyCube(World *world, Scalar w, Scalar mass, VisBody *vis)
 BodyBox::BodyBox(World *w, Vec3 dim, Scalar mass, VisBody *vis)
     : Body(w)
 {
-    btCollisionShape *shape = new btBoxShape(Vec3::toBullet(dim / 2.));
+    btCollisionShape *shape = new btBoxShape(vToBt(dim / 2.));
 
-    if (!vis)
+    if (vis == SIM_BODY_DEFAULT_VIS)
         vis = new VisBodyBox(dim);
 
     _set(vis, shape, mass);
@@ -170,7 +171,7 @@ BodySphere::BodySphere(World *w, Scalar radius, Scalar mass, VisBody *vis)
 {
     btCollisionShape *shape = new btSphereShape(radius);
 
-    if (!vis)
+    if (vis == SIM_BODY_DEFAULT_VIS)
         vis = new VisBodySphere(radius);
 
     _set(vis, shape, mass);
@@ -181,9 +182,9 @@ BodyCylinder::BodyCylinder(World *w, Scalar radius, Scalar height, Scalar mass,
     : Body(w)
 {
     Vec3 v(radius, radius, height / 2.);
-    btCollisionShape *shape = new btCylinderShape(v.toBullet());
+    btCollisionShape *shape = new btCylinderShape(vToBt(v));
 
-    if (!vis)
+    if (vis == SIM_BODY_DEFAULT_VIS)
         vis = new VisBodyCylinder(radius, height);
 
     _set(vis, shape, mass);
@@ -217,12 +218,12 @@ BodyTriMesh::BodyTriMesh(World *w, const sim::Vec3 *coords, size_t coords_len,
     btTriangleMesh *tris = new btTriangleMesh();
 
     for (size_t i = 0; i < indices_len; i += 3){
-        tris->addTriangle(coords[indices[i]].toBullet(),
-                          coords[indices[i + 1]].toBullet(),
-                          coords[indices[i + 2]].toBullet());
+        tris->addTriangle(vToBt(coords[indices[i]]),
+                          vToBt(coords[indices[i + 1]]),
+                          vToBt(coords[indices[i + 2]]));
     }
 
-    if (!vis)
+    if (vis == SIM_BODY_DEFAULT_VIS)
         vis = new sim::VisBodyTriMesh(coords, coords_len, indices, indices_len);
 
     btBvhTriangleMeshShape *shape = new btBvhTriangleMeshShape(tris, true);
@@ -237,7 +238,7 @@ BodyConvexHull::BodyConvexHull(World *w, const sim::Vec3 *points, size_t points_
 
     shape = new btConvexHullShape();
     for (size_t i = 0; i < points_len; i++){
-        shape->addPoint(points[i].toBullet());
+        shape->addPoint(vToBt(points[i]));
     }
 
     _set(vis, shape, mass);

@@ -1,5 +1,6 @@
 #include "sim/ode/body.hpp"
 #include "sim/ode/world.hpp"
+#include "sim/ode/math.hpp"
 #include "sim/msg.hpp"
 
 namespace sim {
@@ -42,10 +43,7 @@ void Body::setPos(const Vec3 &v)
 void Body::setRot(const Quat &q)
 {
     dQuaternion quat;
-    quat[0] = q.w();
-    quat[1] = q.x();
-    quat[2] = q.y();
-    quat[3] = q.z();
+    qToODE(q, quat);
     dGeomSetQuaternion(_shape, quat);
 }
 
@@ -224,7 +222,7 @@ BodyCylinderX::BodyCylinderX(World *w, Scalar radius, Scalar height, Scalar mass
     : BodyCylinder(w, radius, height, mass, vis)
 {
     dQuaternion quat;
-    Quat(Vec3(0., 1., 0.), M_PI * .5).toODE(quat);
+    qToODE(Quat(Vec3(0., 1., 0.), M_PI * .5), quat);
     dGeomSetQuaternion(_shape, quat);
 }
 
@@ -233,7 +231,7 @@ BodyCylinderY::BodyCylinderY(World *w, Scalar radius, Scalar height, Scalar mass
     : BodyCylinder(w, radius, height, mass, vis)
 {
     dQuaternion quat;
-    Quat(Vec3(1., 0., 0.), M_PI * .5).toODE(quat);
+    qToODE(Quat(Vec3(1., 0., 0.), M_PI * .5), quat);
     dGeomSetQuaternion(_shape, quat);
 }
 

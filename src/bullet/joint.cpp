@@ -4,6 +4,7 @@
 
 #include "sim/bullet/joint.hpp"
 #include "sim/bullet/world.hpp"
+#include "sim/bullet/math.hpp"
 #include "sim/msg.hpp"
 
 namespace sim {
@@ -56,9 +57,9 @@ JointHinge2::JointHinge2(World *w, Body *oA, Body *oB, const Vec3 &anchor, const
 {
     btHinge2Constraint *c;
     btRigidBody *b1, *b2;
-    btVector3 anch = anchor.toBullet();
-    btVector3 a1 = axis1.toBullet();
-    btVector3 a2 = axis2.toBullet();
+    btVector3 anch = vToBt(anchor);
+    btVector3 a1 = vToBt(axis1);
+    btVector3 a2 = vToBt(axis2);
 
     b1 = oA->body();
     b2 = oB->body();
@@ -99,8 +100,8 @@ JointHinge::JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const V
     btHingeConstraint *c;
     btTransform frameInA, frameInB;
     btRigidBody *bA, *bB;
-    btVector3 anch = anchor.toBullet();
-    btVector3 ax = axis.toBullet();
+    btVector3 anch = vToBt(anchor);
+    btVector3 ax = vToBt(axis);
 
     bA = oA->body();
     bB = oB->body();

@@ -6,6 +6,7 @@
 #include <algorithm>
 
 #include "sim/bullet/world.hpp"
+#include "sim/bullet/math.hpp"
 #include "sim/msg.hpp"
 
 namespace sim {
@@ -67,7 +68,7 @@ void World::addJoint(Joint *j)
 
 void World::init()
 {
-    _world->setGravity(_gravity.toBullet());
+    _world->setGravity(vToBt(_gravity));
 }
 
 void World::finish()

@@ -1,10 +1,6 @@
 #ifndef _SIM_MATH_HPP_
 #define _SIM_MATH_HPP_
 
-#include <LinearMath/btVector3.h>
-#include <LinearMath/btQuaternion.h>
-#include <ode/ode.h>
-
 #include <osg/Vec3>
 #include <osg/Quat>
 
@@ -30,16 +26,6 @@ class Vec3 : public osg::Vec3d {
         : osg::Vec3d(x, y, z){}
     Vec3(const osg::Vec3d &v) : osg::Vec3d(v){}
 
-    btVector3 toBullet() const { return btVector3(x(), z(), y()); }
-
-    static btVector3 toBullet(Scalar x, Scalar y, Scalar z)
-        { return btVector3(x, z, y); }
-    static btVector3 toBullet(const Vec3 &v) { return v.toBullet(); }
-
-    static Vec3 fromBullet(const btVector3 &v)
-        { return Vec3(v.x(), v.z(), v.y()); }
-    
-
     osg::Vec3d &toOsg() { return (osg::Vec3d &)*this; }
     const osg::Vec3d &toOsg() const { return (const osg::Vec3d &)*this; }
 };
@@ -52,13 +38,6 @@ class Quat : public osg::Quat {
     Quat(const Vec3 &axis, Scalar angle)
         : osg::Quat(angle, axis) {}
     Quat(const osg::Quat &q) : osg::Quat(q){}
-
-    btQuaternion toBullet() const { return btQuaternion(x(), z(), y(), -w()); }
-    void toODE(dQuaternion q) const
-        { q[0] = w(); q[1] = x(); q[2] = y(); q[3] = z(); }
-
-    static Quat fromBullet(const btQuaternion &q)
-        { return Quat(q.x(), q.z(), q.y(), -q.w()); }
 };
 
 

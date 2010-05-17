@@ -1,4 +1,5 @@
 #include "sim/bullet/actuator.hpp"
+#include "sim/bullet/math.hpp"
 
 namespace sim {
 
@@ -50,12 +51,12 @@ void ActuatorWheelCylinderX::deactivate()
 
 void ActuatorWheelCylinderX::applyTorque(const Vec3 &v)
 {
-    _wheel->body()->applyTorque(v.toBullet());
+    _wheel->body()->applyTorque(vToBt(v));
 }
 
 void ActuatorWheelCylinderX::applyTorqueImpulse(const Vec3 &v)
 {
-    _wheel->body()->applyTorqueImpulse(v.toBullet());
+    _wheel->body()->applyTorqueImpulse(vToBt(v));
 }
 
 

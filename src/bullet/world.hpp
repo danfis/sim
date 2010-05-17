@@ -51,18 +51,18 @@ class World : public sim::World {
 
     bool done();
 
-    sim::Body *createBodyCube(Scalar width, Scalar mass, VisBody *vis = 0);
-    sim::Body *createBodyBox(Vec3 dim, Scalar mass, VisBody *vis = 0);
-    sim::Body *createBodySphere(Scalar radius, Scalar mass, VisBody *vis = 0);
+    sim::Body *createBodyCube(Scalar width, Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS);
+    sim::Body *createBodyBox(Vec3 dim, Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS);
+    sim::Body *createBodySphere(Scalar radius, Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS);
     sim::Body *createBodyCylinderX(Scalar radius, Scalar height, Scalar mass,
-                                   VisBody *vis = 0);
+                                   VisBody *vis = SIM_BODY_DEFAULT_VIS);
     sim::Body *createBodyCylinderY(Scalar radius, Scalar height, Scalar mass,
-                                   VisBody *vis = 0);
+                                   VisBody *vis = SIM_BODY_DEFAULT_VIS);
     sim::Body *createBodyCylinderZ(Scalar radius, Scalar height, Scalar mass,
-                                   VisBody *vis = 0);
+                                   VisBody *vis = SIM_BODY_DEFAULT_VIS);
     sim::Body *createBodyTriMesh(const Vec3 *coords, size_t coords_len,
                                  const unsigned int *indices, size_t indices_len,
-                                 VisBody *vis = 0);
+                                 VisBody *vis = SIM_BODY_DEFAULT_VIS);
 
     sim::Joint *createJointFixed(sim::Body *oA, sim::Body *oB);
     sim::Joint *createJointHinge(sim::Body *A, sim::Body *oB,
