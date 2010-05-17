@@ -13,15 +13,21 @@ class S : public sim::Sim {
     S()
         : Sim()
     {
-        _time_step = sim::Time(0, 10000000);
-        _time_substeps = 3;
-        //_time_step = sim::Time(0, 50000000);
-        //_time_substeps = 1;
+        //_time_step = sim::Time(0, 10000000);
+        //_time_substeps = 3;
+        _time_step = sim::Time(0, 50000000);
+        _time_substeps = 1;
 
         World *w = new World();
         sim::Body *b;
 
         setWorld(w);
+        w->setCFM(1e-10);
+        //w->setERP(0.5);
+        //w->setContactSoftCFM(0.01);
+        //w->setContactApprox1(false);
+        //w->setContactApprox2(false);
+        //w->setContactBounce(0.1, 0.1);
     
         /*
         b = w->createBodyBox(sim::Vec3(20., 20., 1.), 0.);

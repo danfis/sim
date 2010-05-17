@@ -42,7 +42,7 @@ void __collision (void *data, dGeomID o1, dGeomID o2)
     int n = dCollide(o1, o2, N, geoms, sizeof(dContactGeom));
 
     if (n > 0){ 
-        DBG("Collides: " << n << " - " << o1 << " " << o2);
+        //DBG("Collides: " << n << " - " << o1 << " " << o2);
         for (int i=0; i<n; i++){
             // copy default contact setting
             contact[i] = world->_default_contact;
@@ -67,12 +67,17 @@ World::World()
     _space = dHashSpaceCreate(0);
     _coll_contacts = dJointGroupCreate(0);
    
-    // TODO: move to init
+    // set default parameters
+    dWorldSetERP(_world, 0.2);
+    dWorldSetCFM(_world, 1e-5);
     //dWorldSetERP(_world, 0.5);
     //dWorldSetCFM(_world, 0.001);
-    dWorldSetCFM(_world, 1e-5);
     //dWorldSetCFM(_world, 0.01);
    
+    _default_contact.surface.mu = dInfinity;
+    _default_contact.surface.mode = dContactSoftCFM | dContactApprox1_1 | dContactApprox1_2;
+    _default_contact.surface.soft_cfm = 0.0001;
+
     /*
     _default_contact.surface.slip1 = 0.7;
     _default_contact.surface.slip2 = 0.7;
@@ -81,7 +86,6 @@ World::World()
     //_default_contact.surface.mu = dInfinity;
     _default_contact.surface.soft_erp = 0.96;
     _default_contact.surface.soft_cfm = 0.04;
-    */
 
     _default_contact.surface.mode = dContactBounce | dContactSoftCFM;
     _default_contact.surface.mu = dInfinity;
@@ -89,6 +93,7 @@ World::World()
     _default_contact.surface.bounce = 0.1;
     _default_contact.surface.bounce_vel = 0.1;
     _default_contact.surface.soft_cfm = 0.001;
+    */
 }
 
 World::~World()
@@ -99,6 +104,90 @@ World::~World()
         dSpaceDestroy(_space);
     if (_coll_contacts)
         dJointGroupDestroy(_coll_contacts);
+}
+
+void World::_contactEnableMode(int mode)
+{
+    _default_contact.surface.mode |= mode;
+}
+
+void World::_contactDisableMode(int mode)
+{
+    _default_contact.surface.mode &= ~mode;
+}
+
+void World::setERP(double erp)
+{
+    dWorldSetERP(_world, erp);
+}
+
+void World::setCFM(double cfm)
+{
+    dWorldSetCFM(_world, cfm);
+}
+
+void World::setContactMu(double mu)
+{
+    _default_contact.surface.mu = mu;
+}
+
+void World::setContactMu2(double mu)
+{
+    if (mu < 0.){
+        _contactDisableMode(dContactMu2);
+    }else{
+        _contactEnableMode(dContactMu2);
+        _default_contact.surface.mu2 = mu;
+    }
+}
+
+void World::setContactBounce(double restitution, double vel)
+{
+    if (restitution < 0.){
+        _contactDisableMode(dContactBounce);
+    }else{
+        _contactEnableMode(dContactBounce);
+        _default_contact.surface.bounce = restitution;
+        _default_contact.surface.bounce_vel = vel;
+    }
+}
+
+void World::setContactSoftCFM(double cfm)
+{
+    if (cfm < 0.){
+        _contactDisableMode(dContactSoftCFM);
+    }else{
+        _contactEnableMode(dContactSoftCFM);
+        _default_contact.surface.soft_cfm = cfm;
+    }
+}
+
+void World::setContactSoftERP(double erp)
+{
+    if (erp < 0.){
+        _contactDisableMode(dContactSoftERP);
+    }else{
+        _contactEnableMode(dContactSoftERP);
+        _default_contact.surface.soft_erp = erp;
+    }
+}
+
+void World::setContactApprox1(bool yes)
+{
+    if (yes){
+        _contactEnableMode(dContactApprox1_1);
+    }else{
+        _contactDisableMode(dContactApprox1_1);
+    }
+}
+
+void World::setContactApprox2(bool yes)
+{
+    if (yes){
+        _contactEnableMode(dContactApprox1_2);
+    }else{
+        _contactDisableMode(dContactApprox1_2);
+    }
 }
 
 void World::init()
@@ -114,7 +203,7 @@ void World::step(const sim::Time &time, unsigned int substeps)
 {
     Scalar fixed = time.inSF() / (double)substeps;
 
-    DBG(fixed << " " << time);
+    //DBG(fixed << " " << time);
 
     for (size_t i = 0; i < substeps; i++){
         dSpaceCollide(_space, this, __collision);
