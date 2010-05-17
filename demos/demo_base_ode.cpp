@@ -24,7 +24,7 @@ class S : public sim::Sim {
         w->setCFM(1e-10);
         w->setCFM(0.001);
         w->setERP(0.5);
-        //w->setContactSoftCFM(0.01);
+        //w->setContactSoftCFM(0.0000001);
         //w->setContactApprox1(false);
         //w->setContactApprox2(false);
         //w->setContactBounce(0.1, 0.1);
@@ -63,11 +63,11 @@ class S : public sim::Sim {
         createHingeLim();
         createHinge2();
         createHinge2Lim();
-        //createRobot();
+        createRobot();
 
         Vec3 verts[] = { Vec3(-10., 10., -0.5),
                          Vec3(0., 10., -0.8),
-                         Vec3(10., 10., -0.5),
+                         Vec3(10., 10., -0.9),
                          Vec3(-10., 0., 0.5),
                          Vec3(0., 0., 0.),
                          Vec3(20., 0., 0.),
@@ -227,10 +227,9 @@ class S : public sim::Sim {
         b2->activate();
     }
 
-    /*
     void createRobot()
     {
-        sim::Vec3 pos(3., 3., -5.);
+        sim::Vec3 pos(3. + 2., 3., -5.);
         sim::Body *chasis;
         sim::ActuatorWheelCylinderX *w[4];
         size_t i;
@@ -241,13 +240,14 @@ class S : public sim::Sim {
         }
 
         chasis->setPos(pos);
-        w[0]->setPos(pos.x() + 0.405, pos.y() + 0.4, pos.z() - 0.2);
-        w[1]->setPos(pos.x() - 0.405, pos.y() + 0.4, pos.z() - 0.2);
-        w[2]->setPos(pos.x() + 0.405, pos.y() - 0.4, pos.z() - 0.2);
-        w[3]->setPos(pos.x() - 0.405, pos.y() - 0.4, pos.z() - 0.2);
+        w[0]->setPos(pos.x() + 0.415, pos.y() + 0.4, pos.z() - 0.2);
+        w[1]->setPos(pos.x() - 0.415, pos.y() + 0.4, pos.z() - 0.2);
+        w[2]->setPos(pos.x() + 0.415, pos.y() - 0.4, pos.z() - 0.2);
+        w[3]->setPos(pos.x() - 0.415, pos.y() - 0.4, pos.z() - 0.2);
 
         for (i = 0; i < 4; i++){
             w[i]->connectToChasis(chasis);
+            ((ActuatorWheelCylinderX *)w[i])->joint()->setLimitAngAxis1(-0.0001, 0.0001);
         }
 
         chasis->activate();
@@ -257,7 +257,6 @@ class S : public sim::Sim {
 
         chasis->visBody()->setText("Robot", 1., osg::Vec4(0.5, 0.6, 0.3, 1.));
     }
-    */
 };
 
 
