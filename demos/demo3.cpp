@@ -13,10 +13,8 @@ class S : public sim::Sim {
     S()
         : Sim()
     {
-        //_time_step = sim::Time(0, 10000000);
-        //_time_substeps = 3;
-        _time_step = sim::Time(0, 50000000);
-        _time_substeps = 1;
+        setTimeStep(sim::Time::fromMs(50));
+        setTimeSubSteps(1);
 
         World *w = new World();
         sim::Body *b;
@@ -95,24 +93,6 @@ class S : public sim::Sim {
         b->setPos(0., 0., -10);
         b->activate();
         */
-
-        {
-            Vec3 verts[] = { Vec3(-5, -5, 2.5),
-                             Vec3(5, -5, 2.5),
-                             Vec3(5, 5, 2.5),
-                             Vec3(-5, 5, 2.5),
-                             Vec3(0, 0, 0) };
-
-            unsigned int ind[] = { 0, 1, 4,
-                                   1, 2, 4,
-                                   2, 3, 4,
-                                   3, 0, 4 };
-            b = w->createBodyTriMesh(verts, 5, ind, 4 * 3, 0.);
-            b->setPos(0., 0., -10);
-            b->visBody()->setColor(0.9, 0.6, 0.3, 1.);
-            b->activate();
-
-        }
     }
 
     void init()

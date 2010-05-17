@@ -116,9 +116,19 @@ void World::_contactDisableMode(int mode)
     _default_contact.surface.mode &= ~mode;
 }
 
+bool World::_contactEnabledMode(int mode) const
+{
+    return (_default_contact.surface.mode & mode) != 0;
+}
+
 void World::setERP(double erp)
 {
     dWorldSetERP(_world, erp);
+}
+
+double World::erp() const
+{
+    return dWorldGetERP(_world);
 }
 
 void World::setCFM(double cfm)
@@ -126,9 +136,19 @@ void World::setCFM(double cfm)
     dWorldSetCFM(_world, cfm);
 }
 
+double World::cfm() const
+{
+    return dWorldGetCFM(_world);
+}
+
 void World::setContactMu(double mu)
 {
     _default_contact.surface.mu = mu;
+}
+
+double World::contactMu() const
+{
+    return _default_contact.surface.mu;
 }
 
 void World::setContactMu2(double mu)
@@ -139,6 +159,15 @@ void World::setContactMu2(double mu)
         _contactEnableMode(dContactMu2);
         _default_contact.surface.mu2 = mu;
     }
+}
+
+double World::contactMu2() const
+{
+    if (!_contactEnabledMode(dContactMu2)){
+        return -1.;
+    }
+
+    return _default_contact.surface.mu2;
 }
 
 void World::setContactBounce(double restitution, double vel)
@@ -152,6 +181,13 @@ void World::setContactBounce(double restitution, double vel)
     }
 }
 
+bool World::contactBounce(double *rest, double *vel) const
+{
+    *rest = _default_contact.surface.bounce;
+    *vel  = _default_contact.surface.bounce_vel;
+    return _contactEnabledMode(dContactBounce);
+}
+
 void World::setContactSoftCFM(double cfm)
 {
     if (cfm < 0.){
@@ -162,6 +198,15 @@ void World::setContactSoftCFM(double cfm)
     }
 }
 
+double World::contactSoftCFM() const
+{
+    if (!_contactEnabledMode(dContactSoftCFM)){
+        return -1.;
+    }else{
+        return _default_contact.surface.soft_cfm;
+    }
+}
+
 void World::setContactSoftERP(double erp)
 {
     if (erp < 0.){
@@ -169,6 +214,15 @@ void World::setContactSoftERP(double erp)
     }else{
         _contactEnableMode(dContactSoftERP);
         _default_contact.surface.soft_erp = erp;
+    }
+}
+
+double World::contactSoftERP() const
+{
+    if (!_contactEnabledMode(dContactSoftERP)){
+        return -1.;
+    }else{
+        return _default_contact.surface.soft_erp;
     }
 }
 
@@ -187,6 +241,54 @@ void World::setContactApprox2(bool yes)
         _contactEnableMode(dContactApprox1_2);
     }else{
         _contactDisableMode(dContactApprox1_2);
+    }
+}
+
+bool World::contactApprox1() const
+{
+    return _contactEnabledMode(dContactApprox1_1);
+}
+
+bool World::contactApprox2() const
+{
+    return _contactEnabledMode(dContactApprox1_2);
+}
+
+void World::setContactSlip1(double slip)
+{
+    if (slip < 0.){
+        _contactDisableMode(dContactSlip1);
+    }else{
+        _contactEnableMode(dContactSlip1);
+        _default_contact.surface.slip1 = slip;
+    }
+}
+
+void World::setContactSlip2(double slip)
+{
+    if (slip < 0.){
+        _contactDisableMode(dContactSlip2);
+    }else{
+        _contactEnableMode(dContactSlip2);
+        _default_contact.surface.slip2 = slip;
+    }
+}
+
+double World::contactSlip1() const
+{
+    if (!_contactEnabledMode(dContactSlip1)){
+        return -1.;
+    }else{
+        return _default_contact.surface.slip1;
+    }
+}
+
+double World::contactSlip2() const
+{
+    if (!_contactEnabledMode(dContactSlip2)){
+        return -1.;
+    }else{
+        return _default_contact.surface.slip2;
     }
 }
 

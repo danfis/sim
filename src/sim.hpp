@@ -236,6 +236,7 @@ class SimComponentMessageRegistry {
  * Simulator.
  */
 class Sim {
+  protected:
     World *_world;
     VisWorld *_visworld;
 
@@ -258,9 +259,9 @@ class Sim {
     Timer _timer_real;
     Time _time_simulated;
 
-  protected:
     Time _time_step;
     unsigned int _time_substeps;
+
     bool _simulate;
 
   protected:
@@ -282,7 +283,7 @@ class Sim {
     const Time &timeStep() const { return _time_step; }
     unsigned int timeSubSteps() const { return _time_substeps; }
     void setTimeStep(const Time &t) { _time_step = t; }
-    void setTimeSubStep(unsigned int ss) { _time_substeps = ss; }
+    void setTimeSubSteps(unsigned int ss) { _time_substeps = ss; }
 
     virtual void init();
     virtual void step();

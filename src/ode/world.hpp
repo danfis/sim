@@ -58,6 +58,7 @@ class World : public sim::World {
      * See http://www.ode.org/ode-latest-userguide.html#sec_3_7_0
      */
     void setERP(double erp);
+    double erp() const;
 
     /**
      * Sets up Constraint Force Mixing.
@@ -71,6 +72,7 @@ class World : public sim::World {
      * See http://www.ode.org/ode-latest-userguide.html#sec_3_8_0
      */
     void setCFM(double cfm);
+    double cfm() const;
 
     /**
      * Coulomb friction coefficient. This must be in the range 0 to
@@ -84,6 +86,7 @@ class World : public sim::World {
      * and http://www.ode.org/ode-latest-userguide.html#sec_7_3_7
      */
     void setContactMu(double mu);
+    double contactMu() const;
 
     /**
      * Optional Coulomb friction coefficient for friction direction 2
@@ -94,6 +97,7 @@ class World : public sim::World {
      * See http://www.ode.org/ode-latest-userguide.html#sec_7_3_7
      */
     void setContactMu2(double mu);
+    double contactMu2() const;
 
     /**
      * If set, the contact surface is bouncy, in other words the bodies
@@ -109,6 +113,7 @@ class World : public sim::World {
      * See http://www.ode.org/ode-latest-userguide.html#sec_7_3_7
      */
     void setContactBounce(double restitution, double vel);
+    bool contactBounce(double *rest, double *vel) const;
 
     /**
      * The Constraint Force Mixing parameter of the contact normal.
@@ -118,6 +123,7 @@ class World : public sim::World {
      * See http://www.ode.org/ode-latest-userguide.html#sec_7_3_7
      */
     void setContactSoftCFM(double cfm);
+    double contactSoftCFM() const;
 
     /**
      * The Error Reduction Parameter of the contact normal.
@@ -127,6 +133,7 @@ class World : public sim::World {
      * See http://www.ode.org/ode-latest-userguide.html#sec_7_3_7
      */
     void setContactSoftERP(double erp);
+    double contactSoftERP() const;
 
     /**
      * Use the friction pyramid approximation for friction direction 1. If
@@ -139,8 +146,21 @@ class World : public sim::World {
      */
     void setContactApprox1(bool yes = true);
     void setContactApprox2(bool yes = true);
+    bool contactApprox1() const;
+    bool contactApprox2() const;
 
-    // TODO: slip{1,2}, motion{1,2}
+    /**
+     * The coefficients of force-dependent-slip (FDS) for friction
+     * directions 1 and 2.
+     * Disabled by default.
+     * See http://www.ode.org/ode-latest-userguide.html#sec_7_3_7
+     */
+    void setContactSlip1(double slip);
+    void setContactSlip2(double slip);
+    double contactSlip1() const;
+    double contactSlip2() const;
+
+    // TODO: motion{1,2}
     /* \} */
 
 
@@ -201,6 +221,7 @@ class World : public sim::World {
   protected:
     void _contactEnableMode(int mode);
     void _contactDisableMode(int mode);
+    bool _contactEnabledMode(int mode) const;
 };
 
 } /* namespace ode */
