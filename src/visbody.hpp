@@ -78,6 +78,8 @@ class VisBody {
     virtual void setColor(float r, float g, float b, float a)
         { setColor(osg::Vec4(r, g, b, a)); }
 
+    virtual void setTexture(const std::string &fn) {}
+
     virtual void setOsgText(osg::ref_ptr<osgText::TextBase> t);
     virtual void setText(const char *text, float size = 1.,
                          const osg::Vec4 &color = osg::Vec4(0., 0., 0., 1.)) {}
@@ -100,6 +102,7 @@ class VisBodyShape : public VisBody {
   public:
     VisBodyShape() : VisBody() {}
     void setColor(const osg::Vec4 &c);
+    void setTexture(const std::string &fn);
     void setText(const char *text, float size = 1.,
                  const osg::Vec4 &color = osg::Vec4(0., 0., 0., 1.));
 

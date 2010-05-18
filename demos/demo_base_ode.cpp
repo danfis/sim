@@ -49,6 +49,8 @@ class S : public sim::Sim {
         b->activate();
 
         b = w->createBodyCylinderZ(.5, 1., 3.);
+        b->visBody()->setTexture("wood.ppm");
+        b->visBody()->setColor(1., 0., 0., 1.);
         b->setPos(3., 0., 0.);
         b->activate();
 

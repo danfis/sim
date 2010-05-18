@@ -5,6 +5,7 @@
 #include <osgText/Text>
 #include <osgUtil/SmoothingVisitor>
 #include <osg/Material>
+#include <osgDB/ReadFile>
 
 #include "visbody.hpp"
 #include "msg.hpp"
@@ -104,6 +105,27 @@ void VisBodyShape::setColor(const osg::Vec4 &c)
     draw->setColor(c);
 }
 
+void VisBodyShape::setTexture(const std::string &fn)
+{
+    osg::ShapeDrawable *draw;
+    draw = (osg::ShapeDrawable *)((osg::Geode *)_node.get())->getDrawable(0);
+
+    osg::Image *image = osgDB::readImageFile(fn);
+    if (!image){
+        ERR("Could not find texture in file " << fn);
+        return;
+    }
+
+    osg::Texture2D *tex = new osg::Texture2D;
+    tex->setDataVariance(osg::Object::DYNAMIC);
+    tex->setImage(image);
+
+    osg::StateSet *state = draw->getOrCreateStateSet();
+    state->setTextureAttributeAndModes(0, tex, osg::StateAttribute::ON);
+    draw->setStateSet(state);
+
+}
+
 void VisBodyShape::setText(const char *str, float size, const osg::Vec4 &color)
 {
     osg::Drawable *draw;
@@ -185,6 +207,8 @@ VisBodyTriMesh::VisBodyTriMesh(const sim::Vec3 *coords, size_t coords_len,
 
     g->addDrawable(geom);
     _setNode(g);
+
+    VisBodyTriMesh::setColor(osg::Vec4(0.5, 0.5, 0.5, 1.));
 }
 
 void VisBodyTriMesh::setColor(const osg::Vec4 &c)
