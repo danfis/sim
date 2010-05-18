@@ -274,7 +274,12 @@ BodyTriMesh::BodyTriMesh(World *w, const sim::Vec3 *coords, size_t coords_len,
         _setOnlyShape(vis, shape);
     }else{
         dMass m;
-        dMassSetTrimeshTotal(&m, mass, shape);
+        dMassSetTrimeshTotal(&m, 1., shape);
+
+        // When assigning a mass to a rigid body, the center of mass must be
+        // (0,0,0) relative to the body's position!
+        dMassTranslate(&m, -m.c[0], -m.c[1], -m.c[2]);
+
         _set(vis, shape, &m);
     }
 }

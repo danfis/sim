@@ -5,6 +5,8 @@
 #include "sim/sim.hpp"
 #include "msg.hpp"
 
+#include "bunny.hpp"
+
 using namespace sim::ode;
 using sim::Vec3;
 using namespace std;
@@ -65,6 +67,7 @@ class S : public sim::Sim {
         createHinge2Lim();
         createRobot();
         createRobotMove();
+        createBunny();
 
         Vec3 verts[] = { Vec3(-10., 10., -0.5),
                          Vec3(0., 10., -0.8),
@@ -294,6 +297,17 @@ class S : public sim::Sim {
 
         chasis->visBody()->setText("Robot move", 1., osg::Vec4(0.5, 0.6, 0.3, 1.));
     }
+
+    void createBunny()
+    {
+        sim::Body *bunny;
+
+        bunny = world()->createBodyTriMesh(bunny_coords, bunny_coords_len,
+                                           bunny_ids, bunny_ids_len, 20.);
+        bunny->visBody()->setColor(0.4, 0.4, 0.4, 1.);
+        bunny->setRot(sim::Quat(Vec3(1., 0., 0.), M_PI * 0.5));
+        bunny->activate();
+    }
 };
 
 
@@ -305,4 +319,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
