@@ -91,11 +91,11 @@ void Body::activate()
         dBodyEnable(_body);
         dBodySetMovedCallback(_body, bodyMovedCB);
         bodyMovedCB(_body);
-    }else if (visBody()){
+    }else if (visBody() && visBody() != SIM_BODY_DEFAULT_VIS){
         visBody()->setPosRot(pos(), rot());
     }
 
-    if (_vis && _world->visWorld()){
+    if (visBody() && visBody() != SIM_BODY_DEFAULT_VIS && _world->visWorld()){
         _world->visWorld()->addBody(visBody());
     }
 }

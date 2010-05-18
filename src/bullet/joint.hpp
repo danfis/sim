@@ -57,14 +57,11 @@ class JointFixed : public Joint {
  * For more info see:
  *  http://opende.sourceforge.net/wiki/index.php/Manual_(All)#Hinge-2
  */
-class JointHinge2 : public Joint, sim::JointHinge2 {
+class JointHinge2 : public Joint {
   public:
     JointHinge2(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis1, const Vec3 &axis2);
 
-    void setLimitLinAxis1(Scalar from, Scalar to);
-    void setLimitLinAxis2(Scalar from, Scalar to);
-    void setLimitAngAxis1(Scalar from, Scalar to);
-    void setLimitAngAxis2(Scalar from, Scalar to);
+    virtual bool setParamLimitLoHi(double lo, double hi);
 };
 
 /**

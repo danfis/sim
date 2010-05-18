@@ -36,7 +36,6 @@ class Joint : public sim::Joint {
      */
     virtual void deactivate();
 
-    // TODO: param vel, bounce, ...
   protected:
     void _setJoint(dJointID j);
 };
@@ -61,7 +60,14 @@ class JointHinge2 : public Joint {
   public:
     JointHinge2(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis1, const Vec3 &axis2);
 
-    void setLimitAngAxis1(Scalar from, Scalar to);
+    virtual bool setParamLimitLoHi(double lo, double hi);
+    virtual void paramLimitLoHi(double *lo, double *hi) const;
+    virtual bool setParamVel2(double vel);
+    virtual double paramVel2() const;
+    virtual bool setParamFMax2(double fmax);
+    virtual double paramFMax2() const;
+    virtual bool setParamBounce(double restitution);
+    virtual double paramBounce() const;
 };
 
 /**
@@ -73,7 +79,14 @@ class JointHinge : public Joint {
   public:
     JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis);
 
-    void setLimitAngAxis(Scalar from, Scalar to);
+    virtual bool setParamLimitLoHi(double lo, double hi);
+    virtual void paramLimitLoHi(double *lo, double *hi) const;
+    virtual bool setParamVel(double vel);
+    virtual double paramVel() const;
+    virtual bool setParamFMax(double fmax);
+    virtual double paramFMax() const;
+    virtual bool setParamBounce(double restitution);
+    virtual double paramBounce() const;
 };
 
 } /* namespace ode */

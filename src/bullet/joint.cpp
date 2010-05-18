@@ -68,6 +68,14 @@ JointHinge2::JointHinge2(World *w, Body *oA, Body *oB, const Vec3 &anchor, const
     _setJoint(c);
 }
 
+bool JointHinge2::setParamLimitLoHi(double lo, double hi)
+{
+    btHinge2Constraint *j = (btHinge2Constraint *)_joint;
+    j->setLimit(5, lo, hi);
+    return true;
+}
+
+/*
 void JointHinge2::setLimitLinAxis1(Scalar from, Scalar to)
 {
     btHinge2Constraint *j = (btHinge2Constraint *)_joint;
@@ -82,8 +90,6 @@ void JointHinge2::setLimitLinAxis2(Scalar from, Scalar to)
 
 void JointHinge2::setLimitAngAxis1(Scalar from, Scalar to)
 {
-    btHinge2Constraint *j = (btHinge2Constraint *)_joint;
-    j->setLimit(5, from, to);
 }
 
 void JointHinge2::setLimitAngAxis2(Scalar from, Scalar to)
@@ -91,6 +97,7 @@ void JointHinge2::setLimitAngAxis2(Scalar from, Scalar to)
     btHinge2Constraint *j = (btHinge2Constraint *)_joint;
     j->setLimit(3, from, to);
 }
+*/
 
 
 

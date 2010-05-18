@@ -151,7 +151,6 @@ class BodyTriMesh : public Body {
                 Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS);
 };
 
-
 } /* namespace ode */
 
 } /* namespace sim */

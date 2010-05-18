@@ -54,8 +54,9 @@ HAS_ODE ?= no
 HAS_BT  ?= no
 HAS_OSG ?= no
 WANT_ODE ?= yes
-WANT_BT  ?= yes
 WANT_OSG ?= yes
+# Disable Bullet for now
+WANT_BT  ?= no
 
 # Try to find ODE
 ifeq '$(WANT_ODE)' 'yes'

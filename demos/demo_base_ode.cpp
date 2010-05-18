@@ -14,15 +14,15 @@ class S : public sim::Sim {
     S()
         : Sim()
     {
-        setTimeStep(sim::Time::fromMs(50));
-        setTimeSubSteps(1);
+        setTimeStep(sim::Time::fromMs(25));
+        setTimeSubSteps(2);
 
         World *w = new World();
         sim::Body *b;
 
         setWorld(w);
         w->setCFM(1e-10);
-        w->setCFM(0.001);
+        w->setCFM(0.01);
         w->setERP(0.5);
         //w->setContactSoftCFM(0.0000001);
         //w->setContactApprox1(false);
@@ -37,7 +37,7 @@ class S : public sim::Sim {
 
         b = w->createBodySphere(1.3, 2.);
         b->visBody()->setColor(osg::Vec4(0.5, 0.1, 0.8, 0.3));
-        b->setPos(-3., 0., 0.);
+        b->setPos(-3., 0., -3.);
         b->activate();
 
 
@@ -64,6 +64,7 @@ class S : public sim::Sim {
         createHinge2();
         createHinge2Lim();
         createRobot();
+        createRobotMove();
 
         Vec3 verts[] = { Vec3(-10., 10., -0.5),
                          Vec3(0., 10., -0.8),
@@ -162,7 +163,7 @@ class S : public sim::Sim {
         cy->setPos(pos + sim::Vec3(0., 0., 2.));
 
         j = world()->createJointHinge(cu, cy, pos + sim::Vec3(0., 0., 1.), sim::Vec3(0., 1., 0.));
-        ((JointHinge *)j)->setLimitAngAxis(-M_PI / 2., 0.);
+        ((JointHinge *)j)->setParamLimitLoHi(-M_PI / 2., 0.);
 
         cu->activate();
         cy->activate();
@@ -211,7 +212,7 @@ class S : public sim::Sim {
         j = world()->createJointHinge2(b, s, pos + Vec3(0., 0., 1.),
                                        Vec3(0., 0., 1.), Vec3(1., 0., 0.));
 
-        ((JointHinge2 *)j)->setLimitAngAxis1(-M_PI / 4., M_PI / 4.);
+        ((JointHinge2 *)j)->setParamLimitLoHi(-M_PI / 4., M_PI / 4.);
 
         b->activate();
         s->activate();
@@ -247,7 +248,7 @@ class S : public sim::Sim {
 
         for (i = 0; i < 4; i++){
             w[i]->connectToChasis(chasis);
-            ((ActuatorWheelCylinderX *)w[i])->joint()->setLimitAngAxis1(-0.0001, 0.0001);
+            ((ActuatorWheelCylinderX *)w[i])->joint()->setParamLimitLoHi(-0.0001, 0.0001);
         }
 
         chasis->activate();
@@ -256,6 +257,42 @@ class S : public sim::Sim {
         }
 
         chasis->visBody()->setText("Robot", 1., osg::Vec4(0.5, 0.6, 0.3, 1.));
+    }
+
+    void createRobotMove()
+    {
+        sim::Vec3 pos(10., -10., -4.9);
+        sim::Body *chasis;
+        sim::ActuatorWheelCylinderX *w[4];
+        size_t i;
+
+        chasis = world()->createBodyBox(sim::Vec3(.6, 1., 0.4), 1.);
+        for (i = 0; i < 4; i++){
+            w[i] = world()->createActuatorWheelCylinderX(0.2, 0.2, 1.);
+        }
+
+        chasis->setPos(pos);
+        w[0]->setPos(pos.x() + 0.415, pos.y() + 0.4, pos.z() - 0.2);
+        w[1]->setPos(pos.x() - 0.415, pos.y() + 0.4, pos.z() - 0.2);
+        w[2]->setPos(pos.x() + 0.415, pos.y() - 0.4, pos.z() - 0.2);
+        w[3]->setPos(pos.x() - 0.415, pos.y() - 0.4, pos.z() - 0.2);
+
+        for (i = 0; i < 4; i++){
+            w[i]->connectToChasis(chasis);
+            ((ActuatorWheelCylinderX *)w[i])->joint()->setParamLimitLoHi(-0.0001, 0.0001);
+        }
+
+        ((ActuatorWheelCylinderX *)w[0])->joint()->setParamVel2(5.);
+        ((ActuatorWheelCylinderX *)w[0])->joint()->setParamFMax2(10.);
+        ((ActuatorWheelCylinderX *)w[1])->joint()->setParamVel2(5.);
+        ((ActuatorWheelCylinderX *)w[1])->joint()->setParamFMax2(10.);
+
+        chasis->activate();
+        for (i = 0; i < 4; i++){
+            w[i]->activate();
+        }
+
+        chasis->visBody()->setText("Robot move", 1., osg::Vec4(0.5, 0.6, 0.3, 1.));
     }
 };
 
