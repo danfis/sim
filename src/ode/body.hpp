@@ -22,6 +22,8 @@ class Body : public sim::Body {
     dBodyID _body;
     dGeomID _shape;
 
+    void (*_move_cb)(dBodyID);
+
   public:
     Body(World *w);
     virtual ~Body();
@@ -37,35 +39,6 @@ class Body : public sim::Body {
 
     /* \{ */
     /**
-     * Set position of body in 3D space.
-     */
-    virtual void setPos(const Vec3 &v);
-
-    /**
-     * Set rotation of body in 3D space.
-     */
-    virtual void setRot(const Quat &q);
-
-    /**
-     * Set position and rotation of body at once.
-     */
-    virtual void setPosRot(const Vec3 &v, const Quat &q);
-
-    /**
-     * Returns position of body.
-     */
-    virtual Vec3 pos() const;
-    virtual void pos(Scalar *x, Scalar *y, Scalar *z) const;
-
-    /**
-     * Returns rotation of body.
-     */
-    virtual Quat rot() const;
-    virtual void rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const;
-    /* \} */
-
-    /* \{ */
-    /**
      * Activates body in world - world will realize this body.
      */
     virtual void activate();
@@ -76,6 +49,14 @@ class Body : public sim::Body {
     virtual void deactivate();
     /* \} */
   protected:
+    virtual void _applyPosRot();
+    virtual void _enableShape();
+    virtual void _enableBody();
+    virtual void _enableVisBody();
+    virtual void _disableShape();
+    virtual void _disableBody();
+    virtual void _disableVisBody();
+
     void _set(VisBody *vis, dGeomID shape, dMass *mass);
     void _setOnlyShape(VisBody *vis, dGeomID shape);
 };
@@ -98,7 +79,7 @@ class BodyCube : public Body {
  */
 class BodyBox : public Body {
   public:
-    BodyBox(World *w, Vec3 dim, Scalar mass,
+    BodyBox(World *w, const Vec3 &dim, Scalar mass,
             VisBody *vis = SIM_BODY_DEFAULT_VIS);
 };
 
@@ -149,6 +130,106 @@ class BodyTriMesh : public Body {
     BodyTriMesh(World *w, const sim::Vec3 *coords, size_t coords_len,
                 const unsigned int *indices, size_t indices_len,
                 Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS);
+};
+
+
+class BodyCompound : public Body {
+  protected:
+    struct shape_t {
+        dGeomID shape;
+        VisBody *vis;
+        Vec3 pos;
+        Quat rot;
+        shape_t(dGeomID s, VisBody *v, const Vec3 &pos, const Quat &rot)
+            : shape(s), vis(v), pos(pos), rot(rot) {}
+    };
+    typedef std::map<int, shape_t *> _shapes_t;
+    typedef _shapes_t::iterator _shapes_it_t;
+    typedef _shapes_t::const_iterator _shapes_cit_t;
+
+    _shapes_t _shapes;
+    int _next_id;
+
+    dMass _mass;
+
+  public:
+    BodyCompound(World *w);
+    virtual ~BodyCompound();
+
+    /* \{ */
+    /**
+     * Adds cube to compound shape.
+     * Visual representation can be provided.
+     * Parameters pos_offset and rot_offset define relative offset of shape
+     * from origin (0., 0., 0.).
+     * Returns ID of shape that can be used lately for modifications.
+     */
+    int addCube(Scalar width,
+                VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                const Quat &rot_offset = Quat(0., 0., 0., 1.));
+    int addBox(const Vec3 &dim,
+               VisBody *vis = SIM_BODY_DEFAULT_VIS,
+               const Vec3 &pos_offset = Vec3(0., 0., 0.),
+               const Quat &rot_offset = Quat(0., 0., 0., 1.));
+    int addSphere(Scalar radius,
+                  VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                  const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                  const Quat &rot_offset = Quat(0., 0., 0., 1.));
+    int addCylinderZ(Scalar radius, Scalar height,
+                     VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                     const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                     const Quat &rot_offset = Quat(0., 0., 0., 1.));
+    int addCylinderY(Scalar radius, Scalar height,
+                     VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                     const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                     const Quat &rot_offset = Quat(0., 0., 0., 1.));
+    int addCylinderX(Scalar radius, Scalar height,
+                     VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                     const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                     const Quat &rot_offset = Quat(0., 0., 0., 1.));
+    int addTriMesh(const sim::Vec3 *coords, size_t coords_len,
+                   const unsigned int *indices, size_t indices_len,
+                   VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                   const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                   const Quat &rot_offset = Quat(0., 0., 0., 1.));
+    /* \} */
+
+    /* \{ */
+    void setMassCube(Scalar width, Scalar mass);
+    void setMassBox(const Vec3 &dim, Scalar mass);
+    void setMassSphere(Scalar radius, Scalar mass);
+    void setMassCylinder(Scalar radius, Scalar height, Scalar mass);
+    /* \} */
+
+    /**
+     * Removes shape with ID that was returned by add.. method.
+     */
+    void rmShape(int ID);
+
+    /**
+     * Returns pointer to VisBody of shape with specified ID.
+     */
+    VisBody *visBody(int ID);
+    const VisBody *visBody(int ID) const;
+
+    void activate();
+
+    void _applyGeomsToVis();
+
+  protected:
+    shape_t *_aShape();
+    const shape_t *_aShape() const;
+    int _addShape(dGeomID shape, VisBody *vis, const Vec3 &pos, const Quat &rot);
+
+    shape_t *shape(int ID);
+    const shape_t *shape(int ID) const;
+
+    void _applyPosRot();
+    void _enableShape();
+    void _enableVisBody();
+    void _disableShape();
+    void _disableVisBody();
 };
 
 } /* namespace ode */
