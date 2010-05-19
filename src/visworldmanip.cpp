@@ -97,9 +97,6 @@ bool VisWorldManip::handle(const GUIEventAdapter& ea,GUIActionAdapter& us)
 
     if (ea.getHandled()) return false;
 
-    if (ea.getModKeyMask() != 0)
-        return false;
-
     switch(ea.getEventType())
     {
         case(GUIEventAdapter::PUSH):
