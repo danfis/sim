@@ -2,6 +2,7 @@
 #include "sim/ode/world.hpp"
 #include "sim/ode/math.hpp"
 #include "sim/msg.hpp"
+#include "sim/common.hpp"
 
 namespace sim {
 
@@ -9,15 +10,20 @@ namespace ode {
 
 static void bodyMovedCB(dBodyID body)
 {
+    const dReal *pos;
+    const dReal *rot;
     Body *b = (Body *)dBodyGetData(body);
     VisBody *vb = b->visBody();
 
-    if (vb){
-        Vec3 pos = b->pos();
-        Quat rot = b->rot();
-        vb->setPosRot(pos, rot);
+    pos = dBodyGetPosition(body);
+    rot = dBodyGetQuaternion(body);
+    b->setPos(pos[0], pos[1], pos[2]);
+    b->setRot(rot[1], rot[2], rot[3], rot[0]);
 
-        //DBG(b << " " << DBGV(pos));
+    DBG(body << " " << DBGV(b->pos()));
+
+    if (vb){
+        vb->setPosRot(b->pos(), b->rot());
     }
 }
 
@@ -35,76 +41,72 @@ Body::~Body()
         dGeomDestroy(_shape);
 }
 
-void Body::setPos(const Vec3 &v)
-{
-    dGeomSetPosition(_shape, v.x(), v.y(), v.z());
-}
 
-void Body::setRot(const Quat &q)
-{
-    dQuaternion quat;
-    qToODE(q, quat);
-    dGeomSetQuaternion(_shape, quat);
-}
-
-void Body::pos(Scalar *x, Scalar *y, Scalar *z) const
-{
-    const dReal *pos;
-    pos = dGeomGetPosition(_shape);
-    *x = pos[0];
-    *y = pos[1];
-    *z = pos[2];
-}
-Vec3 Body::pos() const
-{
-    const dReal *pos;
-    pos = dGeomGetPosition(_shape);
-    return Vec3(pos[0], pos[1], pos[2]);
-}
-
-void Body::rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const
+void Body::_applyPosRot()
 {
     dQuaternion q;
-    dGeomGetQuaternion(_shape, q);
-    *x = q[1];
-    *y = q[2];
-    *z = q[3];
-    *w = q[0];
+    qToODE(rot(), q);
+
+    dGeomSetPosition(_shape, pos().x(), pos().y(), pos().z());
+    dGeomSetQuaternion(_shape, q);
 }
 
-Quat Body::rot() const
+void Body::_enableShape()
 {
-    dQuaternion q;
-    dGeomGetQuaternion(_shape, q);
-    return Quat(q[1], q[2], q[3], q[0]);
+    dGeomEnable(_shape);
 }
 
-void Body::setPosRot(const Vec3 &v, const Quat &q)
-{
-    setPos(v);
-    setRot(q);
-}
-
-void Body::activate()
+void Body::_enableBody()
 {
     if (_body){
         dBodyEnable(_body);
         dBodySetMovedCallback(_body, bodyMovedCB);
-        bodyMovedCB(_body);
-    }else if (visBody() && visBody() != SIM_BODY_DEFAULT_VIS){
-        visBody()->setPosRot(pos(), rot());
-    }
-
-    if (visBody() && visBody() != SIM_BODY_DEFAULT_VIS && _world->visWorld()){
-        _world->visWorld()->addBody(visBody());
     }
 }
 
-void Body::deactivate()
+void Body::_enableVisBody()
+{
+    VisBody *vis = visBody();
+    VisWorld *vw = world()->visWorld();
+
+    if (!vis || vis == SIM_BODY_DEFAULT_VIS || !vw)
+        return;
+
+    vis->setPosRot(pos(), rot());
+    vw->addBody(vis);
+}
+
+void Body::_disableShape()
+{
+    dGeomDisable(_shape);
+}
+
+void Body::_disableBody()
 {
     if (_body){
         dBodyDisable(_body);
     }
+}
+
+void Body::_disableVisBody()
+{
+    // TODO
+}
+
+void Body::activate()
+{
+    DBG(_body);
+    _applyPosRot();
+    _enableShape();
+    _enableBody();
+    _enableVisBody();
+}
+
+void Body::deactivate()
+{
+    _disableVisBody();
+    _disableBody();
+    _disableShape();
 }
 
 void Body::_set(VisBody *vis, dGeomID shape, dMass *mass)
@@ -122,8 +124,9 @@ void Body::_set(VisBody *vis, dGeomID shape, dMass *mass)
     // set body's mass
     dBodySetMass(_body, mass);
 
-    // disable body
+    // disable body and shape
     dBodyDisable(_body);
+    dGeomDisable(_shape);
 
     // assign reference to this class
     dBodySetData(_body, this);
@@ -135,6 +138,9 @@ void Body::_setOnlyShape(VisBody *vis, dGeomID shape)
     setVisBody(vis);
 
     _shape = shape;
+
+    // disable shape
+    dGeomDisable(_shape);
 
     // assign reference to this class
     dGeomSetData(_shape, this);
@@ -159,7 +165,7 @@ BodyCube::BodyCube(World *world, Scalar w, Scalar mass, VisBody *vis)
     }
 }
 
-BodyBox::BodyBox(World *w, Vec3 dim, Scalar mass, VisBody *vis)
+BodyBox::BodyBox(World *w, const Vec3 &dim, Scalar mass, VisBody *vis)
     : Body(w)
 {
     dGeomID shape;
@@ -221,18 +227,14 @@ BodyCylinderX::BodyCylinderX(World *w, Scalar radius, Scalar height, Scalar mass
                              VisBody *vis)
     : BodyCylinder(w, radius, height, mass, vis)
 {
-    dQuaternion quat;
-    qToODE(Quat(Vec3(0., 1., 0.), M_PI * .5), quat);
-    dGeomSetQuaternion(_shape, quat);
+    setRot(Quat(Vec3(0., 1., 0.), M_PI * .5));
 }
 
 BodyCylinderY::BodyCylinderY(World *w, Scalar radius, Scalar height, Scalar mass,
                              VisBody *vis)
     : BodyCylinder(w, radius, height, mass, vis)
 {
-    dQuaternion quat;
-    qToODE(Quat(Vec3(1., 0., 0.), M_PI * .5), quat);
-    dGeomSetQuaternion(_shape, quat);
+    setRot(Quat(Vec3(1., 0., 0.), M_PI * .5));
 }
 
 BodyTriMesh::BodyTriMesh(World *w, const sim::Vec3 *coords, size_t coords_len,

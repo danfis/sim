@@ -20,6 +20,12 @@ Joint::~Joint()
 
 void Joint::activate()
 {
+    Body *a, *b;
+
+    a = (Body *)objA();
+    b = (Body *)objB();
+
+    dJointAttach(_joint, a->body(), b->body());
     dJointEnable(_joint);
 }
 
@@ -30,15 +36,7 @@ void Joint::deactivate()
 
 void Joint::_setJoint(dJointID j)
 {
-    Body *a, *b;
-
-    a = (Body *)objA();
-    b = (Body *)objB();
-
-    DBG(_joint << " " << a->body() << " " << b->body());
-
     _joint = j;
-    dJointAttach(_joint, a->body(), b->body());
 
     dJointDisable(_joint);
     dJointSetData(_joint, this);
@@ -62,17 +60,22 @@ void JointFixed::activate()
 
 
 JointHinge2::JointHinge2(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis1, const Vec3 &axis2)
-    : Joint(w, oA, oB)
+    : Joint(w, oA, oB), _anchor(anchor), _axis1(axis1), _axis2(axis2)
 {
     dJointID joint;
 
     joint = dJointCreateHinge2(w->world(), 0);
 
     _setJoint(joint);
+}
 
-    dJointSetHinge2Anchor(joint, anchor.x(), anchor.y(), anchor.z());
-    dJointSetHinge2Axis1(joint, axis1.x(), axis1.y(), axis1.z());
-    dJointSetHinge2Axis2(joint, axis2.x(), axis2.y(), axis2.z());
+void JointHinge2::activate()
+{
+    Joint::activate();
+
+    dJointSetHinge2Anchor(_joint, _anchor.x(), _anchor.y(), _anchor.z());
+    dJointSetHinge2Axis1(_joint, _axis1.x(), _axis1.y(), _axis1.z());
+    dJointSetHinge2Axis2(_joint, _axis2.x(), _axis2.y(), _axis2.z());
 }
 
 bool JointHinge2::setParamLimitLoHi(double lo, double hi)
@@ -124,16 +127,21 @@ double JointHinge2::paramBounce() const
 
 
 JointHinge::JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis)
-    : Joint(w, oA, oB)
+    : Joint(w, oA, oB), _anchor(anchor), _axis(axis)
 {
     dJointID joint;
 
     joint = dJointCreateHinge(w->world(), 0);
 
     _setJoint(joint);
+}
 
-    dJointSetHingeAnchor(joint, anchor.x(), anchor.y(), anchor.z());
-    dJointSetHingeAxis(joint, axis.x(), axis.y(), axis.z());
+void JointHinge::activate()
+{
+    Joint::activate();
+
+    dJointSetHingeAnchor(_joint, _anchor.x(), _anchor.y(), _anchor.z());
+    dJointSetHingeAxis(_joint, _axis.x(), _axis.y(), _axis.z());
 }
 
 bool JointHinge::setParamLimitLoHi(double lo, double hi)

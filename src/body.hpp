@@ -35,6 +35,9 @@ class Body {
 
     VisBody *_vis;
 
+    Vec3 _pos;
+    Quat _rot;
+
   public:
     Body();
     virtual ~Body();
@@ -43,36 +46,38 @@ class Body {
     /**
      * Returns position of body.
      */
-    virtual Vec3 pos() const = 0;
-    virtual void pos(Scalar *x, Scalar *y, Scalar *z) const = 0;
+    const Vec3 &pos() const { return _pos; }
+    void pos(Scalar *x, Scalar *y, Scalar *z) const
+        { *x = _pos.x(); *y = _pos.y(); *z = _pos.z(); }
 
     /**
      * Returns rotation of body.
      */
-    virtual Quat rot() const = 0;
-    virtual void rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const = 0;
+    const Quat &rot() const { return _rot; }
+    void rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const
+        { *x = _rot.x(); *y = _rot.y(); *z = _rot.z(); *w = _rot.w(); }
 
     /**
      * Set position of body in 3D space.
      */
-    virtual void setPos(const Vec3 &v) = 0;
-    virtual void setPos(const Vec3 *v) { setPos(*v); }
-    virtual void setPos(const Scalar x, const Scalar y, const Scalar z)
+    void setPos(const Vec3 &v) { _pos = v; }
+    void setPos(const Vec3 *v) { setPos(*v); }
+    void setPos(const Scalar x, const Scalar y, const Scalar z)
         { setPos(Vec3(x, y, z)); }
 
     /**
      * Set rotation of body in 3D space.
      */
-    virtual void setRot(const Quat &q) = 0;
-    virtual void setRot(const Quat *q) { setRot(*q); }
-    virtual void setRot(const Scalar x, const Scalar y, const Scalar z, const Scalar w)
+    void setRot(const Quat &q) { _rot = q; }
+    void setRot(const Quat *q) { setRot(*q); }
+    void setRot(const Scalar x, const Scalar y, const Scalar z, const Scalar w)
         { setRot(Quat(x, y, z, w)); }
 
     /**
      * Set position and rotation of body at once.
      */
-    virtual void setPosRot(const Vec3 &v, const Quat &q) = 0;
-    virtual void setPosRot(const Vec3 *v, const Quat *q) { setPosRot(*v, *q); }
+    void setPosRot(const Vec3 &v, const Quat &q) { _pos = v; _rot = q; }
+    void setPosRot(const Vec3 *v, const Quat *q) { setPosRot(*v, *q); }
     /* \} */
 
     /* \{ */

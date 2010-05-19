@@ -37,35 +37,6 @@ class Body : public sim::Body {
 
     /* \{ */
     /**
-     * Set position of body in 3D space.
-     */
-    virtual void setPos(const Vec3 &v);
-
-    /**
-     * Set rotation of body in 3D space.
-     */
-    virtual void setRot(const Quat &q);
-
-    /**
-     * Set position and rotation of body at once.
-     */
-    virtual void setPosRot(const Vec3 &v, const Quat &q);
-
-    /**
-     * Returns position of body.
-     */
-    virtual Vec3 pos() const;
-    virtual void pos(Scalar *x, Scalar *y, Scalar *z) const;
-
-    /**
-     * Returns rotation of body.
-     */
-    virtual Quat rot() const;
-    virtual void rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const;
-    /* \} */
-
-    /* \{ */
-    /**
      * Activates body in world - world will realize this body.
      */
     virtual void activate();
@@ -76,6 +47,14 @@ class Body : public sim::Body {
     virtual void deactivate();
     /* \} */
   protected:
+    virtual void _applyPosRot();
+    virtual void _enableShape();
+    virtual void _enableBody();
+    virtual void _enableVisBody();
+    virtual void _disableShape();
+    virtual void _disableBody();
+    virtual void _disableVisBody();
+
     void _set(VisBody *vis, dGeomID shape, dMass *mass);
     void _setOnlyShape(VisBody *vis, dGeomID shape);
 };
@@ -98,7 +77,7 @@ class BodyCube : public Body {
  */
 class BodyBox : public Body {
   public:
-    BodyBox(World *w, Vec3 dim, Scalar mass,
+    BodyBox(World *w, const Vec3 &dim, Scalar mass,
             VisBody *vis = SIM_BODY_DEFAULT_VIS);
 };
 
