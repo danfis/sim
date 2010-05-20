@@ -13,6 +13,9 @@ namespace ode {
 // Forward declaration
 class World;
 
+void bodyMovedCB(dBodyID body);
+void bodyMovedCBCompound(dBodyID body);
+
 /**
  * Class representing physical body.
  */
@@ -152,6 +155,8 @@ class BodyCompound : public Body {
 
     dMass _mass;
 
+    friend void bodyMovedCBCompound(dBodyID);
+
   public:
     BodyCompound(World *w);
     virtual ~BodyCompound();
@@ -215,8 +220,6 @@ class BodyCompound : public Body {
 
     void activate();
 
-    void _applyGeomsToVis();
-
   protected:
     shape_t *_aShape();
     const shape_t *_aShape() const;
@@ -225,6 +228,7 @@ class BodyCompound : public Body {
     shape_t *shape(int ID);
     const shape_t *shape(int ID) const;
 
+    void _applyGeomsToVis();
     void _applyPosRot();
     void _enableShape();
     void _enableVisBody();

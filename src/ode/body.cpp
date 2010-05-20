@@ -44,7 +44,7 @@ static dGeomID geomBuildTriMesh(const Vec3 *coords, size_t coords_len,
     return shape;
 }
 
-static void bodyMovedCB(dBodyID body)
+void bodyMovedCB(dBodyID body)
 {
     const dReal *pos;
     const dReal *rot;
@@ -63,7 +63,7 @@ static void bodyMovedCB(dBodyID body)
     }
 }
 
-static void bodyMovedCBCompound(dBodyID body)
+void bodyMovedCBCompound(dBodyID body)
 {
     const dReal *pos;
     const dReal *rot;
@@ -74,10 +74,7 @@ static void bodyMovedCBCompound(dBodyID body)
     b->setPos(pos[0], pos[1], pos[2]);
     b->setRot(rot[1], rot[2], rot[3], rot[0]);
 
-    DBG(body << " " << DBGV(b->pos()));
-
-    // TODO: Calirify this. It should be better to have this function as
-    // friend of BodyCompound and call it as protected method
+    //DBG(body << " " << DBGV(b->pos()));
     b->_applyGeomsToVis();
 }
 
