@@ -14,7 +14,7 @@ sim-design.png: sim-design.dia
 	rm -f sim-design.svg
 
 doc:
-	rm -rf doxy
+	rm -rf doxy/html
 	$(DOXYGEN)
 	./open-inheritance.py doxy/html/*.html
 
