@@ -579,6 +579,7 @@ void BodyCompound::_enableShape()
 {
     for_each(_shapes_it_t, _shapes){
         dGeomEnable(it->second->shape);
+        dGeomSetData(it->second->shape, this);
     }
 }
 

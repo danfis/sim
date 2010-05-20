@@ -153,7 +153,7 @@ namespace sim {
  * See \ref man_message for more info.
  */
 class Message {
-    SIM_MESSAGE_INIT2(1, 0)
+    SIM_MESSAGE_INIT2(0, 0)
 
   public:
     enum Priority {
@@ -185,6 +185,18 @@ class Message {
      */
     template <typename To>
     static To *cast(Message *msg) { return dynamic_cast<To *>(msg); }
+};
+
+class MessageKeyPressed : public Message {
+    SIM_MESSAGE_INIT2(0, 1)
+
+  private:
+    int _key;
+
+  public:
+    MessageKeyPressed(int key) : Message(), _key(key) {}
+
+    int key() const { return _key; }
 };
 
 

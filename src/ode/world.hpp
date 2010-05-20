@@ -218,6 +218,7 @@ class World : public sim::World {
     sim::Body *createBodyTriMesh(const Vec3 *coords, size_t coords_len,
                                  const unsigned int *indices, size_t indices_len,
                                  Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS);
+    sim::Body *createBodyCompound();
 
     sim::Joint *createJointFixed(sim::Body *oA, sim::Body *oB);
     sim::Joint *createJointHinge(sim::Body *A, sim::Body *oB,

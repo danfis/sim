@@ -361,6 +361,9 @@ class Sim {
     void toggleSimulation() { _simulate = !_simulate; }
 
   protected:
+    void _initComponents();
+    void _finishComponents();
+
     /**
      * Returns true if Component was added.
      */

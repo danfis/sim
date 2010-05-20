@@ -70,6 +70,8 @@ class World {
                                     const unsigned int *indices, size_t indices_len,
                                     Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS)
         { return 0; }
+    virtual Body *createBodyCompound()
+        { return 0; }
 
     virtual Joint *createJointFixed(Body *oA, Body *oB) { return 0; }
     virtual Joint *createJointHinge(Body *A, Body *oB,

@@ -216,7 +216,7 @@ void Sim::init()
         _visworld->viewer()->addEventHandler(new SimKeyboard(this));
     }
 
-
+    _initComponents();
 
     std::cerr << "Real time / Simulated time: " << std::endl;
 }
@@ -255,12 +255,15 @@ bool Sim::done()
         return _visworld->done();
     if (_world)
         return _world->done();
+
     return false;
 }
 
 void Sim::finish()
 {
     std::cerr << std::endl;
+
+    _finishComponents();
 
     if (_world)
         _world->finish();
@@ -286,6 +289,8 @@ bool Sim::pressedKey(int key)
             _visworld->toggleWireframe();
     }else if (key == 'p'){
         toggleSimulation();
+    }else{
+        sendMessage(new MessageKeyPressed(key));
     }
 
     return false;
@@ -296,7 +301,6 @@ void Sim::addComponent(Component *c)
 {
     if (!_hasComponent(c)){
         _cs.push_back(c);
-        c->init(this);
     }
 }
 
@@ -362,6 +366,21 @@ void Sim::regMessage(Component *c, unsigned long msg_type)
 void Sim::unregMessage(Component *c, unsigned long msg_type)
 {
     _reg.unregComponent(c, msg_type);
+}
+
+
+void Sim::_initComponents()
+{
+    for_each(std::list<Component *>::iterator, _cs){
+        (*it)->init(this);
+    }
+}
+
+void Sim::_finishComponents()
+{
+    for_each(std::list<Component *>::iterator, _cs){
+        (*it)->finish();
+    }
 }
 
 

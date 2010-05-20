@@ -15,12 +15,17 @@ void __collision (void *data, dGeomID o1, dGeomID o2)
     b1 = (Body *)dGeomGetData(o1);
     b2 = (Body *)dGeomGetData(o2);
 
+    //DBG(b1 << " " << b2);
     if (b1 && b2){
+        if (b1 == b2)
+            return;
+        //DBG(b1->collInfo().dont_collide_id << " " << b1->collInfo().dont_collide_id);
         if (b1->collInfo().dont_collide_id == b2->collInfo().dont_collide_id
                 && b1->collInfo().dont_collide_id != 0){
             return;
         }
     }
+    //DBG(b1 << " " << b2);
 
     if (dGeomIsSpace(o1) || dGeomIsSpace(o2)){
         dSpaceCollide2(o1, o2, data, &__collision);
@@ -391,6 +396,11 @@ sim::Body *World::createBodyTriMesh(const Vec3 *coords, size_t coords_len,
                                     Scalar mass, VisBody *vis)
 {
     return new BodyTriMesh(this, coords, coords_len, indices, indices_len, mass, vis);
+}
+
+sim::Body *World::createBodyCompound()
+{
+    return new BodyCompound(this);
 }
 
 sim::Joint *World::createJointFixed(sim::Body *oA, sim::Body *oB)
