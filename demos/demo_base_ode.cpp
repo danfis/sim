@@ -27,6 +27,7 @@ class S : public sim::Sim {
         w->setCFM(1e-10);
         w->setCFM(0.01);
         w->setERP(0.5);
+        w->setAutoDisable(0.01, 0.01, 5, 0.);
         //w->setContactSoftCFM(0.0000001);
         //w->setContactApprox1(false);
         //w->setContactApprox2(false);

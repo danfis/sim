@@ -292,6 +292,21 @@ double World::contactSlip2() const
     }
 }
 
+void World::setAutoDisable(Scalar linear_treshold, Scalar angular_treshold,
+                           int steps, Scalar time)
+{
+    dWorldSetAutoDisableFlag(_world, 1);
+    dWorldSetAutoDisableLinearThreshold(_world, linear_treshold);
+    dWorldSetAutoDisableAngularThreshold(_world, angular_treshold);
+    dWorldSetAutoDisableSteps(_world, steps);
+    dWorldSetAutoDisableTime(_world, time);
+}
+
+void World::resetAutoDisable()
+{
+    dWorldSetAutoDisableFlag(_world, 0);
+}
+
 void World::init()
 {
     dWorldSetGravity(_world, _gravity.x(), _gravity.y(), _gravity.z());

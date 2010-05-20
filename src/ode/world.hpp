@@ -158,6 +158,18 @@ class World : public sim::World {
     double contactSlip2() const;
 
     // TODO: motion{1,2}
+
+
+    /**
+     * Enables auto disabling newly created bodies. A body is disabled it
+     * has been idle for given number of simulation steps _and_ it has been
+     * idle for a given amount of simulation time.
+     * A body is considered to be idle when the magnitudes of both its
+     * linear velocity and angular velocity are below given thresholds.
+     */
+    void setAutoDisable(Scalar linear_treshold = 0.01, Scalar angular_treshold = 0.01,
+                        int steps = 10, Scalar time = 0);
+    void resetAutoDisable();
     /* \} */
 
 
