@@ -1,11 +1,11 @@
 -include ../Makefile.local
 -include ../Makefile.include
 
-TARGETS = doxy sim-design.png
+TARGETS = doxy/html sim-design.png
 
 all: $(TARGETS)
 
-doxy: Doxyfile
+doxy/html: Doxyfile
 	$(MAKE) doc
 	
 sim-design.png: sim-design.dia
