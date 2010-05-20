@@ -19,12 +19,20 @@ void __collision (void *data, dGeomID o1, dGeomID o2);
  * Physical representation world.
  */
 class World : public sim::World {
+  public:
+    enum StepType {
+        STEP_TYPE_NORMAL,
+        STEP_TYPE_QUICK
+    };
+
   protected:
     dWorldID _world;
     dSpaceID _space;
     dJointGroupID _coll_contacts;
 
     dContact _default_contact; /*! default setting of contact */
+
+    StepType _step_type;
 
 
     friend void __collision(void *, dGeomID, dGeomID);
@@ -39,6 +47,14 @@ class World : public sim::World {
     const dSpaceID space() const { return _space; }
 
     /* \{ */
+    /**
+     * Using this method can be changed which type of step will be used.
+     * dWorldStep() or dWorldQuickStep().
+     * See http://opende.sourceforge.net/wiki/index.php/Manual_(All)#Stepping_Functions
+     */
+    void setStepType(StepType type);
+    void setQuickStepIterations(int num);
+
     /**
      * Sets up Error Reduction Parameter.
      * Value should be between 0 and 1.

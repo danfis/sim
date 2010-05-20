@@ -17,7 +17,7 @@ class S : public sim::Sim {
     S()
         : Sim()
     {
-        setTimeStep(sim::Time::fromMs(25));
+        setTimeStep(sim::Time::fromMs(20));
         setTimeSubSteps(2);
 
         World *w = new World();
@@ -27,6 +27,7 @@ class S : public sim::Sim {
         w->setCFM(1e-10);
         w->setCFM(0.01);
         w->setERP(0.5);
+        w->setStepType(World::STEP_TYPE_QUICK);
         w->setAutoDisable(0.01, 0.01, 5, 0.);
         //w->setContactSoftCFM(0.0000001);
         //w->setContactApprox1(false);

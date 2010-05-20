@@ -59,7 +59,7 @@ void __collision (void *data, dGeomID o1, dGeomID o2)
 
 
 World::World()
-    : sim::World()
+    : sim::World(), _step_type(STEP_TYPE_NORMAL)
 {
     dInitODE2(0);
 
@@ -104,6 +104,8 @@ World::~World()
         dSpaceDestroy(_space);
     if (_coll_contacts)
         dJointGroupDestroy(_coll_contacts);
+
+    dCloseODE();
 }
 
 void World::_contactEnableMode(int mode)
@@ -119,6 +121,16 @@ void World::_contactDisableMode(int mode)
 bool World::_contactEnabledMode(int mode) const
 {
     return (_default_contact.surface.mode & mode) != 0;
+}
+
+void World::setStepType(StepType type)
+{
+    _step_type = type;
+}
+
+void World::setQuickStepIterations(int num)
+{
+    dWorldSetQuickStepNumIterations(_world, num);
 }
 
 void World::setERP(double erp)
@@ -324,8 +336,13 @@ void World::step(const sim::Time &time, unsigned int substeps)
 
     for (size_t i = 0; i < substeps; i++){
         dSpaceCollide(_space, this, __collision);
-        dWorldStep(_world, fixed);
-        //dWorldStepFast1(_world, fixed, 5);
+
+        if (_step_type == STEP_TYPE_NORMAL){
+            dWorldStep(_world, fixed);
+        }else if (_step_type == STEP_TYPE_QUICK){
+            dWorldQuickStep(_world, fixed);
+        }
+
         dJointGroupEmpty(_coll_contacts);
     }
 }
@@ -334,38 +351,6 @@ bool World::done()
 {
     return false;
 }
-
-
-
-/*
-void World::addBody(Body *obj)
-{
-    // TODO
-    btRigidBody *body;
-    VisBody *vobj;
-
-    body = obj->body();
-    if (body)
-        _world->addRigidBody(body);
-
-    vobj = obj->visBody();
-    if (vobj && visWorld())
-        visWorld()->addBody(vobj);
-}
-
-void World::addJoint(Joint *j)
-{
-    // TODO
-    btTypedConstraint *c = j->joint();
-
-    DBG(c);
-    if (c)
-        _world->addConstraint(c);
-}
-*/
-
-
-
 
 
 
