@@ -11,6 +11,7 @@ LDFLAGS_ODE = -L../src/ode -lsim-ode $(LDFLAGS) $(OSG_LDFLAGS) $(ODE_LDFLAGS)
 LIBDEPS_BT = ../src/libsim.a ../src/bullet/libsim-bullet.a
 LIBDEPS_ODE = ../src/libsim.a ../src/ode/libsim-ode.a
 
+OBJS_SYROTEK = demo_syrotek.cpp robot_syrotek.cpp
 
 TARGETS =
 
@@ -20,6 +21,7 @@ endif
 
 ifeq '$(WANT_ODE)' 'yes'
   TARGETS += demo_base_ode
+  TARGETS += demo_syrotek
 endif
 
 all: $(TARGETS)
@@ -32,6 +34,9 @@ demo2: demo2.cpp $(LIBDEPS_BT)
 
 demo_base_ode: demo_base_ode.cpp $(LIBDEPS_ODE)
 	$(CXX) $(CXXFLAGS_ODE) -o $@ $< $(LDFLAGS_ODE)
+
+demo_syrotek: $(OBJS_SYROTEK) $(LIBDEPS_ODE)
+	$(CXX) $(CXXFLAGS_ODE) -o $@ $(OBJS_SYROTEK) $(LDFLAGS_ODE)
 
 
 clean:
