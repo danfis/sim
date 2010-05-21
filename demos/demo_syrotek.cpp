@@ -23,9 +23,13 @@ class S : public sim::Sim {
         setWorld(w);
 
         w->setCFM(0.0001);
-        w->setERP(0.5);
+        w->setERP(0.8);
         //w->setStepType(World::STEP_TYPE_QUICK);
         w->setAutoDisable(0.01, 0.01, 5, 0.);
+
+        w->setContactApprox1(true);
+        w->setContactApprox2(true);
+        w->setContactBounce(0.1, 0.1);
 
         createArena();
         createRobot();
@@ -72,6 +76,18 @@ class S : public sim::Sim {
         c->visBody(id)->setColor(0., .1, .8, 1.);
         c->visBody(id)->setTexture("wood.ppm");
         c->activate();
+
+        {
+            sim::Body *b;
+
+            b = w->createBodyCube(0.1, 0.1);
+            b->setPos(0., 0., 1.);
+            b->activate();
+
+            b = w->createBodySphere(0.1, 0.1);
+            b->setPos(0.35, 0.4, .5);
+            b->activate();
+        }
     }
 
     void createRobot()
@@ -81,11 +97,6 @@ class S : public sim::Sim {
         comp = new RobotSyrotekComp();
 
         addComponent(comp);
-
-        sim::Body *b;
-        b = ((sim::ode::World *)world())->createBodyCube(0.1, 0.1);
-        b->setPos(0., 0., 1.);
-        b->activate();
     }
 
 };
