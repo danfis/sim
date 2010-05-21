@@ -10,6 +10,7 @@
 #include "msg.hpp"
 //#include "meshes/ardrone.h"
 #include "meshes/jezek.h"
+#include "meshes/plane.h"
 
 
 int counter = 0;
@@ -417,6 +418,7 @@ class SimTestFormace : public sim::Sim {
         createRobot();
 		//createArdrone();
 		createJezek();
+		createPlane();
 
     }
 
@@ -556,7 +558,7 @@ class SimTestFormace : public sim::Sim {
 
     void createRobot()
     {
-        sim::Vec3 pos(3. + 2., 3., -5.);
+        sim::Vec3 pos(3. + 2., 3., 2.5);
         sim::Body *chasis;
         sim::ActuatorWheelCylinderX *w[4];
         size_t i;
@@ -653,9 +655,18 @@ class SimTestFormace : public sim::Sim {
         sim::Body *obj;
 
         obj = world()->createBodyTriMesh(jezek_verts,jezek_verts_len,jezek_ids,jezek_ids_len,0.2);
-		obj->setPos(0,1,7);
+		obj->setPos(2,4,2);
         obj->visBody()->setColor(0.4, 1, 0.4, 1.);
-//        bunny->setRot(sim::Quat(Vec3(1., 0., 0.), M_PI * 0.5));
+        obj->activate();
+    }
+	
+	void createPlane()
+    {
+        sim::Body *obj;
+
+        obj = world()->createBodyTriMesh(plane10_verts,plane10_verts_len,plane10_ids,plane10_ids_len,0);
+		obj->setPos(0,0,0);
+        obj->visBody()->setColor(0.4, 1, 0.4, 1.);
         obj->activate();
     }
 	
