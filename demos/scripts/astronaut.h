@@ -1,7 +1,8 @@
 #ifndef ASTRONAUT_H
 #define ASTRONAUT_H
 
-Vec3 verts[] = {
+#include <sim/math.hpp>
+static sim::Vec3 astro_verts[] = {
 Vec4(-3.429805,-2.251866,12.190057),
 Vec4(-3.429805,-2.251866,-0.370832),
 Vec4(-3.916210,-2.251866,-0.370832),
@@ -297,7 +298,7 @@ Vec4(-3.447977,0.681940,-0.375831),
 Vec4(-3.934382,0.195535,-0.375831),
 Vec4(-3.934382,0.681940,-0.375831)};
 
-unsigned int ind[] = {
+unsigned int astro_ids[] = {
  0,1,2,
 3,4,5
 6,7,8,
@@ -593,4 +594,5 @@ unsigned int ind[] = {
 3,4,5
 6,7,8};
 
+const size_t astro_ids_len = sizeof(astro_ids/sizeof(unsigned int));
 #endif

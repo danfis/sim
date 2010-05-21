@@ -22,6 +22,7 @@ endif
 ifeq '$(WANT_ODE)' 'yes'
   TARGETS += demo_base_ode
   TARGETS += demo_syrotek
+  TARGETS += main
 endif
 
 all: $(TARGETS)
@@ -31,6 +32,9 @@ demo_base_bt: demo_base_bt.cpp $(LIBDEPS_BT)
 
 demo2: demo2.cpp $(LIBDEPS_BT)
 	$(CXX) $(CXXFLAGS_BT) -o $@ $< $(LDFLAGS_BT)
+
+main: main.cpp $(LIBDEPS_ODE)
+	$(CXX) $(CXXFLAGS_ODE) -o $@ $< $(LDFLAGS_ODE)
 
 demo_base_ode: demo_base_ode.cpp $(LIBDEPS_ODE)
 	$(CXX) $(CXXFLAGS_ODE) -o $@ $< $(LDFLAGS_ODE)
