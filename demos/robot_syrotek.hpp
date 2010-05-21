@@ -13,7 +13,7 @@ class RobotSyrotek {
     sim::ode::BodyCompound *_chasis;
     sim::Body *_wheel[2], *_ball[2];
     sim::ode::JointFixed *_jball[2];
-    sim::ode::JointHinge2 *_jwheel[2];
+    sim::ode::JointHinge *_jwheel[2];
 
     sim::Scalar _vel[2];
 

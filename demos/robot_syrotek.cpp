@@ -150,17 +150,17 @@ RobotSyrotek::RobotSyrotek(sim::World *w, const Vec3 &pos)
         _jball[0] = (sim::ode::JointFixed *)_world->createJointFixed(_chasis, _ball[0]);
         _jball[1] = (sim::ode::JointFixed *)_world->createJointFixed(_chasis, _ball[1]);
 
-        _jwheel[0] = (sim::ode::JointHinge2 *)
-                        _world->createJointHinge2(_chasis, _wheel[0], _wheel[0]->pos(),
-                                                  Vec3(0., 0., 1.), Vec3(0., -1., 0.));
-        _jwheel[1] = (sim::ode::JointHinge2 *)
-                        _world->createJointHinge2(_chasis, _wheel[1], _wheel[1]->pos(),
-                                                  Vec3(0., 0., 1.), Vec3(0., -1., 0.));
+        _jwheel[0] = (sim::ode::JointHinge *)
+                        _world->createJointHinge(_chasis, _wheel[0], _wheel[0]->pos(),
+                                                 Vec3(0., -1., 0.));
+        _jwheel[1] = (sim::ode::JointHinge *)
+                        _world->createJointHinge(_chasis, _wheel[1], _wheel[1]->pos(),
+                                                 Vec3(0., -1., 0.));
 
-        _jwheel[0]->setParamLimitLoHi(-0.0001, 0.0001);
-        _jwheel[1]->setParamLimitLoHi(-0.0001, 0.0001);
-        _jwheel[0]->setParamFMax2(100.);
-        _jwheel[1]->setParamFMax2(100.);
+        //_jwheel[0]->setParamLimitLoHi(-0.0001, 0.0001);
+        //_jwheel[1]->setParamLimitLoHi(-0.0001, 0.0001);
+        _jwheel[0]->setParamFMax(100.);
+        _jwheel[1]->setParamFMax(100.);
 }
 
 void RobotSyrotek::activate()
@@ -179,13 +179,13 @@ void RobotSyrotek::activate()
 void RobotSyrotek::addVelLeft(Scalar d)
 {
     _vel[0] += d;
-    _jwheel[0]->setParamVel2(_vel[0]);
+    _jwheel[0]->setParamVel(_vel[0]);
 }
 
 void RobotSyrotek::addVelRight(Scalar d)
 {
     _vel[1] += d;
-    _jwheel[1]->setParamVel2(_vel[1]);
+    _jwheel[1]->setParamVel(_vel[1]);
 }
 
 
