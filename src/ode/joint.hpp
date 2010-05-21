@@ -38,6 +38,16 @@ class Joint : public sim::Joint {
 
   protected:
     void _setJoint(dJointID j);
+
+    /**
+     * Enables joint and connected bodies.
+     */
+    void _enable();
+
+    /**
+     * Returns true if joint is enabled.
+     */
+    bool _enabled() const;
 };
 
 /**

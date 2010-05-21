@@ -159,9 +159,7 @@ RobotSyrotek::RobotSyrotek(sim::World *w, const Vec3 &pos)
 
         _jwheel[0]->setParamLimitLoHi(-0.0001, 0.0001);
         _jwheel[1]->setParamLimitLoHi(-0.0001, 0.0001);
-        //_jwheel[0]->setParamVel2(1.1);
         _jwheel[0]->setParamFMax2(100.);
-        //_jwheel[1]->setParamVel2(1.1);
         _jwheel[1]->setParamFMax2(100.);
 }
 
@@ -182,22 +180,12 @@ void RobotSyrotek::addVelLeft(Scalar d)
 {
     _vel[0] += d;
     _jwheel[0]->setParamVel2(_vel[0]);
-
-    if (!dBodyIsEnabled(((sim::ode::Body *)_wheel[0])->body())){
-        // FIXME: This must be solved trough API!!!
-        dBodyEnable(((sim::ode::Body *)_wheel[0])->body());
-    }
 }
 
 void RobotSyrotek::addVelRight(Scalar d)
 {
     _vel[1] += d;
     _jwheel[1]->setParamVel2(_vel[1]);
-
-    if (!dBodyIsEnabled(((sim::ode::Body *)_wheel[1])->body())){
-        // FIXME: This must be solved trough API!!!
-        dBodyEnable(((sim::ode::Body *)_wheel[1])->body());
-    }
 }
 
 
@@ -217,7 +205,6 @@ void RobotSyrotekComp::init(sim::Sim *sim)
 {
     Vec3 pos(0., 0., 0.08);
 
-    DBG("");
     _sim = sim;
     _robot = new RobotSyrotek(sim->world(), pos);
     _robot->activate();
@@ -235,7 +222,7 @@ void RobotSyrotekComp::processMessage(const sim::Message &_msg)
         const sim::MessageKeyPressed &msg = (const sim::MessageKeyPressed &)_msg;
         int key = msg.key();
 
-        DBG("Component: " << this << " - key pressed: " << msg.key());
+        //DBG("Component: " << this << " - key pressed: " << msg.key());
 
         if (key == 'a'){
             _robot->addVelLeft(0.1);

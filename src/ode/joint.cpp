@@ -26,13 +26,33 @@ void Joint::activate()
     b = (Body *)objB();
 
     dJointAttach(_joint, a->body(), b->body());
-    dJointEnable(_joint);
+
+    _enable();
 }
 
 void Joint::deactivate()
 {
     dJointDisable(_joint);
 }
+
+void Joint::_enable()
+{
+    dBodyID b;
+
+    dJointEnable(_joint);
+
+    for (size_t i = 0; i < 2; i++){
+        b = dJointGetBody(_joint, 0);
+        if (b)
+            dBodyEnable(b);
+    }
+}
+
+bool Joint::_enabled() const
+{
+    return dJointIsEnabled(_joint);
+}
+
 
 void Joint::_setJoint(dJointID j)
 {
@@ -94,6 +114,12 @@ void JointHinge2::paramLimitLoHi(double *lo, double *hi) const
 bool JointHinge2::setParamVel2(double vel)
 {
     dJointSetHinge2Param(_joint, dParamVel2, vel);
+
+    // if velocity is non-zero enable connected bodies
+    if (_enabled() && !isZero(vel)){
+        _enable();
+    }
+
     return true;
 }
 
@@ -160,6 +186,12 @@ void JointHinge::paramLimitLoHi(double *lo, double *hi) const
 bool JointHinge::setParamVel(double vel)
 {
     dJointSetHingeParam(_joint, dParamVel, vel);
+
+    // if velocity is non-zero enable connected bodies
+    if (_enabled() && !isZero(vel)){
+        _enable();
+    }
+
     return true;
 }
 
