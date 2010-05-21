@@ -5,6 +5,7 @@
 #include <sim/component.hpp>
 #include <sim/ode/body.hpp>
 #include <sim/ode/joint.hpp>
+#include <SDL/SDL.h>
 
 class RobotSyrotek {
     sim::World *_world;
@@ -34,12 +35,17 @@ class RobotSyrotekComp : public sim::Component {
 
     RobotSyrotek *_robot;
 
+    sim::Time _joystick_delay, _joystick_last;
+    SDL_Joystick *_joystick;
+
   public:
     RobotSyrotekComp();
     ~RobotSyrotekComp();
 
     void init(sim::Sim *sim);
     void finish();
+
+    void cbPreStep();
     void processMessage(const sim::Message &msg);
 };
 

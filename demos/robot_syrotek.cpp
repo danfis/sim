@@ -119,7 +119,7 @@ RobotSyrotek::RobotSyrotek(sim::World *w, const Vec3 &pos)
         id = _chasis->addTriMesh(verts, SIZE(verts), ids, SIZE(ids));
         _chasis->visBody(id)->setColor(0., 0.1, 0.7, .6);
         _chasis->setPos(_pos);
-        _chasis->setMassBox(Vec3(0.15, 0.15, 0.18), 1.);
+        _chasis->setMassBox(Vec3(0.15, 0.15, 0.18), 2.);
         _chasis->collSetDontCollideId(robot_coll_id);
         //DBG("chasis: " << _chasis);
 
@@ -191,14 +191,55 @@ void RobotSyrotek::addVelRight(Scalar d)
 
 
 RobotSyrotekComp::RobotSyrotekComp()
-    : sim::Component(), _sim(0), _robot(0)
+    : sim::Component(), _sim(0), _robot(0),
+      _joystick(0)
 {
+    int initialized = false;
+
+    if (SDL_WasInit(SDL_INIT_JOYSTICK) == 0){
+        if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0){
+            ERR("Can't initialize Joystick!");
+        }else{
+            initialized = true;
+        }
+    }else{
+        initialized = true;
+    }
+
+    if (initialized){
+        _joystick_delay = sim::Time(0, 100000000UL);
+        _joystick_last = sim::Time::cur();
+
+        _joystick = SDL_JoystickOpen(0);
+        SDL_JoystickEventState(SDL_IGNORE);
+
+#ifndef NDEBUG
+        {
+            DBG("Joystick:");
+            int num;
+            num = SDL_NumJoysticks();
+            DBG("  " << num << " joysticks found");
+            for (int i = 0; i < num; i++){
+                DBG("    " << i << ": " << SDL_JoystickName(i));
+            }
+            DBG("  Num axes: " << SDL_JoystickNumAxes(_joystick));
+            DBG("  Num buttons: " << SDL_JoystickNumButtons(_joystick));
+            DBG("  Num hats: " << SDL_JoystickNumHats(_joystick));
+            DBG("  Num balls: " << SDL_JoystickNumBalls(_joystick));
+        }
+#endif /* NDEBUG */
+    }
 }
 
 RobotSyrotekComp::~RobotSyrotekComp()
 {
     if (_robot)
         delete _robot;
+
+    if (_joystick){
+        SDL_JoystickClose(_joystick);
+        SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+    }
 }
 
 void RobotSyrotekComp::init(sim::Sim *sim)
@@ -209,11 +250,40 @@ void RobotSyrotekComp::init(sim::Sim *sim)
     _robot = new RobotSyrotek(sim->world(), pos);
     _robot->activate();
 
+    if (_joystick)
+        sim->regPreStep(this);
+
     sim->regMessage(this, sim::MessageKeyPressed::Type);
 }
 
 void RobotSyrotekComp::finish()
 {
+}
+
+void RobotSyrotekComp::cbPreStep()
+{
+    if (!_joystick)
+        return;
+
+    if (sim::Time::diff(_joystick_last, sim::Time::cur()) < _joystick_delay)
+        return;
+
+    _joystick_last = sim::Time::cur();
+
+    SDL_JoystickUpdate();
+
+    if (SDL_JoystickGetButton(_joystick, 6)){
+        _robot->addVelLeft(-0.1);
+    }else if (SDL_JoystickGetButton(_joystick, 4)){
+        _robot->addVelLeft(0.1);
+    }
+
+    if (SDL_JoystickGetButton(_joystick, 7)){
+        _robot->addVelRight(-0.1);
+    }else if (SDL_JoystickGetButton(_joystick, 5)){
+        _robot->addVelRight(0.1);
+    }
+    DBG("Velocity: " << _robot->velLeft() << " " << _robot->velRight());
 }
 
 void RobotSyrotekComp::processMessage(const sim::Message &_msg)
