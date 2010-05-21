@@ -30,6 +30,7 @@ class VisWorld {
     osg::ref_ptr<osg::Group> _bodies;
     osg::ref_ptr<osg::Group> _lights;
     bool _window; /*!< Show a window? */
+	bool axisDrawn;
 
   public:
     VisWorld();
@@ -78,9 +79,15 @@ class VisWorld {
 
     void toggleWireframe();
 
+	void toggleAlpha();
+
+	void toggleAxis();
+
   protected:
     void _setUpStateSet();
     void _setUpLights();
+
+
 };
 
 }

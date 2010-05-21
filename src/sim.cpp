@@ -293,7 +293,15 @@ bool Sim::pressedKey(int key)
     if (key == 'w'){
         if (_visworld)
             _visworld->toggleWireframe();
-    }else if (key == 'p'){
+	} else if (key == 'a') {
+		if (_visworld) {
+			_visworld->toggleAlpha();
+		}
+	} else if (key == 'x') {
+		if (_visworld) {
+			_visworld->toggleAxis();
+		}
+	} else if (key == 'p'){
         toggleSimulation();
     }else{
         sendMessage(new MessageKeyPressed(key));

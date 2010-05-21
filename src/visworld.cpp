@@ -4,6 +4,7 @@
 #include <osgViewer/Renderer>
 #include <string.h>
 #include <stdio.h>
+#include <osg/AlphaFunc>
 
 #include "visworld.hpp"
 #include "visworldmanip.hpp"
@@ -37,6 +38,8 @@ VisWorld::VisWorld()
 
     _setUpStateSet();
     _setUpLights();
+
+	axisDrawn = false;
 }
 
 VisWorld::~VisWorld()
@@ -201,5 +204,55 @@ void VisWorld::toggleWireframe()
         pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
     }
 }
+
+
+void VisWorld::toggleAlpha()
+{
+	if (_state_set->getMode(GL_BLEND) == osg::StateAttribute::ON) {
+		_state_set->setMode(GL_BLEND,osg::StateAttribute::OFF);
+	} else {
+		_state_set->setMode(GL_BLEND,osg::StateAttribute::ON);
+	}
+}
+
+void VisWorld::toggleAxis() {
+
+	const double axisHeight = 10;
+	const double axisRadius = 0.1;
+	if (!axisDrawn) {
+
+		// axis z
+		VisBody *b = new VisBodyCylinder(axisRadius,axisHeight);
+		b->setColor(osg::Vec4(0,0,1,1));
+		b->setPos(0,0,axisHeight/2);		
+		this->addBody(b);
+
+		// axis x
+		b = new VisBodyCylinder(axisRadius,axisHeight);
+		b->setColor(osg::Vec4(1,0,0,1));
+		b->setPos(axisHeight/2,0,0);
+		osg::Quat q(M_PI/2,osg::Vec3(0,1,0));
+		b->setRot(q);
+		this->addBody(b);
+
+		// axis y
+		b = new VisBodyCylinder(axisRadius,axisHeight);
+		b->setColor(osg::Vec4(0,1,0,1));
+		b->setPos(0,axisHeight/2,0);
+		b->setRot(osg::Quat(M_PI/2,osg::Vec3(1,0,0)));
+//		b->setRot(q);
+		this->addBody(b);
+
+		axisDrawn = true;
+
+	} else {
+
+		axisDrawn = false;
+	}
+
+
+}
+
+
 
 }
