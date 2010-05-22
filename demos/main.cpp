@@ -364,6 +364,19 @@ void testSim(const int argc, char **argv, const int id) {
 }
 
 
+void printTree(osg::Node *node) {
+	cerr << "Name=" << node->getName() << "\n";
+	osg::Group *group = node->asGroup();
+	if (group) {
+		for(int i=0;i<group->getNumChildren();i++) {
+			cerr << " Children: \n";
+			printTree(group->getChild(i));
+			cerr << "EOCH\n";
+		}
+	}
+
+}
+
 
 
 
@@ -419,6 +432,8 @@ class SimTestFormace : public sim::Sim {
 		//createArdrone();
 		createJezek();
 		createPlane();
+
+		printTree(_visworld->sceneRoot());
 
     }
 
