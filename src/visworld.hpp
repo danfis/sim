@@ -20,6 +20,10 @@ class VisWorld {
     bool _window; /*!< Show a window? */
 
   public:
+    osg::ref_ptr<osg::Group> _r;
+    osg::ref_ptr<osg::Camera> _cam;
+    osg::ref_ptr<osg::Image> _image;
+  public:
     VisWorld();
     virtual ~VisWorld();
 
@@ -31,6 +35,7 @@ class VisWorld {
     /**
      * Returns root of scene graph.
      */
+    //osg::Node *sceneRoot() { return _root; }
     osg::Node *sceneRoot() { return _root; }
 
     /**

@@ -157,9 +157,9 @@ RobotSyrotek::RobotSyrotek(sim::World *w, const Vec3 &pos)
                         _world->createJointHinge(_chasis, _wheel[1], _wheel[1]->pos(),
                                                  Vec3(0., -1., 0.));
 
-        //_jwheel[0]->setParamLimitLoHi(-0.0001, 0.0001);
-        //_jwheel[1]->setParamLimitLoHi(-0.0001, 0.0001);
+        _jwheel[0]->setParamVel(0.);
         _jwheel[0]->setParamFMax(100.);
+        _jwheel[1]->setParamVel(0.);
         _jwheel[1]->setParamFMax(100.);
 }
 
