@@ -170,17 +170,17 @@ Sim::~Sim()
 {
     Component *c;
 
-    if (_world)
-        delete _world;
-    if (_visworld)
-        delete _visworld;
-
     // remove and delete all components
     while (!_cs.empty()){
         c = _cs.front();
         rmComponent(c);
         delete c;
     }
+
+    if (_world)
+        delete _world;
+    if (_visworld)
+        delete _visworld;
 }
 
 
@@ -212,8 +212,8 @@ void Sim::init()
         _world->init();
     if (_visworld)
         _visworld->init();
-    if (_visworld && _visworld->window()){
-        _visworld->viewer()->addEventHandler(new SimKeyboard(this));
+    if (_visworld && _visworld->window() && _visworld->viewer()->getView(0)){
+        _visworld->viewer()->getView(0)->addEventHandler(new SimKeyboard(this));
     }
 
     _initComponents();
@@ -307,7 +307,6 @@ void Sim::addComponent(Component *c)
 void Sim::rmComponent(Component *c)
 {
     if (_hasComponent(c)){
-        c->finish();
         _cs.remove(c);
 
         // remove it also from callback lists

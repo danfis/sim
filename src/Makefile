@@ -15,6 +15,7 @@ endif
 TARGETS = libsim.a
 OBJS = visbody.o visworld.o body.o joint.o sim.o component.o message.o \
        time.o visworldmanip.o
+OBJS += sensor/camera.o
 
 all: $(TARGETS) $(SUBTARGETS)
 

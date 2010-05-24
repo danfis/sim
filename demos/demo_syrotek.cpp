@@ -2,6 +2,7 @@
 #include <sim/sim.hpp>
 #include <sim/ode/world.hpp>
 #include <sim/msg.hpp>
+#include <sim/sensor/camera.hpp>
 
 #include "robot_syrotek.hpp"
 
@@ -38,6 +39,7 @@ class S : public sim::Sim {
     void init()
     {
         sim::Sim::init();
+        /*
         for (size_t i = 0; i < 300; i++){
             visWorld()->step();
             std::cerr << i << "\r";
@@ -46,6 +48,7 @@ class S : public sim::Sim {
         std::cerr << std::endl;
 
         timeRealRestart();
+        */
     }
 
     void createArena()

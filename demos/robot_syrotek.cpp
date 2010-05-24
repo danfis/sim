@@ -1,5 +1,6 @@
 #include "robot_syrotek.hpp"
 #include <sim/msg.hpp>
+#include <sim/sensor/camera.hpp>
 using sim::Vec3;
 using sim::ode::BodyCompound;
 using sim::Scalar;
@@ -248,6 +249,11 @@ void RobotSyrotekComp::init(sim::Sim *sim)
 
     _sim = sim;
     _robot = new RobotSyrotek(sim->world(), pos);
+
+    sim::sensor::Camera *cam = new sim::sensor::Camera;
+    cam->attachToBody(_robot->chasis());
+    sim->addComponent(cam);
+
     _robot->activate();
 
     if (_joystick)

@@ -1,7 +1,7 @@
 #ifndef _SIM_VIS_WORLD_HPP_
 #define _SIM_VIS_WORLD_HPP_
 
-#include <osgViewer/Viewer>
+#include <osgViewer/CompositeViewer>
 #include <osgGA/TrackballManipulator>
 
 #include "visbody.hpp"
@@ -13,35 +13,53 @@ namespace sim {
  * Based on openscenegraph.
  */
 class VisWorld {
-    osg::ref_ptr<osgViewer::Viewer> _viewer;
+    typedef std::list<osg::ref_ptr<osgViewer::View> > _views_t;
+    typedef _views_t::iterator _views_it_t;
+
+    osg::ref_ptr<osgViewer::CompositeViewer> _viewer; /*!< Main viewer */
+    osg::ref_ptr<osgViewer::View> _view_main;
+    _views_t _views;
+
     osg::ref_ptr<osg::StateSet> _state_set;
     osg::ref_ptr<osg::Group> _root; /*!< Root of scene graph */
+
+    osg::ref_ptr<osg::Group> _cams; /*!< Offline cameras */
+
+    /**
+     * Root of visible environment. This node should contain all bodies,
+     * lights etc.
+     */
+    osg::ref_ptr<osg::Group> _root_vis;
+
+    osg::ref_ptr<osg::Group> _bodies;
     osg::ref_ptr<osg::Group> _lights;
     bool _window; /*!< Show a window? */
 
   public:
-    osg::ref_ptr<osg::Group> _r;
-    osg::ref_ptr<osg::Camera> _cam;
-    osg::ref_ptr<osg::Image> _image;
-  public:
     VisWorld();
     virtual ~VisWorld();
 
-    osgViewer::Viewer *viewer() { return _viewer.get(); }
-    const osgViewer::Viewer *viewer() const { return _viewer.get(); }
+    osgViewer::CompositeViewer *viewer() { return _viewer.get(); }
+    const osgViewer::CompositeViewer *viewer() const { return _viewer.get(); }
     bool window() const { return _window; }
     void setWindow(bool yes = true) { _window = yes; }
 
     /**
      * Returns root of scene graph.
      */
-    //osg::Node *sceneRoot() { return _root; }
     osg::Node *sceneRoot() { return _root; }
 
     /**
      * Adds visualisable object.
      */
     void addBody(VisBody *obj);
+    void rmBody(VisBody *obj);
+
+    void addView(osgViewer::View *view);
+    void rmView(osgViewer::View *view);
+
+    void addCam(osg::Camera *cam);
+    void rmCam(osg::Camera *cam);
 
     /**
      * Initializes world.

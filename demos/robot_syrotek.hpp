@@ -21,6 +21,8 @@ class RobotSyrotek {
   public:
     RobotSyrotek(sim::World *w, const sim::Vec3 &pos = sim::Vec3(0., 0., 0.08));
 
+    const sim::Body *chasis() const { return _chasis; }
+
     void activate();
 
     void addVelLeft(sim::Scalar d);
@@ -41,6 +43,8 @@ class RobotSyrotekComp : public sim::Component {
   public:
     RobotSyrotekComp();
     ~RobotSyrotekComp();
+
+    const RobotSyrotek *robot() const { return _robot; }
 
     void init(sim::Sim *sim);
     void finish();
