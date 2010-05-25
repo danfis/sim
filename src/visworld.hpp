@@ -29,8 +29,16 @@ class VisWorld {
 
     osg::ref_ptr<osg::Group> _bodies;
     osg::ref_ptr<osg::Group> _lights;
+
+	osg::ref_ptr<osg::Node> _axisX;
+	osg::ref_ptr<osg::Node> _axisY;
+	osg::ref_ptr<osg::Node> _axisZ;
     bool _window; /*!< Show a window? */
-	bool axisDrawn;
+	bool _axisCreated;
+//	osg::Node *_axisX;
+//	osg::Node *_axisY;
+//	osg::Node *_axisZ;
+
 
   public:
     VisWorld();

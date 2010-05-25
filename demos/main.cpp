@@ -433,7 +433,7 @@ class SimTestFormace : public sim::Sim {
 		createJezek();
 		createPlane();
 
-		printTree(_visworld->sceneRoot());
+//		printTree(_visworld->sceneRoot());
 
     }
 

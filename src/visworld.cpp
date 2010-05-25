@@ -13,6 +13,8 @@
 
 namespace sim {
 
+//VisBody *a1,*a2,*a3;
+
 VisWorld::VisWorld()
     : _window(true)
 {
@@ -39,7 +41,7 @@ VisWorld::VisWorld()
     _setUpStateSet();
     _setUpLights();
 
-	axisDrawn = false;
+	_axisCreated = false;
 }
 
 VisWorld::~VisWorld()
@@ -217,15 +219,17 @@ void VisWorld::toggleAlpha()
 
 void VisWorld::toggleAxis() {
 
-	const double axisHeight = 10;
-	const double axisRadius = 0.1;
-	if (!axisDrawn) {
+	
+	if (!_axisCreated) {
+		const double axisHeight = 10;
+		const double axisRadius = 0.1;
 
 		// axis z
 		VisBody *b = new VisBodyCylinder(axisRadius,axisHeight);
 		b->setColor(osg::Vec4(0,0,1,1));
 		b->setPos(0,0,axisHeight/2);		
 		this->addBody(b);
+		_axisZ = b->node();
 
 		// axis x
 		b = new VisBodyCylinder(axisRadius,axisHeight);
@@ -234,20 +238,30 @@ void VisWorld::toggleAxis() {
 		osg::Quat q(M_PI/2,osg::Vec3(0,1,0));
 		b->setRot(q);
 		this->addBody(b);
+		_axisX = b->node();
 
 		// axis y
 		b = new VisBodyCylinder(axisRadius,axisHeight);
 		b->setColor(osg::Vec4(0,1,0,1));
 		b->setPos(0,axisHeight/2,0);
 		b->setRot(osg::Quat(M_PI/2,osg::Vec3(1,0,0)));
-//		b->setRot(q);
 		this->addBody(b);
+		_axisY = b->node();
 
-		axisDrawn = true;
-
+		_axisCreated = true;
 	} else {
+		
+		if (_axisX->getNodeMask()) {
+			_axisX->setNodeMask(0 );	
+			_axisY->setNodeMask(0);	
+			_axisZ->setNodeMask(0);
+		} else {
+			_axisX->setNodeMask(0xffffffff);	
+			_axisY->setNodeMask(0xffffffff);	
+			_axisZ->setNodeMask(0xffffffff);
+		}
 
-		axisDrawn = false;
+
 	}
 
 
