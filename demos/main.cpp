@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 #include "sim/ode/world.hpp"
 #include "sim/sim.hpp"
@@ -364,11 +365,119 @@ void testSim(const int argc, char **argv, const int id) {
 }
 
 
+int determineShapeClass(osg::Shape *s) {
+	if (!s) {
+		return -1;
+	}
+	{
+		osg::Box *b = new osg::Box();
+		if (s->isSameKindAs(b)) {
+			return 0;
+		}
+	}
+	{
+		osg::Capsule *b = new osg::Capsule();
+		if (s->isSameKindAs(b)) {
+			return 1;
+		}
+	}
+	{
+		osg::Cone *b = new osg::Cone();
+		if (s->isSameKindAs(b)) {
+			return 2;
+		}
+	}
+	{
+		osg::Cylinder *b = new osg::Cylinder();
+		if (s->isSameKindAs(b)) {
+			return 3;
+		}
+	}
+	{
+		osg::HeightField *b = new osg::HeightField();
+		if (s->isSameKindAs(b)) {
+			return 4;
+		}
+	}
+	{
+		osg::Sphere *b = new osg::Sphere();
+		if (s->isSameKindAs(b)) {
+			return 5;
+		}
+	}
+	{
+		osg::TriangleMesh *b = new osg::TriangleMesh();
+		if (s->isSameKindAs(b)) {
+			return 6;
+		}
+	}
+	return -1;
+}
+
+void drawBox(osg::Shape *s, const int index) {
+	char name[200];
+	sprintf(name,"box.%06d.inc",index);
+	ofstream ofs(name);
+	ofs << "// box \n";
+	ofs << "#define box" << index << " = \n";
+
+	osg::Box *b = (osg::Box *)s;
+
+	osg::Vec3 center = b->getCenter();
+	osg::Vec3 length = b->getHalfLengths();
+
+	ofs	<< "box { ";
+	ofs << "<" << center[0]-length[0] << "," << center[1]-length[1] << "," << center[2]-length[2] << ">, ";
+	ofs	<< "<" << center[0]+length[0] << "," << center[1]+length[1] << "," << center[2]+length[2] << ">  ";
+	ofs << "color { rgb <1,0,1> }";
+	ofs << "\n}\n";
+	ofs.close();
+}
+
+void drawCylinder(osg::Shape *s, const int index) {
+	char name[200];
+	osg::Cylinder *c = (osg::Cylinder *)s;
+	double radius = c->getRadius();
+	double height = c->getHeight();
+
+	sprintf(name,"cyl.%06d.inc",index);
+	ofstream ofs(name);
+	ofs << "// cylinder \n";
+	ofs << "#define cyl" << index << " = \n";
+
+	osg::Vec3 center = c->getCenter();
+	ofs << "cylinder { ";
+	ofs << "<" << center[0] << "," << center[1] << "," << center[2]-height/2.0 << ">, ";
+	ofs << "<" << center[0] << "," << center[1] << "," << center[2]+height/2.0 << ">, ";
+	ofs << radius << " ";
+	ofs << "color { rgb <1,0,0> }\n";
+	ofs << "}\n";
+	ofs.close();
+
+}
+
 void printTree(osg::Node *node) {
+	osg::Geode *geode = node->asGeode();
+
+	static int index = 0;
+	if (geode) {
+		cerr << "Node is geodde\n";
+		cerr << "Geode num drawables = " << geode->getNumDrawables() << "\n";
+		for(int i=0;i<(int)geode->getNumDrawables();i++) {
+			osg::Drawable *d = geode->getDrawable(i);
+			osg::Shape *s = d->getShape();
+			int sc = determineShapeClass(s);
+			switch (sc) {
+				case 0: { drawBox(s,index++); break; }
+				case 3: { drawCylinder(s,index++); break; }
+			}	
+		}
+	}
+
 	cerr << "Name=" << node->getName() << "\n";
 	osg::Group *group = node->asGroup();
 	if (group) {
-		for(int i=0;i<group->getNumChildren();i++) {
+		for(int i=0;i<(int)group->getNumChildren();i++) {
 			cerr << " Children: \n";
 			printTree(group->getChild(i));
 			cerr << "EOCH\n";
@@ -389,6 +498,8 @@ class SimTestFormace : public sim::Sim {
         setTimeStep(sim::Time::fromMs(10));
         setTimeSubSteps(2);
 
+		vector<sim::VisBody *> bodies;
+
         World *w = new World();
         sim::Body *b;
 
@@ -401,11 +512,17 @@ class SimTestFormace : public sim::Sim {
         //w->setContactApprox2(false);
         //w->setContactBounce(0.1, 0.1);
     
-        /*
-        b = w->createBodyBox(sim::Vec3(20., 20., 1.), 0.);
-        b->setPos(0., 0., -10.);
+        
+        b = w->createBodyBox(sim::Vec3(2., 2., 1.), 0.);
+        b->setPos(3, 4., 5);
         b->activate();
-        */
+		bodies.push_back(b->visBody());
+
+		b = w->createBodyBox(sim::Vec3(3., 2., 1.), 0.);
+        b->setPos(-3, 4., 5);
+        b->activate();
+		bodies.push_back(b->visBody());
+
 
 /*
         b = w->createBodyCube(1., 1.);
@@ -428,12 +545,24 @@ class SimTestFormace : public sim::Sim {
         b->activate();
 
 */
-        createRobot();
+        //createRobot(bodies);
 		//createArdrone();
-		createJezek();
+	//	createJezek();
 		createPlane();
 
 //		printTree(_visworld->sceneRoot());
+
+		char name[200];
+		sprintf(name,"all.pov");
+		ofstream ofs(name);
+		for(int i=0;i<(int)bodies.size();i++) {
+			cerr << "*Exporting body: " << i << "\n";
+			if (bodies[i]) {
+				cerr << "*Exporting body: " << i << "\n";
+				bodies[i]->exportToPovray(ofs,2);
+			}
+		}
+		ofs.close();
 
     }
 
@@ -571,7 +700,7 @@ class SimTestFormace : public sim::Sim {
         b2->activate();
     }
 
-    void createRobot()
+    void createRobot(vector<sim::VisBody *> &bodies)
     {
         sim::Vec3 pos(3. + 2., 3., 2.5);
         sim::Body *chasis;
@@ -583,7 +712,11 @@ class SimTestFormace : public sim::Sim {
             w[i] = world()->createActuatorWheelCylinderX(0.2, 0.2, 1.);
         }
 
+
         chasis->setPos(pos);
+		bodies.push_back(chasis->visBody());
+
+
         w[0]->setPos(pos.x() + 0.415, pos.y() + 0.4, pos.z() - 0.2);
         w[1]->setPos(pos.x() - 0.415, pos.y() + 0.4, pos.z() - 0.2);
         w[2]->setPos(pos.x() + 0.415, pos.y() - 0.4, pos.z() - 0.2);

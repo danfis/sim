@@ -12,6 +12,23 @@
 
 namespace sim {
 
+void povCoords(std::ofstream &ofs, const osg::Vec3 &vec) {
+	ofs << " <" << vec[0] << "," << vec[1] << "," << vec[2] << "> ";
+}
+
+void povTransformation(std::ofstream &ofs, const osg::Vec3 &position, const osg::Quat &rotation) {
+	osg::Matrixd m;
+	m.makeIdentity();
+	m.makeRotate(rotation);
+	m.makeTranslate(position);
+	ofs << "matrix <";
+	ofs << m(0,0) << "," << m(0,1) <<","<<m(0,2) <<",\n";
+	ofs << m(1,0) << "," << m(1,1) <<","<<m(1,2) <<",\n";
+	ofs << m(2,0) << "," << m(2,1) <<","<<m(2,2) <<",\n";
+	ofs << m(3,0) << "," << m(3,1) <<","<<m(3,2) <<">\n";
+}
+
+
 VisBody::VisBody()
     : _node(0), _offset(0., 0., 0.)
 {
@@ -84,6 +101,8 @@ void VisBody::setOsgText(osg::ref_ptr<osgText::TextBase> t)
     }
 }
 
+void VisBody::exportToPovray(std::ofstream &ofs, const int type) {
+}
 
 
 void VisBodyShape::setColor(const osg::Vec4 &c)
@@ -158,12 +177,77 @@ void VisBodyShape::_setShape(osg::Shape *shape)
     setColor(osg::Vec4(0.5, 0.5, 0.5, 1.));
 }
 
+void VisBodyShape::exportToPovray(std::ofstream &ofs, const int type) {
+
+}
+
 
 VisBodyBox::VisBodyBox(Vec3 dim)
     : VisBodyShape()
 {
     _setShape(new osg::Box(osg::Vec3(0., 0., 0.), dim.x(), dim.y(), dim.z()));
 }
+
+void VisBodyBox::exportToPovray(std::ofstream &ofs, const int type) {
+	osg::Geode *g = _node->asGeode();
+
+	if (!g) {
+		return;
+	}
+
+	if (type == 0 || type == 2) {
+		for(int i=0;i<(int)g->getNumDrawables();i++) {
+			osg::Drawable *d = g->getDrawable(i);
+			if (d) {
+				osg::Box *b = (osg::Box *)d->getShape();
+				Vec3 center(b->getCenter());
+				Vec3 lengths(b->getHalfLengths());
+				ofs << "box { <" << center[0]-lengths[0] << "," << center[1]-lengths[1] << "," << center[2]-lengths[2] << ">,";
+				ofs << " <" << center[0]+lengths[0] << "," << center[1]+lengths[1] << "," << center[2]+lengths[2] << "> ";
+				ofs << "}\n";
+			}
+		}
+	} 
+
+	if (type == 1 || type == 2) {
+//		ofs << "translate ";
+//		povCoords(ofs,pos());
+//		ofs << "\n";
+		povTransformation(ofs,pos(),rot());
+	} 
+
+}
+
+void VisBodyCube::exportToPovray(std::ofstream &ofs, const int type) {
+	osg::Geode *g = _node->asGeode();
+
+	if (!g) {
+		return;
+	}
+
+	if (type == 0 || type == 2) {
+		for(int i=0;i<(int)g->getNumDrawables();i++) {
+			osg::Drawable *d = g->getDrawable(i);
+			if (d) {
+				osg::Box *b = (osg::Box *)d->getShape();
+				Vec3 center(b->getCenter());
+				Vec3 lengths(b->getHalfLengths());
+				ofs << "box { <" << center[0]-lengths[0] << "," << center[1]-lengths[1] << "," << center[2]-lengths[2] << ">,";
+				ofs << " <" << center[0]+lengths[0] << "," << center[1]+lengths[1] << "," << center[2]+lengths[2] << "> ";
+				ofs << "}\n";
+			}
+		}
+	} 
+
+	if (type == 1 || type == 2) {
+		ofs << "translate ";
+		povCoords(ofs,pos());
+		ofs << "\n";
+	} 
+
+}
+
+
 
 
 VisBodySphere::VisBodySphere(Scalar radius)
@@ -172,18 +256,80 @@ VisBodySphere::VisBodySphere(Scalar radius)
     _setShape(new osg::Sphere(Vec3(0., 0., 0.), radius));
 }
 
+
+void VisBodySphere::exportToPovray(std::ofstream &ofs, const int type) {
+	osg::Geode *g = _node->asGeode();
+
+	if (!g) {
+		return;
+	}
+
+	if (type == 0 || type == 2) {
+		for(int i=0;i<(int)g->getNumDrawables();i++) {
+			osg::Drawable *d = g->getDrawable(i);
+			if (d) {
+				osg::Sphere *b = (osg::Sphere *)d->getShape();
+				Vec3 center(b->getCenter());
+				double radius = b->getRadius();
+				ofs << "sphere { ";
+				povCoords(ofs,center);
+				ofs << "," << radius << "}\n";
+			}
+		}
+	} 
+
+	if (type == 1 || type == 2) {
+		ofs << "translate ";
+		povCoords(ofs,pos());
+		ofs << "\n";
+	} 
+
+}
+
+
 VisBodyCylinder::VisBodyCylinder(Scalar radius, Scalar height)
     : VisBodyShape()
 {
     _setShape(new osg::Cylinder(Vec3(0., 0., 0.), radius, height));
 }
 
+void VisBodyCylinder::exportToPovray(std::ofstream &ofs, const int type) {
+	osg::Geode *g = _node->asGeode();
+
+	if (!g) {
+		return;
+	}
+
+	if (type == 0 || type == 2) {
+		for(int i=0;i<(int)g->getNumDrawables();i++) {
+			osg::Drawable *d = g->getDrawable(i);
+			if (d) {
+				osg::Cylinder *b = (osg::Cylinder *)d->getShape();
+				Vec3 center(b->getCenter());
+				double radius = b->getRadius();
+				double height = b->getHeight();
+				ofs << "cylinder { ";
+				ofs << "<" << center[0] << "," << center[1] <<"," << center[2]-height/2.0 << ">,";
+				ofs << "<" << center[0] << "," << center[1] <<"," << center[2]+height/2.0 << ">,";
+				ofs << radius << "}\n";
+			}
+		}
+	} 
+
+	if (type == 1 || type == 2) {
+		ofs << "translate ";
+		povCoords(ofs,pos());
+		ofs << "\n";
+	} 
+
+}
+
+
 VisBodyCone::VisBodyCone(Scalar radius, Scalar height)
     : VisBodyShape()
 {
     _setShape(new osg::Cone(Vec3(0., 0., 0.), radius, height));
 }
-
 
 
 VisBodyTriMesh::VisBodyTriMesh(const sim::Vec3 *coords, size_t coords_len,
@@ -225,5 +371,35 @@ void VisBodyTriMesh::setColor(const osg::Vec4 &c)
     g->setColorArray(color);
     g->setColorBinding(osg::Geometry::BIND_OVERALL);
 }
+
+void VisBodyTriMesh::exportToPovray(std::ofstream &ofs, const int type) {
+	/*
+	osg::Geode *g = _node->asGeode();
+
+	if (!g) {
+		return;
+	}
+
+	if (type == 0 || type == 2) {
+		for(int i=0;i<(int)g->getNumDrawables();i++) {
+			osg::Drawable *d = g->getDrawable(i);
+			if (d) {
+				osg::TriangleMesh *b = (osg::TriangleMesh *)d->getShape();
+    			osg::ref_ptr<osg::Vec3Array> vert = b->getVertices();
+			}
+		}
+	} 
+
+	if (type == 1 || type == 2) {
+		ofs << "translate ";
+		povCoords(ofs,pos());
+		ofs << "\n";
+	} 
+	*/
+}
+
+
+
+
 
 }

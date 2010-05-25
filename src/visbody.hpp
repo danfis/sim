@@ -6,6 +6,8 @@
 #include <osgText/TextBase>
 
 #include "math.hpp"
+#include <fstream>
+
 
 namespace sim {
 
@@ -83,6 +85,7 @@ class VisBody {
     virtual void setOsgText(osg::ref_ptr<osgText::TextBase> t);
     virtual void setText(const char *text, float size = 1.,
                          const osg::Vec4 &color = osg::Vec4(0., 0., 0., 1.)) {}
+	virtual void exportToPovray(std::ofstream &ofs, const int type);
 
   protected:
     /**
@@ -105,6 +108,15 @@ class VisBodyShape : public VisBody {
     void setTexture(const std::string &fn);
     void setText(const char *text, float size = 1.,
                  const osg::Vec4 &color = osg::Vec4(0., 0., 0., 1.));
+	/**
+	  * export body's geometry and position to povray file 
+	  * type:
+	  * 0 .. export only geometry (it is usefull for making .inc files
+	  * 1 .. export only position and rotations of the object 
+	  * 2 .. export geometry+position+rotations
+	  */
+	virtual void exportToPovray(std::ofstream &ofs, const int type);
+
 
   protected:
     /**
@@ -121,6 +133,7 @@ class VisBodyShape : public VisBody {
 class VisBodyBox : public VisBodyShape {
   public:
     VisBodyBox(Vec3 dim);
+	void exportToPovray(std::ofstream &ofs, const int type);
 };
 
 /**
@@ -130,6 +143,7 @@ class VisBodyBox : public VisBodyShape {
 class VisBodyCube : public VisBodyBox {
   public:
     VisBodyCube(Scalar width) : VisBodyBox(Vec3(width, width, width)) {}
+	void exportToPovray(std::ofstream &ofs, const int type);
 };
 
 /**
@@ -138,6 +152,7 @@ class VisBodyCube : public VisBodyBox {
 class VisBodySphere : public VisBodyShape {
   public:
     VisBodySphere(Scalar radius);
+	void exportToPovray(std::ofstream &ofs, const int type);
 };
 
 /**
@@ -146,6 +161,7 @@ class VisBodySphere : public VisBodyShape {
 class VisBodyCylinder : public VisBodyShape {
   public:
     VisBodyCylinder(Scalar radius, Scalar height);
+	void exportToPovray(std::ofstream &ofs, const int type);
 };
 
 /**
@@ -163,6 +179,7 @@ class VisBodyTriMesh : public VisBody {
     VisBodyTriMesh(const sim::Vec3 *coords, size_t coords_len,
                    const unsigned int *indices, size_t indices_len);
     void setColor(const osg::Vec4 &c);
+	void exportToPovray(std::ofstream &ofs, const int type);
 };
 
 } /* namespace sim */
