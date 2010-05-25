@@ -34,6 +34,9 @@ class S : public sim::Sim {
 
         createArena();
         createRobot();
+
+
+
     }
 
     void init()

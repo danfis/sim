@@ -412,19 +412,17 @@ void VisBodyTriMesh::exportToPovray(std::ofstream &ofs, const int type) {
 				osg::Geometry *gm = d->asGeometry();
 				if (gm) {
 					osg::Vec3Array *points = (osg::Vec3Array *)gm->getVertexArray();
-//					DBG("num points= "<< points->getNumElements());
 					osg::Geometry::DrawElementsList l;
 					gm->getDrawElementsList(l);
 					for(int j=0;j<(int)l.size();j++) {
 						ofs << "triangle{";
 						osg::DrawElementsUInt *dui = (osg::DrawElementsUInt *)l[j];
-						for(int k=0;k<dui->getNumIndices();k++) {
+						for(int k=0;k<(int)dui->getNumIndices();k++) {
 							osg::Vec3 v = (*points)[dui->index(k)];
 							ofs << "<" << v[0] <<","<<v[1]<<","<<v[2] << ">";
 							if (k < 2) {
 								ofs << ",";
 							}
-//							DBG("index is " << dui->index(k));
 							
 						}	
 						ofs << "}\n";

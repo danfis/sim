@@ -48,7 +48,6 @@ endif
 
 CXXFLAGS += $(SYSTEM_CXXFLAGS)
 
-
 HAS_ODE ?= no
 HAS_BT  ?= no
 HAS_OSG ?= no

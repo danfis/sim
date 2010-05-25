@@ -12,7 +12,7 @@
 //#include "meshes/ardrone.h"
 #include "meshes/jezek.h"
 #include "meshes/plane.h"
-
+#include "sim/comppovray.hpp"
 
 int counter = 0;
 #define intro counter++; if (id == -1) std::cerr << counter << " :"<< __FUNCTION__ << "\n"; if (id != counter) return;
@@ -487,76 +487,6 @@ void printTree(osg::Node *node) {
 }
 
 
-class PovrayComponent : public sim::Component {
-	sim::Sim *_sim;
-	std::vector<sim::VisBody *> *_bodies;
-	int frame;
-	public:
-	PovrayComponent(std::vector<sim::VisBody *> *bodies);
-	~PovrayComponent();
-
-	void init(sim::Sim *sim);
-	void finish();
-	void cbPostStep();
-	void processMessage(const sim::Message &msg);
-};
-
-PovrayComponent::PovrayComponent(std::vector<sim::VisBody *> *bodies){
-	_bodies = bodies;
-	frame = 0;
-}
-
-PovrayComponent::~PovrayComponent(){
-	_bodies = NULL;
-}
-
-void PovrayComponent::init(sim::Sim *sim){
-	_sim = sim;
-	char name[200];
-	sprintf(name,"camera.inc");
-	std::ofstream ofs(name);
-	ofs << "// camera definition \n";
-	ofs << "#include \"colors.inc\"\n";
-	ofs << "camera {\n";
-	ofs << "\tlocation <5,-5,3>\n";
-	ofs << "\tsky <0,0,1>\n";
-	ofs << "\tlook_at <0,0,3>\n";
-	ofs << "}\n";
-	ofs << "light_source { <20,-5,20> color White }\n";
-	ofs << "light_source { <-20,-5,20> color White }\n";
-	ofs << "light_source { <0,-15,10> color White }\n";
-	ofs.close();
-}
-
-void PovrayComponent::finish(){
-}
-
-void PovrayComponent::cbPostStep(){
-	cerr << "PostStep:\n";
-
-	char name[200];
-	sprintf(name,"frame_%06d.pov",frame);
-	ofstream ofs(name);
-	ofs << "#include \"camera.inc\"\n";
-	for(int i=0;i<(int)(*_bodies).size();i++) {
-		if ((*_bodies)[i]) {
-			ofs << "object {\n";
-			((*_bodies)[i])->exportToPovray(ofs,2);
-			ofs << "}\n";
-		}
-	}
-	ofs.close();
-
-	frame++;
-
-}
-
-void PovrayComponent::processMessage(const sim::Message &msg){
-
-}
-
-
-
 class SimTestFormace : public sim::Sim {
   std::vector<sim::VisBody *> bodies;
   public:
@@ -622,7 +552,7 @@ class SimTestFormace : public sim::Sim {
 //		printTree(_visworld->sceneRoot());
 
 
-		PovrayComponent *pc = new PovrayComponent(&bodies);
+		sim::PovrayComponent *pc = new sim::PovrayComponent(&bodies);
 		addComponent(pc);
 		regPostStep(pc);
 
