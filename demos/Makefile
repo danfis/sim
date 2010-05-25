@@ -27,6 +27,7 @@ endif
 
 all: $(TARGETS)
 
+
 demo_base_bt: demo_base_bt.cpp $(LIBDEPS_BT)
 	$(CXX) $(CXXFLAGS_BT) -o $@ $< $(LDFLAGS_BT)
 
