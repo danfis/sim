@@ -157,6 +157,7 @@ void SimComponentMessageRegistry::deliverAssignedMessages(Component *c,
 
 Sim::Sim(World *world, VisWorld *visworld)
     : _world(world), _visworld(visworld),
+      _init(false),
       _time_step(0, 20000000), _time_substeps(10),
       _simulate(true)
 {
@@ -220,6 +221,8 @@ void Sim::init()
     _initComponents();
 
     std::cerr << "Real time / Simulated time: " << std::endl;
+
+    _init = true;
 }
 
 void Sim::step()
@@ -270,6 +273,8 @@ void Sim::finish()
         _world->finish();
     if (_visworld)
         _visworld->finish();
+
+    _init = false;
 }
 
 void Sim::run()
@@ -302,6 +307,11 @@ void Sim::addComponent(Component *c)
 {
     if (!_hasComponent(c)){
         _cs.push_back(c);
+    }
+
+    // if init was already called, initialize Component
+    if (_init){
+        c->init(this);
     }
 }
 

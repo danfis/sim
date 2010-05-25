@@ -26,6 +26,11 @@ class World : public sim::World {
     };
 
   protected:
+    typedef std::list<sim::Body *> _bodies_t;
+    typedef _bodies_t::iterator _bodies_it_t;
+    typedef std::list<sim::Joint *> _joints_t;
+    typedef _joints_t::iterator _joints_it_t;
+
     dWorldID _world;
     dSpaceID _space;
     dJointGroupID _coll_contacts;
@@ -33,6 +38,9 @@ class World : public sim::World {
     dContact _default_contact; /*! default setting of contact */
 
     StepType _step_type;
+
+    _bodies_t _bodies;
+    _joints_t _joints;
 
 
     friend void __collision(void *, dGeomID, dGeomID);

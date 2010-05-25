@@ -17,7 +17,7 @@ VisBody::VisBody()
 {
     _root = new osg::PositionAttitudeTransform();
     _group = new osg::Group();
-    _root->addChild(_group);
+    _root->addChild(_group.get());
 
     _text = new osg::Geode();
     _group->addChild(_text);

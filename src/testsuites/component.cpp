@@ -161,6 +161,7 @@ TEST(compMsg)
 {
     cout << endl << "--- compMsg() ---" << endl;
 
+
     sim::Sim s;
     s.visWorld()->setWindow(false);
 
@@ -251,7 +252,7 @@ TEST(compMsg)
     s.step();
     cout << endl;
 
-    s.regMessage(c2, M3::Type);
+    //s.regMessage(c2, M3::Type);
     cout << "Sending M3(1)" << endl;
     s.sendMessage(new M3("1"));
     s.step();

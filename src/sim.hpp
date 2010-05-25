@@ -240,6 +240,8 @@ class Sim {
     World *_world;
     VisWorld *_visworld;
 
+    bool _init; //!< true if init() was called
+
     std::list<Component *> _cs; //!< List of all components
 
     /**

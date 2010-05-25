@@ -2,6 +2,7 @@
 
 #include "sim/ode/world.hpp"
 #include "sim/msg.hpp"
+#include "sim/common.hpp"
 
 namespace sim {
 
@@ -109,6 +110,18 @@ World::~World()
         dSpaceDestroy(_space);
     if (_coll_contacts)
         dJointGroupDestroy(_coll_contacts);
+
+    // delete all bodies
+    for_each(_bodies_it_t, _bodies){
+        delete *it;
+    }
+    _bodies.clear();
+
+    // delete all joints
+    for_each(_joints_it_t, _joints){
+        delete *it;
+    }
+    _joints.clear();
 
     dCloseODE();
 }
@@ -361,63 +374,86 @@ bool World::done()
 
 sim::Body *World::createBodyCube(Scalar width, Scalar mass, VisBody *vis)
 {
-    return new BodyCube(this, width, mass, vis);
+    sim::Body *b = new BodyCube(this, width, mass, vis);
+    _bodies.push_back(b);
+    return b;
 }
 
 sim::Body *World::createBodyBox(Vec3 dim, Scalar mass, VisBody *vis)
 {
-    return new BodyBox(this, dim, mass, vis);
+    sim::Body *b = new BodyBox(this, dim, mass, vis);
+    _bodies.push_back(b);
+    return b;
 }
 
 sim::Body *World::createBodySphere(Scalar radius, Scalar mass, VisBody *vis)
 {
-    return new BodySphere(this, radius, mass, vis);
+    sim::Body *b = new BodySphere(this, radius, mass, vis);
+    _bodies.push_back(b);
+    return b;
 }
 
 sim::Body *World::createBodyCylinderX(Scalar radius, Scalar height, Scalar mass,
                                       VisBody *vis)
 {
-    return new BodyCylinderX(this, radius, height, mass, vis);
+    sim::Body *b = new BodyCylinderX(this, radius, height, mass, vis);
+    _bodies.push_back(b);
+    return b;
 }
 
 sim::Body *World::createBodyCylinderY(Scalar radius, Scalar height, Scalar mass,
                                       VisBody *vis)
 {
-    return new BodyCylinderY(this, radius, height, mass, vis);
+    sim::Body *b = new BodyCylinderY(this, radius, height, mass, vis);
+    _bodies.push_back(b);
+    return b;
 }
 
 sim::Body *World::createBodyCylinderZ(Scalar radius, Scalar height, Scalar mass,
                                       VisBody *vis)
 {
-    return new BodyCylinder(this, radius, height, mass, vis);
+    sim::Body *b = new BodyCylinder(this, radius, height, mass, vis);
+    _bodies.push_back(b);
+    return b;
 }
+
 sim::Body *World::createBodyTriMesh(const Vec3 *coords, size_t coords_len,
                                     const unsigned int *indices, size_t indices_len,
                                     Scalar mass, VisBody *vis)
 {
-    return new BodyTriMesh(this, coords, coords_len, indices, indices_len, mass, vis);
+    sim::Body *b = new BodyTriMesh(this, coords, coords_len, indices, indices_len, mass, vis);
+    _bodies.push_back(b);
+    return b;
 }
 
 sim::Body *World::createBodyCompound()
 {
-    return new BodyCompound(this);
+    sim::Body *b = new BodyCompound(this);
+    _bodies.push_back(b);
+    return b;
 }
 
 sim::Joint *World::createJointFixed(sim::Body *oA, sim::Body *oB)
 {
-    return new JointFixed(this, (Body *)oA, (Body *)oB);
+    sim::Joint *j = new JointFixed(this, (Body *)oA, (Body *)oB);
+    _joints.push_back(j);
+    return j;
 }
 
 sim::Joint *World::createJointHinge(sim::Body *oA, sim::Body *oB,
                                     const Vec3 &anchor, const Vec3 &axis)
 {
-    return new JointHinge(this, (Body *)oA, (Body *)oB, anchor, axis);
+    sim::Joint *j = new JointHinge(this, (Body *)oA, (Body *)oB, anchor, axis);
+    _joints.push_back(j);
+    return j;
 }
 
 sim::Joint *World::createJointHinge2(sim::Body *oA, sim::Body *oB, const Vec3 &anchor,
                                      const Vec3 &axis1, const Vec3 &axis2)
 {
-    return new JointHinge2(this, (Body *)oA, (Body *)oB, anchor, axis1, axis2);
+    sim::Joint *j = new JointHinge2(this, (Body *)oA, (Body *)oB, anchor, axis1, axis2);
+    _joints.push_back(j);
+    return j;
 }
 
 
