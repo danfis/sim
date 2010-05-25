@@ -253,11 +253,12 @@ void RobotSyrotekComp::init(sim::Sim *sim)
 
     sim::sensor::Camera *cam = new sim::sensor::Camera;
     //cam->attachToBody(_robot->chasis(), Vec3(0.13, 0., 0.18), Quat(Vec3(0., 0., 1.), M_PI / 2.));
-    cam->attachToBody(_robot->chasis(), Vec3(0.13, 0., 0.18));
+    cam->attachToBody(_robot->chasis(), Vec3(0.13, 0., 0.15));
     cam->visBodyEnable();
     cam->setWidthHeight(300, 300);
     cam->setBgColor(0., 0., 0., 1.);
     cam->enableDump("cam/");
+    cam->enableView();
     sim->addComponent(cam);
 
     _robot->activate();

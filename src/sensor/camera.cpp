@@ -32,12 +32,17 @@ void Camera::init(sim::Sim *sim)
 {
     _sim = sim;
 
-    _createCamera();
-
-    _sim->visWorld()->addCam(_cam);
 
     _sim->regPreStep(this);
     _sim->regPostStep(this);
+
+    _createCamera();
+    _sim->visWorld()->addCam(_cam);
+
+    if (_view_enabled){
+        _createView();
+        _sim->visWorld()->addView(_view);
+    }
 
     if (_vis_enabled && _vis)
         _sim->visWorld()->addBody(_vis);
@@ -48,6 +53,9 @@ void Camera::init(sim::Sim *sim)
 void Camera::finish()
 {
     _sim->visWorld()->rmCam(_cam);
+
+    if (_view.valid())
+        _sim->visWorld()->rmView(_view);
 
     if (_vis_enabled && _vis)
         _sim->visWorld()->rmBody(_vis);
@@ -97,6 +105,41 @@ void Camera::_createCamera()
     _image = new osg::Image;
     //_image->allocateImage(width, height, 1, GL_RGBA, GL_FLOAT);
     _cam->attach(osg::Camera::COLOR_BUFFER, _image);
+
+}
+
+void Camera::_createView()
+{
+    Scalar aspect = (Scalar)_width / (Scalar)_height;
+
+    if (_view.valid())
+        _view->unref();
+
+    // set up graphics context
+    osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
+    traits->x = 0;
+    traits->y = 0;
+    traits->width = _width;
+    traits->height = _height;
+    traits->windowDecoration = true;
+    traits->doubleBuffer = true;
+    traits->sharedContext = 0;
+
+    osg::ref_ptr<osg::GraphicsContext> gc = osg::GraphicsContext::createGraphicsContext(traits.get());
+
+    // set up camera
+    osg::Camera *cam = new osg::Camera;
+    cam->setClearColor(_bgcolor);
+    cam->setProjectionMatrixAsPerspective(30, aspect, 0.01, 10.);
+    cam->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+    cam->setViewport(0, 0, _width, _height);
+    cam->setGraphicsContext(gc.get());
+
+    // create view
+    _view = new osgViewer::View;
+
+    // assign camera
+    _view->setCamera(cam);
 }
 
 void Camera::_updatePosition()
@@ -120,8 +163,15 @@ void Camera::_updatePosition()
         _zaxis = rot * (_body_offset_rot * Vec3(0., 0., 1.));
     }
 
+    // transform camera
     _cam->setViewMatrixAsLookAt(_eye, _at, _zaxis);
 
+    // transform camera in view
+    if (_view.valid() && _view->getCamera()){
+        _view->getCamera()->setViewMatrixAsLookAt(_eye, _at, _zaxis);
+    }
+
+    // transform VisBody
     if (_vis_enabled && _vis){
         // direction of camera
         Vec3 dir = _at - _eye;

@@ -9,6 +9,16 @@ namespace sim {
 
 namespace sensor {
 
+/**
+ * Camera sensor that can be static or attached to any Body.
+ * If you want to create static Camera simply use setLookAt() method to set
+ * up camera view matrix.
+ * If you want to attach camera to Body use attachToBody() method that
+ * takes pointer to Body and position and rotation offsets. By default
+ * camera is placed at (0, 0, 0) position, camera is facing in (1, 0, 0)
+ * direction and z-axis is (0, 0, 1) - all offsets are relative to these
+ * defaults.
+ */
 class Camera : public sim::Component {
   protected:
     Sim *_sim;
@@ -31,6 +41,9 @@ class Camera : public sim::Component {
     const char *_dump_prefix; /*!< Prefix of files where camera will dump
                                    all images. If prefix is zero dumping is
                                    disabled */
+
+    osg::ref_ptr<osgViewer::View> _view;
+    bool _view_enabled; /*!< By default view is disabled */
 
   public:
     Camera();
@@ -83,10 +96,18 @@ class Camera : public sim::Component {
     void enableDump(const char *prefix = "") { _dump_prefix = prefix; }
     void disableDump() { _dump_prefix = 0; }
 
+    /**
+     * Enables/Disables view window.
+     */
+    void enableView(bool enable = true) { _view_enabled = enable; }
+
 
     /**
      * Attach camera to body with specified position and rotation offsets.
      * If attached to body camera is moving with body.
+     * By default camera is on position (0., 0., 0.) facing in direction
+     * (1., 0., 0.) and z-axis is (0., 0., 1.) - both offsets are relative
+     * to these values.
      */
     void attachToBody(const sim::Body *b,
                       const Vec3 &offset_pos = Vec3(0., 0., 0.),
@@ -114,6 +135,11 @@ class Camera : public sim::Component {
      * Creates camera according to previously set parameters.
      */
     void _createCamera();
+
+    /**
+     * Creates view.
+     */
+    void _createView();
 
     /**
      * Update position of camera (and visual representation).

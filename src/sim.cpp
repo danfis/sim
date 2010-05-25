@@ -212,8 +212,9 @@ void Sim::init()
         _world->init();
     if (_visworld)
         _visworld->init();
-    if (_visworld && _visworld->window() && _visworld->viewer()->getView(0)){
-        _visworld->viewer()->getView(0)->addEventHandler(new SimKeyboard(this));
+    if (_visworld && _visworld->window() && _visworld->viewMain()){
+        DBG("");
+        _visworld->viewMain()->addEventHandler(new SimKeyboard(this));
     }
 
     _initComponents();

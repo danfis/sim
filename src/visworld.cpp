@@ -81,21 +81,18 @@ void VisWorld::rmCam(osg::Camera *cam)
 
 void VisWorld::addView(osgViewer::View *view)
 {
-    _views.push_back(view);
+    view->setSceneData(_root_vis);
+    _viewer->addView(view);
 }
 
 void VisWorld::rmView(osgViewer::View *view)
 {
-    _views.remove(view);
+    _viewer->removeView(view);
 }
 
 void VisWorld::init()
 {
     _view_main->setSceneData(_root);
-    for_each(_views_it_t, _views){
-        (*it)->setSceneData(_root);
-    }
-
 
     if (_window){
         if (!_view_main->getCameraManipulator()){
@@ -115,19 +112,12 @@ void VisWorld::init()
     }
 
     _viewer->addView(_view_main);
-    for_each(_views_it_t, _views){
-        _viewer->addView(*it);
-    }
-
     _viewer->realize();
 }
 
 void VisWorld::finish()
 {
     _viewer->removeView(_view_main);
-    for_each(_views_it_t, _views){
-        _viewer->removeView(it->get());
-    }
 }
 
 void VisWorld::step()
