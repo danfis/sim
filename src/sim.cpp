@@ -234,12 +234,12 @@ void Sim::step()
         _time_simulated += _time_step;
     }
 
-    if (_visworld)
-        _visworld->step();
-
     timeRealNow();
 
     _cbPostStep();
+
+    if (_visworld)
+        _visworld->step();
 
     std::cerr << timeReal() << " / " << timeSimulated() << "\r";
 

@@ -16,9 +16,15 @@ class Camera : public sim::Component {
     osg::ref_ptr<osg::Camera> _cam;
     osg::ref_ptr<osg::Image> _image;
 
+    VisBody *_vis; /*!< Visual representation (for debugging). */
+
     // camera parameters
     Vec3 _eye, _at, _zaxis;
-    const sim::Body *_body;
+
+    // attachement to body
+    const sim::Body *_body; /*!< Body camera is attached to. */
+    Vec3 _body_offset_pos; /*!< Position offset of camera from body. */
+    Quat _body_offset_rot; /*!< Rotation offset from body. */
 
   public:
     Camera();
@@ -27,11 +33,18 @@ class Camera : public sim::Component {
     void init(sim::Sim *sim);
     void finish();
     void cbPreStep();
+    void cbPostStep();
 
     // TODO
     //void setViewport
     void setLookAt(const Vec3 &eye, const Vec3 &at, const Vec3 &zaxis);
-    void attachToBody(const sim::Body *b);
+
+    /**
+     * TODO
+     */
+    void attachToBody(const sim::Body *b,
+                      const Vec3 &offset_pos = Vec3(0., 0., 0.),
+                      const Quat &offset_rot = Quat(0., 0., 0., 1.));
 
   protected:
     void _createCamera();

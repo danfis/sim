@@ -148,6 +148,14 @@ class VisBodyCylinder : public VisBodyShape {
     VisBodyCylinder(Scalar radius, Scalar height);
 };
 
+/**
+ * Cone shape. Takes radius and height.
+ */
+class VisBodyCone : public VisBodyShape {
+  public:
+    VisBodyCone(Scalar radius, Scalar height);
+};
+
 
 
 class VisBodyTriMesh : public VisBody {

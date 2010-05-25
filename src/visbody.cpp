@@ -178,6 +178,12 @@ VisBodyCylinder::VisBodyCylinder(Scalar radius, Scalar height)
     _setShape(new osg::Cylinder(Vec3(0., 0., 0.), radius, height));
 }
 
+VisBodyCone::VisBodyCone(Scalar radius, Scalar height)
+    : VisBodyShape()
+{
+    _setShape(new osg::Cone(Vec3(0., 0., 0.), radius, height));
+}
+
 
 
 VisBodyTriMesh::VisBodyTriMesh(const sim::Vec3 *coords, size_t coords_len,

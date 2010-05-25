@@ -73,8 +73,10 @@ void VisWorld::addCam(osg::Camera *cam)
 void VisWorld::rmCam(osg::Camera *cam)
 {
     DBG("_cams: " << _cams);
-    if (_cams->containsNode(cam))
+    if (_cams->containsNode(cam)){
         _cams->removeChild(cam);
+        cam->removeChild(_root_vis);
+    }
 }
 
 void VisWorld::addView(osgViewer::View *view)
