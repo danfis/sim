@@ -4,7 +4,7 @@ CXXFLAGS += -I../src
 CXXFLAGS_BT = $(CXXFLAGS) $(OSG_CXXFLAGS) $(BT_CXXFLAGS)
 CXXFLAGS_ODE = $(CXXFLAGS) $(OSG_CXXFLAGS) $(ODE_CXXFLAGS)
 
-LDFLAGS += -lrt -L../src -lsim
+LDFLAGS +=  -L../src -lsim
 LDFLAGS_BT = -L../src/bullet -lsim-bullet $(LDFLAGS) $(OSG_LDFLAGS) $(BT_LDFLAGS)
 LDFLAGS_ODE = -L../src/ode -lsim-ode $(LDFLAGS) $(OSG_LDFLAGS) $(ODE_LDFLAGS)
 
