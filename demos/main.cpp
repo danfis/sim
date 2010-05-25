@@ -487,10 +487,78 @@ void printTree(osg::Node *node) {
 }
 
 
+class PovrayComponent : public sim::Component {
+	sim::Sim *_sim;
+	std::vector<sim::VisBody *> *_bodies;
+	int frame;
+	public:
+	PovrayComponent(std::vector<sim::VisBody *> *bodies);
+	~PovrayComponent();
+
+	void init(sim::Sim *sim);
+	void finish();
+	void cbPostStep();
+	void processMessage(const sim::Message &msg);
+};
+
+PovrayComponent::PovrayComponent(std::vector<sim::VisBody *> *bodies){
+	_bodies = bodies;
+	frame = 0;
+}
+
+PovrayComponent::~PovrayComponent(){
+	_bodies = NULL;
+}
+
+void PovrayComponent::init(sim::Sim *sim){
+	_sim = sim;
+	char name[200];
+	sprintf(name,"camera.inc");
+	std::ofstream ofs(name);
+	ofs << "// camera definition \n";
+	ofs << "#include \"colors.inc\"\n";
+	ofs << "camera {\n";
+	ofs << "\tlocation <5,-5,3>\n";
+	ofs << "\tsky <0,0,1>\n";
+	ofs << "\tlook_at <0,0,3>\n";
+	ofs << "}\n";
+	ofs << "light_source { <20,-5,20> color White }\n";
+	ofs << "light_source { <-20,-5,20> color White }\n";
+	ofs << "light_source { <0,-15,10> color White }\n";
+	ofs.close();
+}
+
+void PovrayComponent::finish(){
+}
+
+void PovrayComponent::cbPostStep(){
+	cerr << "PostStep:\n";
+
+	char name[200];
+	sprintf(name,"frame_%06d.pov",frame);
+	ofstream ofs(name);
+	ofs << "#include \"camera.inc\"\n";
+	for(int i=0;i<(int)(*_bodies).size();i++) {
+		if ((*_bodies)[i]) {
+			ofs << "object {\n";
+			((*_bodies)[i])->exportToPovray(ofs,2);
+			ofs << "}\n";
+		}
+	}
+	ofs.close();
+
+	frame++;
+
+}
+
+void PovrayComponent::processMessage(const sim::Message &msg){
+
+}
 
 
 
 class SimTestFormace : public sim::Sim {
+  std::vector<sim::VisBody *> bodies;
   public:
     SimTestFormace	()
         : Sim()
@@ -498,7 +566,6 @@ class SimTestFormace : public sim::Sim {
         setTimeStep(sim::Time::fromMs(10));
         setTimeSubSteps(2);
 
-		vector<sim::VisBody *> bodies;
 
         World *w = new World();
         sim::Body *b;
@@ -513,12 +580,14 @@ class SimTestFormace : public sim::Sim {
         //w->setContactBounce(0.1, 0.1);
     
         
-        b = w->createBodyBox(sim::Vec3(2., 2., 1.), 0.);
+        b = w->createBodyBox(sim::Vec3(2., 2., 1.), 0.4);
+        b->visBody()->setColor(osg::Vec4(1,0.8,0.4, 1.));
         b->setPos(3, 4., 5);
         b->activate();
 		bodies.push_back(b->visBody());
 
-		b = w->createBodyBox(sim::Vec3(3., 2., 1.), 0.);
+		b = w->createBodyBox(sim::Vec3(3., 2., 1.), 0.8);
+        b->visBody()->setColor(osg::Vec4(1.0, 0.63, 0.32, 1.));
         b->setPos(-3, 4., 5);
         b->activate();
 		bodies.push_back(b->visBody());
@@ -551,6 +620,11 @@ class SimTestFormace : public sim::Sim {
 		createPlane();
 
 //		printTree(_visworld->sceneRoot());
+
+
+		PovrayComponent *pc = new PovrayComponent(&bodies);
+		addComponent(pc);
+		regPostStep(pc);
 
 		char name[200];
 		sprintf(name,"all.pov");
@@ -816,6 +890,7 @@ class SimTestFormace : public sim::Sim {
 		obj->setPos(0,0,0);
         obj->visBody()->setColor(0.4, 1, 0.4, 1.);
         obj->activate();
+		bodies.push_back(obj->visBody());
     }
 	
 

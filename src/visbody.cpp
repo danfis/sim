@@ -28,6 +28,11 @@ void povTransformation(std::ofstream &ofs, const osg::Vec3 &position, const osg:
 	ofs << m(3,0) << "," << m(3,1) <<","<<m(3,2) <<">\n";
 }
 
+void povColor(std::ofstream &ofs, const osg::Vec4 &color) {
+	//ofs << "color rgb <" << color[0]<<","<<color[1]<<","<<color[2]<<"> ";
+	ofs << "color rgbf <" << color[0]<<","<<color[1]<<","<<color[2]<<"," << (1-color[3]) << "> ";
+}
+
 
 VisBody::VisBody()
     : _node(0), _offset(0., 0., 0.)
@@ -200,10 +205,16 @@ void VisBodyBox::exportToPovray(std::ofstream &ofs, const int type) {
 			osg::Drawable *d = g->getDrawable(i);
 			if (d) {
 				osg::Box *b = (osg::Box *)d->getShape();
+				osg::ShapeDrawable *sd = (osg::ShapeDrawable *)d;
 				Vec3 center(b->getCenter());
 				Vec3 lengths(b->getHalfLengths());
+				
 				ofs << "box { <" << center[0]-lengths[0] << "," << center[1]-lengths[1] << "," << center[2]-lengths[2] << ">,";
 				ofs << " <" << center[0]+lengths[0] << "," << center[1]+lengths[1] << "," << center[2]+lengths[2] << "> ";
+
+				ofs << " pigment {";
+				povColor(ofs,sd->getColor());
+				ofs << "} ";
 				ofs << "}\n";
 			}
 		}
@@ -215,6 +226,7 @@ void VisBodyBox::exportToPovray(std::ofstream &ofs, const int type) {
 //		ofs << "\n";
 		povTransformation(ofs,pos(),rot());
 	} 
+
 
 }
 
@@ -269,11 +281,17 @@ void VisBodySphere::exportToPovray(std::ofstream &ofs, const int type) {
 			osg::Drawable *d = g->getDrawable(i);
 			if (d) {
 				osg::Sphere *b = (osg::Sphere *)d->getShape();
+				osg::ShapeDrawable *sd = (osg::ShapeDrawable *)d;
 				Vec3 center(b->getCenter());
 				double radius = b->getRadius();
 				ofs << "sphere { ";
 				povCoords(ofs,center);
-				ofs << "," << radius << "}\n";
+				ofs << "," << radius << "\n";
+
+				ofs << " pigment {";
+				povColor(ofs,sd->getColor());
+				ofs << "} ";
+				ofs << "}\n";
 			}
 		}
 	} 
@@ -305,13 +323,19 @@ void VisBodyCylinder::exportToPovray(std::ofstream &ofs, const int type) {
 			osg::Drawable *d = g->getDrawable(i);
 			if (d) {
 				osg::Cylinder *b = (osg::Cylinder *)d->getShape();
+				osg::ShapeDrawable *sd = (osg::ShapeDrawable *)d;
 				Vec3 center(b->getCenter());
 				double radius = b->getRadius();
 				double height = b->getHeight();
 				ofs << "cylinder { ";
 				ofs << "<" << center[0] << "," << center[1] <<"," << center[2]-height/2.0 << ">,";
 				ofs << "<" << center[0] << "," << center[1] <<"," << center[2]+height/2.0 << ">,";
-				ofs << radius << "}\n";
+				ofs << radius << "\n";
+
+				ofs << " pigment {";
+				povColor(ofs,sd->getColor());
+				ofs << "} ";
+				ofs << "}\n";
 			}
 		}
 	} 
@@ -373,7 +397,7 @@ void VisBodyTriMesh::setColor(const osg::Vec4 &c)
 }
 
 void VisBodyTriMesh::exportToPovray(std::ofstream &ofs, const int type) {
-	/*
+	
 	osg::Geode *g = _node->asGeode();
 
 	if (!g) {
@@ -381,13 +405,38 @@ void VisBodyTriMesh::exportToPovray(std::ofstream &ofs, const int type) {
 	}
 
 	if (type == 0 || type == 2) {
+		ofs << "mesh {";
 		for(int i=0;i<(int)g->getNumDrawables();i++) {
 			osg::Drawable *d = g->getDrawable(i);
 			if (d) {
-				osg::TriangleMesh *b = (osg::TriangleMesh *)d->getShape();
-    			osg::ref_ptr<osg::Vec3Array> vert = b->getVertices();
+				osg::Geometry *gm = d->asGeometry();
+				if (gm) {
+					osg::Vec3Array *points = (osg::Vec3Array *)gm->getVertexArray();
+//					DBG("num points= "<< points->getNumElements());
+					osg::Geometry::DrawElementsList l;
+					gm->getDrawElementsList(l);
+					for(int j=0;j<(int)l.size();j++) {
+						ofs << "triangle{";
+						osg::DrawElementsUInt *dui = (osg::DrawElementsUInt *)l[j];
+						for(int k=0;k<dui->getNumIndices();k++) {
+							osg::Vec3 v = (*points)[dui->index(k)];
+							ofs << "<" << v[0] <<","<<v[1]<<","<<v[2] << ">";
+							if (k < 2) {
+								ofs << ",";
+							}
+//							DBG("index is " << dui->index(k));
+							
+						}	
+						ofs << "}\n";
+					}
+					ofs << "pigment {";
+					//povColor(ofs,gm->getColor());
+					povColor(ofs,osg::Vec4(0.3,0.1,0,1));
+					ofs << "}\n";
+				}
 			}
 		}
+		ofs << "}\n";
 	} 
 
 	if (type == 1 || type == 2) {
@@ -395,7 +444,6 @@ void VisBodyTriMesh::exportToPovray(std::ofstream &ofs, const int type) {
 		povCoords(ofs,pos());
 		ofs << "\n";
 	} 
-	*/
 }
 
 
