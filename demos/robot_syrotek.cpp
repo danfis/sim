@@ -2,6 +2,7 @@
 #include <sim/msg.hpp>
 #include <sim/sensor/camera.hpp>
 using sim::Vec3;
+using sim::Quat;
 using sim::ode::BodyCompound;
 using sim::Scalar;
 
@@ -251,7 +252,12 @@ void RobotSyrotekComp::init(sim::Sim *sim)
     _robot = new RobotSyrotek(sim->world(), pos);
 
     sim::sensor::Camera *cam = new sim::sensor::Camera;
-    cam->attachToBody(_robot->chasis());
+    //cam->attachToBody(_robot->chasis(), Vec3(0.13, 0., 0.18), Quat(Vec3(0., 0., 1.), M_PI / 2.));
+    cam->attachToBody(_robot->chasis(), Vec3(0.13, 0., 0.18));
+    cam->visBodyEnable();
+    cam->setWidthHeight(300, 300);
+    cam->setBgColor(0., 0., 0., 1.);
+    cam->enableDump("cam/");
     sim->addComponent(cam);
 
     _robot->activate();

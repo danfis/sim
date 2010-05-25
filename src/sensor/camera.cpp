@@ -11,10 +11,17 @@ namespace sensor {
 
 Camera::Camera()
     : sim::Component(),
-      _eye(-0.8, 0., 0.1), _at(1., 0., 0.1), _zaxis(0., 0., 1.),
-      _body(0)
+      _cam(0), _image(0), _vis(0), _vis_enabled(false),
+      _eye(0., 0., 0.), _at(0., 0., 0.), _zaxis(0., 0., 1.),
+      _bgcolor(0.1, 0.1, 0.3, 1.),
+      _width(100), _height(100),
+      _body(0), _body_offset_pos(0., 0., 0.), _body_offset_rot(0., 0., 0., 1.),
+      _dump_prefix(0)
 
 {
+    // create visual representation
+    _vis = new VisBodyCone(0.005, 0.03);
+    _vis->setColor(1., 0., 0., 1.);
 }
 
 Camera::~Camera()
@@ -31,11 +38,19 @@ void Camera::init(sim::Sim *sim)
 
     _sim->regPreStep(this);
     _sim->regPostStep(this);
+
+    if (_vis_enabled && _vis)
+        _sim->visWorld()->addBody(_vis);
+
+    _updatePosition();
 }
 
 void Camera::finish()
 {
     _sim->visWorld()->rmCam(_cam);
+
+    if (_vis_enabled && _vis)
+        _sim->visWorld()->rmBody(_vis);
 }
 
 void Camera::cbPreStep()
@@ -43,9 +58,8 @@ void Camera::cbPreStep()
     static size_t counter = 0;
     static char fn[100];
 
-    if (_image->valid()){
-        DBG(counter);
-        sprintf(fn, "%06d.png", counter);
+    if (_dump_prefix && _image->valid()){
+        sprintf(fn, "%s%06d.png", _dump_prefix, counter);
         osgDB::writeImageFile(*_image, fn);
         counter++;
     }
@@ -60,53 +74,55 @@ void Camera::attachToBody(const sim::Body *b, const Vec3 &pos, const Quat &rot)
 {
     _body = b;
     _body_offset_pos = pos;
-    _body_offset_pos = Vec3(0., 0., 0.2);
     _body_offset_rot = rot;
-    _body_offset_rot = Quat(Vec3(0., 0., 1.), M_PI / 2.);
 }
 
 void Camera::_createCamera()
 {
-    osg::Vec4 bgcolor(0.1, 0.1, 0.3, 1.);
-    int x, y, width, height;
+    Scalar aspect = (Scalar)_width / (Scalar)_height;
 
-    x = 0;
-    y = 0;
-    width = 512;
-    height = 512;
-
-    // set up camera
+    // delete camera if already created
     if (_cam)
         _cam->unref();
 
+    // set up camera
     _cam = new osg::Camera;
-    _cam->setClearColor(bgcolor);
-    //_cam->setProjectionMatrixAsFrustum(-10, 10, -10, 10, -30, 30);
-    _cam->setProjectionMatrixAsPerspective(30, (double)width / (double)height, 0.01, 10.);
+    _cam->setClearColor(_bgcolor);
+    _cam->setProjectionMatrixAsPerspective(30, aspect, 0.01, 10.);
     _cam->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-    _cam->setViewport(x, y, width, height);
-    _cam->setViewMatrixAsLookAt(_eye, _at, _zaxis);
+    _cam->setViewport(0, 0, _width, _height);
     _cam->setRenderOrder(osg::Camera::PRE_RENDER);
-
-    /*
-    //_cam->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER);
-    DBG("Render Target:");
-    DBG("Frame buffer object: " << osg::Camera::FRAME_BUFFER_OBJECT);
-    DBG("Pixel buffer rtt: " << osg::Camera::PIXEL_BUFFER_RTT);
-    DBG("Pixel buffer: " << osg::Camera::PIXEL_BUFFER);
-    DBG("Frame buffer: " << osg::Camera::FRAME_BUFFER);
-    DBG("Sep window: " << osg::Camera::SEPERATE_WINDOW);
-    DBG("cur: " << _cam->getRenderTargetImplementation());
-    */
-
 
     // attach image to camera - each frame will be stored in _image
     _image = new osg::Image;
     //_image->allocateImage(width, height, 1, GL_RGBA, GL_FLOAT);
     _cam->attach(osg::Camera::COLOR_BUFFER, _image);
+}
 
-    // create visual representation
-    {
+void Camera::_updatePosition()
+{
+    if (_body){
+        const Vec3 &pos = _body->pos();
+        const Quat &rot = _body->rot();
+
+        // Initial view matrix of camera is: eye is (0., 0., 0.),
+        // looking at point (1., 0., 0.) and zaxis is (0., 0., 1.)
+        // When applying body's transformation, eye position must moved to
+        // pos from origin and rotated position offset must be added.
+        // At point is computed this way: first direction vector must be
+        // computed (= _body_offset_rot * Vec3(1., 0., 0.)), on this
+        // direction vector must be applied rotation of body and finaly at
+        // point is eye moved by direction vector.
+        // Z axis is simply rotated zaxis by offset first then by body's
+        // rotation.
+        _eye = pos + (rot * _body_offset_pos);
+        _at = rot * (_body_offset_rot * Vec3(1., 0., 0.)) + _eye;
+        _zaxis = rot * (_body_offset_rot * Vec3(0., 0., 1.));
+    }
+
+    _cam->setViewMatrixAsLookAt(_eye, _at, _zaxis);
+
+    if (_vis_enabled && _vis){
         // direction of camera
         Vec3 dir = _at - _eye;
 
@@ -114,61 +130,10 @@ void Camera::_createCamera()
         Quat rot;
         rot.makeRotate(Vec3(0., 0., 1.), -dir);
 
-        _vis = new VisBodyCone(0.005, 0.03);
-        // place cone behind the camera!
+        // set position and rotation
         _vis->setPos(_eye - (dir * 0.03));
         _vis->setRot(rot);
-        _vis->setColor(1., 0., 0., 1.);
-
-        _sim->visWorld()->addBody(_vis);
     }
-}
-
-void Camera::_updatePosition()
-{
-    static size_t counter = 0;
-
-    if (_body){
-        const Vec3 &pos = _body->pos();
-        const Quat &rot = _body->rot();
-
-        // position of camera is pos, rot is rotation of camera from x-axis
-        // direction
-        _eye = pos + _body_offset_pos;
-        _at = _eye + ((rot * _body_offset_rot) * Vec3(1., 0., 0.));
-        _zaxis = rot * Vec3(0., 0., 1.);
-
-        /*
-        osg::Matrixd matrix;
-        matrix.makeIdentity();
-        matrix.makeTranslate(pos + Vec3(0., 0., 10.));
-        matrix.makeRotate(rot);
-        _cam->setViewMatrix(matrix);
-        //_cam->setViewMatrixAsLookAt(Vec3(0., 0., 10), pos, _zaxis);
-        {
-            osg::Vec3f eye, at, zaxis;
-            _cam->getViewMatrix().getLookAt(eye, at, zaxis);
-            DBG(counter << ": " << _image->valid() << " " << DBGV(pos));
-            DBG(DBGV(eye) << " " << DBGV(at) << " " << DBGV(zaxis));
-        }
-        */
-
-        _cam->setViewMatrixAsLookAt(_eye, _at, _zaxis);
-
-        {
-            // direction of camera
-            Vec3 dir = _at - _eye;
-
-            // rotate VisBody from z axis to direction
-            Quat rot;
-            rot.makeRotate(Vec3(0., 0., 1.), -dir);
-            _vis->setPos(_eye - (dir * 0.03));
-            _vis->setRot(rot);
-            _vis->setColor(1., 0., 0., 1.);
-        }
-    }
-
-    counter++;
 }
 
 
