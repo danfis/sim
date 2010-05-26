@@ -69,7 +69,9 @@ void Snake::processMessage(const Message &msg) {
 
 		for(int i=0;i<(int)_snakeBodies.size();i++) {
 			_snakeBodies[i]->setParamVel(vel1[i]);			
-			_snakeBodies[i]->setParamVel2(vel2[i]);		
+			_snakeBodies[i]->setParamVel2(vel2[i]);	
+			_snakeBodies[i]->setParamFMax(20);	
+			_snakeBodies[i]->setParamFMax2(20);	
 			DBG("Joint " << i << ", vel1=" << vel1[i] << ", vel2=" << vel2[i]);	
 		}
 
