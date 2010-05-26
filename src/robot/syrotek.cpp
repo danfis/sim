@@ -6,39 +6,39 @@ using sim::ode::BodyCompound;
 
 #define SIZE(a) (sizeof(a) / sizeof(*a))
 
-static Vec3 verts[] = { Vec3( 0.087,  0.045, 0.),
-                        Vec3( 0.087, -0.045, 0.),
-                        Vec3( 0.050, -0.081, 0.),
-                        Vec3(-0.050, -0.081, 0.),
-                        Vec3(-0.087, -0.045, 0.),
-                        Vec3(-0.087,  0.045, 0.),
-                        Vec3(-0.050,  0.081, 0.),
-                        Vec3( 0.050,  0.081, 0.),
-                        Vec3( 0.087,  0.045, 0.06),
-                        Vec3( 0.087, -0.045, 0.06),
-                        Vec3( 0.050, -0.081, 0.06),
-                        Vec3(-0.050, -0.081, 0.06),
-                        Vec3(-0.087, -0.045, 0.06),
-                        Vec3(-0.087,  0.045, 0.06),
-                        Vec3(-0.050,  0.081, 0.06),
-                        Vec3( 0.050,  0.081, 0.06),
+static Vec3 verts[] = { Vec3( 0.117,  0.045, 0.),
+                        Vec3( 0.117, -0.045, 0.),
+                        Vec3( 0.080, -0.081, 0.),
+                        Vec3(-0.020, -0.081, 0.),
+                        Vec3(-0.057, -0.045, 0.),
+                        Vec3(-0.057,  0.045, 0.),
+                        Vec3(-0.020,  0.081, 0.),
+                        Vec3( 0.080,  0.081, 0.),
+                        Vec3( 0.117,  0.045, 0.06),
+                        Vec3( 0.117, -0.045, 0.06),
+                        Vec3( 0.080, -0.081, 0.06),
+                        Vec3(-0.020, -0.081, 0.06),
+                        Vec3(-0.057, -0.045, 0.06),
+                        Vec3(-0.057,  0.045, 0.06),
+                        Vec3(-0.020,  0.081, 0.06),
+                        Vec3( 0.080,  0.081, 0.06),
 
-                        Vec3(0.075,  0.030, 0.06),
-                        Vec3(0.075, -0.030, 0.06),
-                        Vec3(0.024, -0.059, 0.06),
-                        Vec3(-0.062, -0.059, 0.06),
-                        Vec3(-0.074, -0.050, 0.06),
-                        Vec3(-0.074,  0.050, 0.06),
-                        Vec3(-0.062,  0.059, 0.06),
-                        Vec3(0.024,  0.059, 0.06),
-                        Vec3(0.075,  0.030, 0.18),
-                        Vec3(0.075, -0.030, 0.18),
-                        Vec3(0.024, -0.059, 0.18),
-                        Vec3(-0.062, -0.059, 0.18),
-                        Vec3(-0.074, -0.050, 0.18),
-                        Vec3(-0.074,  0.050, 0.18),
-                        Vec3(-0.062,  0.059, 0.18),
-                        Vec3(0.024,  0.059, 0.18),
+                        Vec3(0.105,  0.030, 0.06),
+                        Vec3(0.105, -0.030, 0.06),
+                        Vec3(0.054, -0.059, 0.06),
+                        Vec3(-0.032, -0.059, 0.06),
+                        Vec3(-0.044, -0.050, 0.06),
+                        Vec3(-0.044,  0.050, 0.06),
+                        Vec3(-0.032,  0.059, 0.06),
+                        Vec3(0.054,  0.059, 0.06),
+                        Vec3(0.105,  0.030, 0.18),
+                        Vec3(0.105, -0.030, 0.18),
+                        Vec3(0.054, -0.059, 0.18),
+                        Vec3(-0.032, -0.059, 0.18),
+                        Vec3(-0.044, -0.050, 0.18),
+                        Vec3(-0.044,  0.050, 0.18),
+                        Vec3(-0.032,  0.059, 0.18),
+                        Vec3(0.054,  0.059, 0.18),
 };
 static unsigned int ids[] = { 0, 1, 2,
                               0, 2, 3,
@@ -106,23 +106,17 @@ namespace sim {
 
 namespace robot {
 
-Syrotek::Syrotek(sim::World *w, const Vec3 &pos)
+Syrotek::Syrotek(sim::World *w, const Vec3 &pos,
+                 const osg::Vec4 &chasis_color)
     : _world(w), _pos(pos)
 {
         int id;
         unsigned long robot_coll_id = (unsigned long)this;
 
-        {
-            size_t i;
-            for (i = 0; i < SIZE(verts); i++){
-                verts[i] += Vec3(0.03, 0., 0.);
-            }
-        }
-
         // create chasis
         _chasis = (BodyCompound *)_world->createBodyCompound();
         id = _chasis->addTriMesh(verts, SIZE(verts), ids, SIZE(ids));
-        _chasis->visBody(id)->setColor(0., 0.1, 0.7, .6);
+        _chasis->visBody(id)->setColor(chasis_color);
         _chasis->setPos(_pos);
         _chasis->setMassBox(Vec3(0.15, 0.15, 0.18), 2.);
         _chasis->collSetDontCollideId(robot_coll_id);

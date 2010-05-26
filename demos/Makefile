@@ -12,6 +12,7 @@ LIBDEPS_BT = ../src/libsim.a ../src/bullet/libsim-bullet.a
 LIBDEPS_ODE = ../src/libsim.a ../src/ode/libsim-ode.a
 
 OBJS_SYROTEK = demo_syrotek.cpp robot_syrotek.cpp
+OBJS_FOLLOW_COLOR = demo_follow_color.cpp robot_syrotek.cpp
 
 TARGETS =
 
@@ -22,6 +23,7 @@ endif
 ifeq '$(WANT_ODE)' 'yes'
   TARGETS += demo_base_ode
   TARGETS += demo_syrotek
+  TARGETS += demo_follow_color
   TARGETS += main
 endif
 
@@ -42,6 +44,8 @@ demo_base_ode: demo_base_ode.cpp $(LIBDEPS_ODE)
 
 demo_syrotek: $(OBJS_SYROTEK) $(LIBDEPS_ODE)
 	$(CXX) $(CXXFLAGS_ODE) $(SDL_CXXFLAGS) -o $@ $(OBJS_SYROTEK) $(LDFLAGS_ODE) $(SDL_LDFLAGS) -lSDL
+demo_follow_color: $(OBJS_FOLLOW_COLOR) $(LIBDEPS_ODE)
+	$(CXX) $(CXXFLAGS_ODE) $(SDL_CXXFLAGS) -o $@ $(OBJS_FOLLOW_COLOR) $(LDFLAGS_ODE) $(SDL_LDFLAGS) -lSDL
 
 
 clean:

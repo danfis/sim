@@ -3,5 +3,6 @@ demo[0-9]
 demo*_ode
 demo*_bt
 demo_syrotek
+demo_follow_color
 main
 

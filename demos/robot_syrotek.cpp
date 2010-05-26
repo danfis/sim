@@ -22,7 +22,8 @@ void RobotSyrotekComp::init(sim::Sim *sim)
     Vec3 pos(0., 0., 0.08);
 
     _sim = sim;
-    _robot = new sim::robot::Syrotek(sim->world(), pos);
+    _robot = new sim::robot::Syrotek(sim->world(), pos,
+                                     osg::Vec4(0.7, 0.1, 0., 0.6));
 
     sim::sensor::Camera *cam = new sim::sensor::Camera;
     //cam->attachToBody(_robot->chasis(), Vec3(0.13, 0., 0.18), Quat(Vec3(0., 0., 1.), M_PI / 2.));
@@ -30,7 +31,7 @@ void RobotSyrotekComp::init(sim::Sim *sim)
     cam->visBodyEnable();
     cam->setWidthHeight(300, 300);
     cam->setBgColor(0., 0., 0., 1.);
-    cam->enableDump("cam/");
+    //cam->enableDump("cam/");
     cam->enableView();
     sim->addComponent(cam);
 

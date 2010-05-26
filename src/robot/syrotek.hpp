@@ -21,7 +21,8 @@ class Syrotek {
     sim::Scalar _vel[2];
 
   public:
-    Syrotek(sim::World *w, const sim::Vec3 &pos = sim::Vec3(0., 0., 0.08));
+    Syrotek(sim::World *w, const sim::Vec3 &pos = sim::Vec3(0., 0., 0.08),
+            const osg::Vec4 &chasis_color = osg::Vec4(0., 0.1, 0.7, 0.6));
 
     const sim::Body *chasis() const { return _chasis; }
     sim::Body *chasis() { return _chasis; }
