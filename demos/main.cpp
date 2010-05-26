@@ -9,7 +9,7 @@
 #include "msg.hpp"
 //#include "meshes/ardrone.h"
 #include "meshes/jezek.h"
-////#include "meshes/surface.h"
+#include "meshes/surface.h"
 #include "meshes/plane.h"
 #include "sim/comp/povray.hpp"
 #include "sim/comp/snake.hpp"
@@ -635,10 +635,6 @@ class SimTestFormace : public sim::Sim {
 	}
 
 
-<<<<<<< HEAD:demos/main.cpp
-=======
-=======
->>>>>>> new snake robot with four legs:demos/main.cpp
 	void createSnake() {
 
 		const double posx = 0;
@@ -961,12 +957,7 @@ class SimTestFormace : public sim::Sim {
         obj->visBody()->setColor(0.4, 1, 0.4, 1.);
         obj->activate();
     }
-<<<<<<< HEAD:demos/main.cpp
-
-	
-=======
 /*	
->>>>>>> new snake robot with four legs:demos/main.cpp
 	void createSurface()
     {
         sim::Body *obj;
@@ -976,12 +967,7 @@ class SimTestFormace : public sim::Sim {
         obj->visBody()->setColor((12*16+12)/255.0, (9*16+9)/255.0, (3*16+3)/255.0, 1.);
         obj->activate();
     }
-<<<<<<< HEAD:demos/main.cpp
-	
-	
-=======
 */	
->>>>>>> new snake robot with four legs:demos/main.cpp
 	void createPlane()
     {
         sim::Body *obj;
