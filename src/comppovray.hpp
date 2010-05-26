@@ -26,6 +26,13 @@
   *
   * Exporting bodies geometry+position to povray is done by 'exportToPovray' method in visBody* classes
   *
+  * The result pictures can be processed by povray:
+  * povray -W1024 -H768 frame_xxxx.pov
+  * or a script demos/script/processPovray.pl can be used (it has several predefined modes to produce low/high quality pictures 
+  *
+  * the result pictures (in png format) can be used to produce a video:
+  * demos/script/makeVidMen2.sh
+  * this script load all png files and run mencoder to make a video in two pass process
   */
 
 
@@ -35,6 +42,7 @@ class PovrayComponent : public sim::Component {
 	sim::Sim *_sim;
 	std::vector<sim::VisBody *> *_bodies;
 	int frame;
+
 	public:
 	PovrayComponent(std::vector<sim::VisBody *> *bodies);
 	~PovrayComponent();
