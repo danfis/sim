@@ -17,10 +17,16 @@ void povCoords(std::ofstream &ofs, const osg::Vec3 &vec) {
 }
 
 void povTransformation(std::ofstream &ofs, const osg::Vec3 &position, const osg::Quat &rotation) {
-	osg::Matrixd m;
-	m.makeIdentity();
-	m.makeRotate(rotation);
-	m.makeTranslate(position);
+	osg::Matrixd mt;
+	mt.makeIdentity();
+	mt.makeTranslate(position);
+
+	osg::Matrixd mr;
+	mr.makeIdentity();
+	mr.makeRotate(rotation);
+
+	osg::Matrix m = mr*mt;
+//	DBG("Rotation="<<rotation[0] <<"," << rotation[1] <<","<< rotation[2] << "," << rotation[3]);
 	ofs << "matrix <";
 	ofs << m(0,0) << "," << m(0,1) <<","<<m(0,2) <<",\n";
 	ofs << m(1,0) << "," << m(1,1) <<","<<m(1,2) <<",\n";
@@ -249,9 +255,7 @@ void VisBodyCube::exportToPovray(std::ofstream &ofs, const TPovrayMode mode) {
 	} 
 
 	if (mode == POVRAY_TRANSFORM || mode == POVRAY_GEOMTRANSFROM) {
-		ofs << "translate ";
-		povCoords(ofs,pos());
-		ofs << "\n";
+		povTransformation(ofs,pos(),rot());
 	} 
 
 }
@@ -294,9 +298,7 @@ void VisBodySphere::exportToPovray(std::ofstream &ofs, const TPovrayMode mode) {
 	} 
 
 	if (mode == POVRAY_TRANSFORM || mode == POVRAY_GEOMTRANSFROM) {
-		ofs << "translate ";
-		povCoords(ofs,pos());
-		ofs << "\n";
+		povTransformation(ofs,pos(),rot());
 	} 
 
 }
@@ -338,9 +340,7 @@ void VisBodyCylinder::exportToPovray(std::ofstream &ofs, const TPovrayMode mode)
 	} 
 
 	if (mode == POVRAY_TRANSFORM || mode == POVRAY_GEOMTRANSFROM) {
-		ofs << "translate ";
-		povCoords(ofs,pos());
-		ofs << "\n";
+		povTransformation(ofs,pos(),rot());
 	} 
 
 }
@@ -477,9 +477,7 @@ void VisBodyTriMesh::exportToPovray(std::ofstream &ofs, const TPovrayMode mode) 
 	} 
 
 	if (mode == POVRAY_TRANSFORM || mode == POVRAY_GEOMTRANSFROM) {
-		ofs << "translate ";
-		povCoords(ofs,pos());
-		ofs << "\n";
+		povTransformation(ofs,pos(),rot());
 	} 
 }
 

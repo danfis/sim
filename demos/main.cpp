@@ -513,6 +513,7 @@ class SimTestFormace : public sim::Sim {
         b = w->createBodyBox(sim::Vec3(2., 2., 1.), 0.4);
         b->visBody()->setColor(osg::Vec4(1,0.8,0.4, 1.));
         b->setPos(3, 4., 5);
+        b->setRot(sim::Quat(Vec3(1., 1., 0.), M_PI * 0.3));
         b->activate();
 		bodies.push_back(b->visBody());
 

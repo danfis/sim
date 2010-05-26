@@ -20,9 +20,9 @@ void PovrayComponent::init(sim::Sim *sim){
 	ofs << "// camera definition \n";
 	ofs << "#include \"colors.inc\"\n";
 	ofs << "camera {\n";
-	ofs << "\tlocation <5,-5,3>\n";
+	ofs << "\tlocation <6,-6,4>\n";
 	ofs << "\tsky <0,0,1>\n";
-	ofs << "\tlook_at <0,0,3>\n";
+	ofs << "\tlook_at <1,0,3>\n";
 	ofs << "}\n";
 	ofs << "light_source { <20,-5,20> color White }\n";
 	ofs << "light_source { <-20,-5,20> color White }\n";
