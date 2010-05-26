@@ -502,7 +502,7 @@ class SimTestFormace : public sim::Sim {
         for (size_t i = 0; i < 300; i++){
             visWorld()->step();
             std::cerr << i << "\r";
-            usleep(10000);
+            usleep(5000);
         }
         std::cerr << std::endl;
 
@@ -645,15 +645,18 @@ class SimTestFormace : public sim::Sim {
         chasis = world()->createBodyBox(sim::Vec3(robotLength, robotWidth, robotHeight), 1.);
         chasis->setPos(pos);
         chasis->visBody()->setColor(0.4, 0.1, 1., 0.3);
+		chasis->collSetDontCollideId(1);
 
 		// front wheels
 		w1 = world()->createBodyCylinderY(wheelRadius,wheelWidth,0.5);
         w1->setPos(sim::Vec3(pos[0]+robotLength/2,pos[1]-robotWidth/2-wheelWidth/1.8,pos[2]));
         w1->visBody()->setColor(1., 0., 0., 0.8);
+		w1->collSetDontCollideId(1);
 
 		w2 = world()->createBodyCylinderY(wheelRadius,wheelWidth,0.5);
         w2->setPos(sim::Vec3(pos[0]+robotLength/2,pos[1]+robotWidth/2+wheelWidth/1.8,pos[2]));
         w2->visBody()->setColor(1., 0., 0., 0.8);
+		w2->collSetDontCollideId(1);
 		
 		// rear wheel
 		w3 = world()->createBodyCylinderY(wheelRadius,wheelWidth,0.5);
