@@ -482,7 +482,7 @@ class SimTestFormace : public sim::Sim {
 		//createArdrone();
 	//	createJezek();
 	//	createPlane();
-		createSurface();
+createSurface();
 //		createRobotCarlike();
 //		createSnake();
 		createSnake3();
@@ -958,7 +958,7 @@ class SimTestFormace : public sim::Sim {
         obj->visBody()->setColor(0.4, 1, 0.4, 1.);
         obj->activate();
     }
-	
+
 	
 	void createSurface()
     {
