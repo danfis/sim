@@ -555,7 +555,8 @@ class SimTestFormace : public sim::Sim {
 		createPlane();
 
 //		printTree(_visworld->sceneRoot());
-
+	
+		createRobotCarlike();
 
 		sim::PovrayComponent *pc = new sim::PovrayComponent(&bodies);
 		addComponent(pc);
@@ -696,8 +697,94 @@ class SimTestFormace : public sim::Sim {
         b2->setPos(pos + Vec3(2.1, -0.3, 2.5));
         b2->activate();
     }
+   
 
-    void createRobot(vector<sim::VisBody *> &bodies)
+	void createRobotCarlike()
+    {
+		const double robotWidth = 1;
+		const double robotLength = 2;
+		const double robotHeight = 0.6;
+		const double wheelRadius = 0.3;
+		const double wheelWidth = 0.2;
+		sim::Vec3 pos(5,2,1.1);
+
+        sim::Body *chasis, *w1,*w2,*w3,*w4;
+
+        chasis = world()->createBodyBox(sim::Vec3(robotLength, robotWidth, robotHeight), 1.);
+        chasis->setPos(pos);
+        chasis->visBody()->setColor(0.4, 0.1, 1., 0.3);
+
+		// front wheels
+		w1 = world()->createBodyCylinderY(wheelRadius,wheelWidth,0.5);
+        w1->setPos(sim::Vec3(pos[0]+robotLength/2,pos[1]-robotWidth/2-wheelWidth/1.8,pos[2]));
+        w1->visBody()->setColor(1., 0., 0., 0.8);
+
+		w2 = world()->createBodyCylinderY(wheelRadius,wheelWidth,0.5);
+        w2->setPos(sim::Vec3(pos[0]+robotLength/2,pos[1]+robotWidth/2+wheelWidth/1.8,pos[2]));
+        w2->visBody()->setColor(1., 0., 0., 0.8);
+		
+		// rear wheel
+		w3 = world()->createBodyCylinderY(wheelRadius,wheelWidth,0.5);
+        w3->setPos(sim::Vec3(pos[0]-robotLength/2,pos[1]-robotWidth/2-wheelWidth/1.8,pos[2]));
+        w3->visBody()->setColor(1., 0., 0., 0.8);
+
+		w4 = world()->createBodyCylinderY(wheelRadius,wheelWidth,0.5);
+        w4->setPos(sim::Vec3(pos[0]-robotLength/2,pos[1]+robotWidth/2+wheelWidth/1.8,pos[2]));
+        w4->visBody()->setColor(1., 0., 0., 0.8);
+
+
+        chasis->setPos(pos);
+		bodies.push_back(chasis->visBody());
+		bodies.push_back(w1->visBody());
+		bodies.push_back(w2->visBody());
+		bodies.push_back(w3->visBody());
+		bodies.push_back(w4->visBody());
+
+		// joint between chassis and wheels
+		sim::Joint *j1 = world()->createJointHinge2(chasis,w1,
+				sim::Vec3(pos[0]+robotLength/2,pos[1]-robotWidth/2-wheelWidth/1.8,pos[2]),
+				sim::Vec3(0,0,1),
+				sim::Vec3(0,1,0));
+
+		sim::Joint *j2 = world()->createJointHinge2(chasis,w2,
+				sim::Vec3(pos[0]+robotLength/2,pos[1]+robotWidth/2+wheelWidth/1.8,pos[2]),
+				sim::Vec3(0,0,1),
+				sim::Vec3(0,1,0));
+
+		sim::Joint *j3 = world()->createJointHinge2(chasis,w3,
+				sim::Vec3(pos[0]-robotLength/2,pos[1]-robotWidth/2-wheelWidth/1.8,pos[2]),
+				sim::Vec3(0,0,1),
+				sim::Vec3(0,1,0));
+
+		sim::Joint *j4 = world()->createJointHinge2(chasis,w4,
+				sim::Vec3(pos[0]-robotLength/2,pos[1]+robotWidth/2+wheelWidth/1.8,pos[2]),
+				sim::Vec3(0,0,1),
+				sim::Vec3(0,1,0));
+
+		const double angle = 15*M_PI/180.0;
+		j1->setParamLimitLoHi(-angle,angle);
+		j2->setParamLimitLoHi(-angle,angle);
+		j3->setParamLimitLoHi(-0.001,0.001);
+		j4->setParamLimitLoHi(-0.001,0.001);
+
+        chasis->activate();
+
+		w1->activate();
+		w2->activate();
+		w3->activate();
+		w4->activate();
+
+		j1->activate();
+		j2->activate();
+		j3->activate();
+		j4->activate();
+
+        chasis->visBody()->setText("Robot", 1., osg::Vec4(0.5, 0.6, 0.3, 1.));
+    }
+
+
+
+	void createRobot()
     {
         sim::Vec3 pos(3. + 2., 3., 2.5);
         sim::Body *chasis;
@@ -711,7 +798,6 @@ class SimTestFormace : public sim::Sim {
 
 
         chasis->setPos(pos);
-		bodies.push_back(chasis->visBody());
 
 
         w[0]->setPos(pos.x() + 0.415, pos.y() + 0.4, pos.z() - 0.2);
