@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <sim/body.hpp>
+#include <sim/joint.hpp>
 
 namespace sim {
 
@@ -12,10 +13,13 @@ namespace comp {
 
 class Snake : public sim::Component {
 	sim::Sim *_sim;
-	std::vector<sim::Body *> _snakeBodies;
+	std::vector<sim::Joint *> _snakeBodies;
+	std::vector<double> vel1,vel2;
+//	sim::Vec4 oldColor;
+	int selectedRobot;
 
 	public:
-	Snake(const std::vector<sim::Body *> &snakeBodies);
+	Snake(const std::vector<sim::Joint *> &snakeBodies);
 	~Snake();
 
 

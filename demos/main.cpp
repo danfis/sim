@@ -422,7 +422,7 @@ void printTree(osg::Node *node) {
 
 
 class SimTestFormace : public sim::Sim {
-	vector<sim::Body *> snakeBodies;
+	vector<sim::Joint *> snakeJoints;
   public:
     SimTestFormace	()
         : Sim()
@@ -493,7 +493,7 @@ class SimTestFormace : public sim::Sim {
 //		regPostStep(pc);
 
 
-		sim::comp::Snake *sc = new sim::comp::Snake(snakeBodies);
+		sim::comp::Snake *sc = new sim::comp::Snake(snakeJoints);
 		addComponent(sc);
 		regMessage(sc,sim::MessageKeyPressed::Type);
 
@@ -520,7 +520,7 @@ class SimTestFormace : public sim::Sim {
 		const double posy = 0;
 		const double posz = 1.1;
 		const double width = 1;
-		const double gap = width*1.1;
+		const double gap = width*1.5;
 		const double mass = 0.5;
 
         sim::Body *b1 = world()->createBodyCube(width,mass);
@@ -560,10 +560,10 @@ class SimTestFormace : public sim::Sim {
 		j3->activate();
 		j4->activate();
 
-		snakeBodies.push_back(b1);
-		snakeBodies.push_back(b2);
-		snakeBodies.push_back(b3);
-		snakeBodies.push_back(b4);
+		snakeJoints.push_back(j1);
+		snakeJoints.push_back(j2);
+		snakeJoints.push_back(j3);
+		snakeJoints.push_back(j4);
 
 		j3->setParamVel(1);
 		j3->setParamFMax(10);
