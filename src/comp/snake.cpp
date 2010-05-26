@@ -18,6 +18,12 @@ Snake::~Snake(){
 
 void Snake::init(sim::Sim *sim) {
 	_sim = sim;
+	for(int i=0;i<(int)_snakeBodies.size();i++) {
+		vel1.push_back(0);
+		vel2.push_back(0);
+		_snakeBodies[i]->setParamVel(0);			
+		_snakeBodies[i]->setParamVel2(0);			
+	}
 }
 
 void Snake::finish(){

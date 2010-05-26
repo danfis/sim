@@ -498,7 +498,7 @@ class SimTestFormace : public sim::Sim {
 //		regPostStep(pc);
 
 
-		sim::comp::Snake *sc = new sim::comp::Snake(snakeBodies);
+		sim::comp::Snake *sc = new sim::comp::Snake(snakeJoints);
 		addComponent(sc);
 		regMessage(sc,sim::MessageKeyPressed::Type);
 
