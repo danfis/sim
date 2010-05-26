@@ -482,7 +482,6 @@ class SimTestFormace : public sim::Sim {
 		//createArdrone();
 	//	createJezek();
 	//	createPlane();
-createSurface();
 //		createRobotCarlike();
 //		createSnake();
 		createSnake3();
@@ -493,6 +492,13 @@ createSurface();
 
 
 		sim::comp::Snake *sc = new sim::comp::Snake(snakeJoints);
+
+//		sim::comp::Povray *pc = new sim::comp::Povray("povray/");
+//		addComponent(pc);
+//		regPostStep(pc);
+
+
+		sim::comp::Snake *sc = new sim::comp::Snake(snakeBodies);
 		addComponent(sc);
 		regMessage(sc,sim::MessageKeyPressed::Type);
 
@@ -636,6 +642,7 @@ createSurface();
 	}
 
 
+=======
 	void createSnake() {
 
 		const double posx = 0;
@@ -647,23 +654,14 @@ createSurface();
 
         sim::Body *b1 = world()->createBodyCube(width,mass);
 		b1->setPos(sim::Vec3(posx,posy,posz));
-		b1->visBody()->setColor(1,1,1,1);
-
         sim::Body *b2 = world()->createBodyCube(width,mass);
 		b2->setPos(sim::Vec3(posx+1*gap,posy,posz));
-		b2->visBody()->setColor(1,0,1,1);
-
         sim::Body *b3 = world()->createBodyCube(width,mass);
 		b3->setPos(sim::Vec3(posx+2*gap,posy,posz));
-		b3->visBody()->setColor(0.15,0.7,0.6,1);
-
         sim::Body *b4 = world()->createBodyCube(width,mass);
 		b4->setPos(sim::Vec3(posx+3*gap,posy,posz));
-		b4->visBody()->setColor(0.2,0.3,0.11,1);
-
         sim::Body *b5 = world()->createBodyCube(width,mass);
 		b5->setPos(sim::Vec3(posx+4*gap,posy,posz));
-		b5->visBody()->setColor(0.5,0,0.2,1);
 
 		sim::Joint *j1 = world()->createJointHinge2(b1,b2,b1->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0));
 		sim::Joint *j2 = world()->createJointHinge2(b2,b3,b2->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0));
