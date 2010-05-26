@@ -559,9 +559,9 @@ class SimTestFormace : public sim::Sim {
 	
 		createRobotCarlike();
 
-		sim::PovrayComponent *pc = new sim::PovrayComponent(&bodies);
-		addComponent(pc);
-		regPostStep(pc);
+//		sim::PovrayComponent *pc = new sim::PovrayComponent(&bodies);
+//		addComponent(pc);
+//		regPostStep(pc);
 
     }
 
@@ -705,9 +705,9 @@ class SimTestFormace : public sim::Sim {
 		const double robotWidth = 1;
 		const double robotLength = 2;
 		const double robotHeight = 0.6;
-		const double wheelRadius = 0.3;
+		const double wheelRadius = 0.8;
 		const double wheelWidth = 0.2;
-		sim::Vec3 pos(5,2,1.1);
+		sim::Vec3 pos(5,2,1.2);
 
         sim::Body *chasis, *w1,*w2,*w3,*w4;
 
