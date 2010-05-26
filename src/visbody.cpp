@@ -221,9 +221,6 @@ void VisBodyBox::exportToPovray(std::ofstream &ofs, const TPovrayMode mode) {
 	} 
 
 	if (mode == POVRAY_TRANSFORM || mode == POVRAY_GEOMTRANSFROM) {
-//		ofs << "translate ";
-//		povCoords(ofs,pos());
-//		ofs << "\n";
 		povTransformation(ofs,pos(),rot());
 	} 
 
@@ -468,9 +465,10 @@ void VisBodyTriMesh::exportToPovray(std::ofstream &ofs, const TPovrayMode mode) 
 						}	
 						ofs << "}\n";
 					}
+    				osg::Vec4Array *colorArray = (osg::Vec4Array *)gm->getColorArray();
+					
 					ofs << "pigment {";
-					//povColor(ofs,gm->getColor());
-					povColor(ofs,osg::Vec4(0.3,0.1,0,1));
+					povColor(ofs,(*colorArray)[0]);
 					ofs << "}\n";
 				}
 			}

@@ -777,7 +777,7 @@ class SimTestFormace : public sim::Sim {
 
         obj = world()->createBodyTriMesh(plane10_verts,plane10_verts_len,plane10_ids,plane10_ids_len,0);
 		obj->setPos(0,0,0);
-        obj->visBody()->setColor(0.4, 1, 0.4, 1.);
+        obj->visBody()->setColor(0.7, 1, 0.2, 1.);
         obj->activate();
 		bodies.push_back(obj->visBody());
     }
