@@ -488,9 +488,9 @@ class SimTestFormace : public sim::Sim {
 
 		createSnake();
 
-//		sim::comp::Povray *pc = new sim::comp::Povray("povray/");
-//		addComponent(pc);
-//		regPostStep(pc);
+		sim::comp::Povray *pc = new sim::comp::Povray("povray/");
+		addComponent(pc);
+		regPostStep(pc);
 
 
 		sim::comp::Snake *sc = new sim::comp::Snake(snakeJoints);
