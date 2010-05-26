@@ -240,9 +240,8 @@ class Sim {
     World *_world;
     VisWorld *_visworld;
 
-    bool _init; //!< true if init() was called
-
     std::list<Component *> _cs; //!< List of all components
+    std::list<Component *> _cs_uninit; //!< List of uninitialized components
 
     /**
      * List of components registered for preStep callback

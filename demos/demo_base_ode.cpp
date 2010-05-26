@@ -1,7 +1,5 @@
 #include <unistd.h>
 #include <iostream>
-#include <fstream>
-#include <sstream>
 
 #include "sim/ode/world.hpp"
 #include "sim/sim.hpp"
@@ -26,8 +24,8 @@ class S : public sim::Sim {
         sim::Body *b;
 
         setWorld(w);
-//        w->setCFM(1e-3);
-//      w->setCFM(0.01);
+        w->setCFM(1e-10);
+        w->setCFM(0.01);
         w->setERP(0.5);
         w->setStepType(World::STEP_TYPE_QUICK);
         w->setAutoDisable(0.01, 0.01, 5, 0.);
@@ -43,23 +41,11 @@ class S : public sim::Sim {
         */
 
         b = w->createBodySphere(1.3, 2.);
-        b->visBody()->setColor(osg::Vec4(1, 0, 0, 0.3));
-        b->setPos(5., 0, 0);
-        b->activate();
-
-        b = w->createBodySphere(1.3, 2.);
-        b->visBody()->setColor(osg::Vec4(0, 1, 0, 0.3));
-        b->setPos(0, 5, 0);
-        b->activate();
-
-        b = w->createBodySphere(1.3, 2.);
-        b->visBody()->setColor(osg::Vec4(0, 0, 1, 0.3));
-        b->setPos(0, 0, 5.);
+        b->visBody()->setColor(osg::Vec4(0.5, 0.1, 0.8, 0.3));
+        b->setPos(-3., 0., -3.);
         b->activate();
 
 
-
-/*
         b = w->createBodyCube(1., 1.);
         b->visBody()->setColor(osg::Vec4(0., 0., 0., 1.));
         b->setPos(-3., 0.2, 3.);
@@ -155,19 +141,7 @@ class S : public sim::Sim {
         createHinge2Lim();
         createRobot();
         createRobotMove();
-        //createBunny();
-*/
-
-
-/*		int *indices = NULL;
-		Vec3 *vertices = NULL;
-		int indicesSize = 0;
-		int verticesSize = 0;
-//		const char *rawFile = "trmesh2.raw";
-		const char *rawFile = "mar.raw";
-		vector<Vec3> points(loadTriangles(rawFile,&indices, &vertices, indicesSize, verticesSize));
-*/	
-
+        createBunny();
 
         Vec3 verts[] = { Vec3(-10., 10., -0.5),
                          Vec3(0., 10., -0.8),
@@ -187,13 +161,9 @@ class S : public sim::Sim {
                                4, 7, 5,
                                7, 8, 5 };
         b = w->createBodyTriMesh(verts, 9, ind, 24, 0.);
+        b->visBody()->setColor(0.9, 0.6, 0.3, 1.);
         b->setPos(0., 0., -5.3);
         b->activate();
-        
-		/*
-		b = w->createBodyTriMesh(vertices,verticesSize,(const unsigned int*)indices,indicesSize,0.);
-        b->visBody()->setColor(0.9, 0.6, 0.3, 1.);
-		*/
         /*
         b = w->createBodyBox(Vec3(20, 20, 2), 0.);
         b->setPos(0., 0., -10);
@@ -407,8 +377,7 @@ class S : public sim::Sim {
         sim::Body *bunny;
 
         bunny = world()->createBodyTriMesh(bunny_coords, bunny_coords_len,
-                                           bunny_ids, bunny_ids_len, 2.);
-		bunny->setPos(-2,1,100);
+                                           bunny_ids, bunny_ids_len, 20.);
         bunny->visBody()->setColor(0.4, 0.4, 0.4, 1.);
         bunny->setRot(sim::Quat(Vec3(1., 0., 0.), M_PI * 0.5));
         bunny->activate();

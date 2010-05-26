@@ -157,7 +157,6 @@ void SimComponentMessageRegistry::deliverAssignedMessages(Component *c,
 
 Sim::Sim(World *world, VisWorld *visworld)
     : _world(world), _visworld(visworld),
-      _init(false),
       _time_step(0, 20000000), _time_substeps(10),
       _simulate(true)
 {
@@ -221,8 +220,6 @@ void Sim::init()
     _initComponents();
 
     std::cerr << "Real time / Simulated time: " << std::endl;
-
-    _init = true;
 }
 
 void Sim::step()
@@ -273,8 +270,6 @@ void Sim::finish()
         _world->finish();
     if (_visworld)
         _visworld->finish();
-
-    _init = false;
 }
 
 void Sim::run()
@@ -315,11 +310,7 @@ void Sim::addComponent(Component *c)
 {
     if (!_hasComponent(c)){
         _cs.push_back(c);
-    }
-
-    // if init was already called, initialize Component
-    if (_init){
-        c->init(this);
+        _cs_uninit.push_back(c);
     }
 }
 
@@ -327,6 +318,7 @@ void Sim::rmComponent(Component *c)
 {
     if (_hasComponent(c)){
         _cs.remove(c);
+        _cs_uninit.remove(c);
 
         // remove it also from callback lists
         _cs_pre.remove(c);
@@ -389,8 +381,12 @@ void Sim::unregMessage(Component *c, unsigned long msg_type)
 
 void Sim::_initComponents()
 {
-    for_each(std::list<Component *>::iterator, _cs){
-        (*it)->init(this);
+    Component *c;
+
+    while (_cs_uninit.size() > 0){
+        c = _cs_uninit.front();
+        _cs_uninit.pop_front();
+        c->init(this);
     }
 }
 
@@ -431,6 +427,10 @@ void Sim::_cbPreStep()
 {
     for_each(cit_t, _cs_pre){
         (*it)->cbPreStep();
+
+        if (_cs_uninit.size() > 0){
+            _initComponents();
+        }
     }
 }
 
@@ -438,12 +438,20 @@ void Sim::_cbPostStep()
 {
     for_each(cit_t, _cs_post){
         (*it)->cbPostStep();
+
+        if (_cs_uninit.size() > 0){
+            _initComponents();
+        }
     }
 }
 
 void Sim::_cbMessages()
 {
     _reg.deliverMessages();
+
+    if (_cs_uninit.size() > 0){
+        _initComponents();
+    }
 }
 
 }
