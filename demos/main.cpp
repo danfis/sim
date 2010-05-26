@@ -12,6 +12,7 @@
 #include "meshes/surface.h"
 #include "meshes/plane.h"
 #include "sim/comp/povray.hpp"
+#include "sim/comp/snake.hpp"
 
 int counter = 0;
 #define intro counter++; if (id == -1) std::cerr << counter << " :"<< __FUNCTION__ << "\n"; if (id != counter) return;
@@ -421,6 +422,7 @@ void printTree(osg::Node *node) {
 
 
 class SimTestFormace : public sim::Sim {
+	vector<sim::Body *> snakeBodies;
   public:
     SimTestFormace	()
         : Sim()
@@ -481,10 +483,19 @@ class SimTestFormace : public sim::Sim {
 	//	createJezek();
 		createPlane();
 //		createSurface();
-		createRobotCarlike();
+//		createRobotCarlike();
 
-		sim::comp::Povray *pc = new sim::comp::Povray("povray/");
-		addComponent(pc);
+
+		createSnake();
+
+//		sim::comp::Povray *pc = new sim::comp::Povray("povray/");
+//		addComponent(pc);
+//		regPostStep(pc);
+
+
+		sim::comp::Snake *sc = new sim::comp::Snake(snakeBodies);
+		addComponent(sc);
+		regMessage(sc,sim::MessageKeyPressed::Type);
 
     }
 
@@ -502,6 +513,63 @@ class SimTestFormace : public sim::Sim {
     }
 
   protected:
+
+	void createSnake() {
+
+		const double posx = 0;
+		const double posy = 0;
+		const double posz = 1.1;
+		const double width = 1;
+		const double gap = width*1.1;
+		const double mass = 0.5;
+
+        sim::Body *b1 = world()->createBodyCube(width,mass);
+		b1->setPos(sim::Vec3(posx,posy,posz));
+        sim::Body *b2 = world()->createBodyCube(width,mass);
+		b2->setPos(sim::Vec3(posx+1*gap,posy,posz));
+        sim::Body *b3 = world()->createBodyCube(width,mass);
+		b3->setPos(sim::Vec3(posx+2*gap,posy,posz));
+        sim::Body *b4 = world()->createBodyCube(width,mass);
+		b4->setPos(sim::Vec3(posx+3*gap,posy,posz));
+        sim::Body *b5 = world()->createBodyCube(width,mass);
+		b5->setPos(sim::Vec3(posx+4*gap,posy,posz));
+
+		sim::Joint *j1 = world()->createJointHinge2(b1,b2,b1->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0));
+		sim::Joint *j2 = world()->createJointHinge2(b2,b3,b2->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0));
+		sim::Joint *j3 = world()->createJointHinge2(b3,b4,b3->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0));
+		sim::Joint *j4 = world()->createJointHinge2(b4,b5,b4->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0));
+
+		j1->setParamLimitLoHi(0,90*M_PI/180.0);
+		j2->setParamLimitLoHi(0,90*M_PI/180.0);
+		j3->setParamLimitLoHi(0,90*M_PI/180.0);
+		j4->setParamLimitLoHi(0,90*M_PI/180.0);
+
+		j1->setParamLimitLoHi(-45*M_PI/180.0,45*M_PI/180.0);
+		j2->setParamLimitLoHi(-45*M_PI/180.0,45*M_PI/180.0);
+		j3->setParamLimitLoHi(-45*M_PI/180.0,45*M_PI/180.0);
+		j4->setParamLimitLoHi(-45*M_PI/180.0,45*M_PI/180.0);
+
+
+		b1->activate();
+		b2->activate();
+		b3->activate();
+		b4->activate();
+		b5->activate();
+		j1->activate();
+		j2->activate();
+		j3->activate();
+		j4->activate();
+
+		snakeBodies.push_back(b1);
+		snakeBodies.push_back(b2);
+		snakeBodies.push_back(b3);
+		snakeBodies.push_back(b4);
+
+		j3->setParamVel(1);
+		j3->setParamFMax(10);
+
+	}
+
     void createFixed()
     {
         sim::Vec3 pos(-6., -6., -3.);
