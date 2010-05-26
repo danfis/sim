@@ -5,7 +5,6 @@
 
 #include "sim/message.hpp"
 
-
 namespace sim {
 
 // forward declaration
