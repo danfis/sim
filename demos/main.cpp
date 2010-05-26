@@ -9,7 +9,7 @@
 #include "msg.hpp"
 //#include "meshes/ardrone.h"
 #include "meshes/jezek.h"
-////#include "meshes/surface.h"
+#include "meshes/surface.h"
 #include "meshes/plane.h"
 #include "sim/comp/povray.hpp"
 #include "sim/comp/snake.hpp"
@@ -481,8 +481,8 @@ class SimTestFormace : public sim::Sim {
         //createRobot(bodies);
 		//createArdrone();
 	//	createJezek();
-		createPlane();
-	//	createSurface();
+	//	createPlane();
+		createSurface();
 //		createRobotCarlike();
 //		createSnake();
 		createSnake3();
@@ -958,7 +958,8 @@ class SimTestFormace : public sim::Sim {
         obj->visBody()->setColor(0.4, 1, 0.4, 1.);
         obj->activate();
     }
-/*	
+	
+	
 	void createSurface()
     {
         sim::Body *obj;
@@ -968,7 +969,8 @@ class SimTestFormace : public sim::Sim {
         obj->visBody()->setColor((12*16+12)/255.0, (9*16+9)/255.0, (3*16+3)/255.0, 1.);
         obj->activate();
     }
-*/	
+	
+	
 	void createPlane()
     {
         sim::Body *obj;
