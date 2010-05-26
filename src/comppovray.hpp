@@ -3,7 +3,6 @@
 
 #include "sim/ode/world.hpp"
 #include "sim/sim.hpp"
-#include "msg.hpp"
 #include <vector>
 #include <string>
 
@@ -40,11 +39,11 @@ namespace sim {
 
 class PovrayComponent : public sim::Component {
 	sim::Sim *_sim;
-	std::vector<sim::VisBody *> *_bodies;
-	int frame;
+	int _frame;
+    const char *_prefix;
 
 	public:
-	PovrayComponent(std::vector<sim::VisBody *> *bodies);
+	PovrayComponent(const char *prefix = "");
 	~PovrayComponent();
 
 	void init(sim::Sim *sim);

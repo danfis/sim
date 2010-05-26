@@ -32,8 +32,8 @@ VisWorld::VisWorld()
     _root_vis->setStateSet(_state_set);
     _root->addChild(_root_vis);
 
-    _bodies = new osg::Group();
-    _root_vis->addChild(_bodies);
+    _g_bodies = new osg::Group();
+    _root_vis->addChild(_g_bodies);
 
     _lights = new osg::Group();
     _root_vis->addChild(_lights);
@@ -51,19 +51,22 @@ VisWorld::~VisWorld()
 void VisWorld::addBody(VisBody *obj)
 {
     osg::Node *n = obj->rootNode();
-    if (!n || _bodies->containsNode(n))
+    if (!n || _g_bodies->containsNode(n))
         return;
 
-    _bodies->addChild(n);
+    _g_bodies->addChild(n);
+    _bodies.push_back(obj);
 }
 
 
 void VisWorld::rmBody(VisBody *obj)
 {
     osg::Node *n = obj->rootNode();
-    if (!n || !_bodies->containsNode(n))
+    if (!n || !_g_bodies->containsNode(n))
         return;
-    _bodies->removeChild(n);
+
+    _g_bodies->removeChild(n);
+    _bodies.remove(obj);
 }
 
 void VisWorld::addCam(osg::Camera *cam)

@@ -27,8 +27,10 @@ class VisWorld {
      */
     osg::ref_ptr<osg::Group> _root_vis;
 
-    osg::ref_ptr<osg::Group> _bodies;
+    osg::ref_ptr<osg::Group> _g_bodies; //!< Group of VisBodies
     osg::ref_ptr<osg::Group> _lights;
+
+    std::list<VisBody *> _bodies;
 
 	osg::ref_ptr<osg::Node> _axisX;
 	osg::ref_ptr<osg::Node> _axisY;
@@ -50,6 +52,9 @@ class VisWorld {
     const osgViewer::View *viewMain() const { return _view_main.get(); }
     bool window() const { return _window; }
     void setWindow(bool yes = true) { _window = yes; }
+
+    const std::list<VisBody *> &bodies() const { return _bodies; }
+    std::list<VisBody *> &bodies() { return _bodies; }
 
     /**
      * Returns root of scene graph.

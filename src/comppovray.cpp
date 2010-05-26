@@ -1,21 +1,23 @@
-
 #include "comppovray.hpp"
+#include "sim/common.hpp"
 
 namespace sim {
 
-PovrayComponent::PovrayComponent(std::vector<sim::VisBody *> *bodies){
-	_bodies = bodies;
-	frame = 0;
+PovrayComponent::PovrayComponent(const char *prefix)
+    : sim::Component(), _frame(0), _prefix(prefix)
+{
 }
 
-PovrayComponent::~PovrayComponent(){
-	_bodies = NULL;
+PovrayComponent::~PovrayComponent()
+{
 }
 
 void PovrayComponent::init(sim::Sim *sim){
-	_sim = sim;
 	char name[200];
-	sprintf(name,"camera.inc");
+
+	_sim = sim;
+
+	sprintf(name, "%scamera.inc", _prefix);
 	std::ofstream ofs(name);
 	ofs << "// camera definition \n";
 	ofs << "#include \"colors.inc\"\n";
@@ -29,18 +31,21 @@ void PovrayComponent::init(sim::Sim *sim){
 	ofs << "light_source { <0,-15,10> color White }\n";
 	ofs.close();
 
-	for(int i=0;i<(int)_bodies->size();i++) {
-		if ((*_bodies)[i]) {
-			char name[200];
-			sprintf(name,"object_%06d.inc",i);
+    const std::list<VisBody *> &bodies = _sim->visWorld()->bodies();
+    int i = 0;
+    for_each(std::list<VisBody *>::const_iterator, bodies){
+        if (*it){
+			sprintf(name, "%sobject_%06d.inc", _prefix, i);
 			std::ofstream ofs(name);
 			sprintf(name,"object_%06d",i);
 			ofs << "#declare "<<name<<"=";
-			((*_bodies)[i])->exportToPovray(ofs,POVRAY_GEOM);
+            (*it)->exportToPovray(ofs,POVRAY_GEOM);
 			ofs.close();
-		}
-	}	
+            i++;
+        }
+    }
 
+    _sim->regPostStep(this);
 }
 
 void PovrayComponent::finish(){
@@ -49,28 +54,34 @@ void PovrayComponent::finish(){
 void PovrayComponent::cbPostStep(){
 
 	char name[200];
-	sprintf(name,"frame_%06d.pov",frame);
+    const std::list<VisBody *> &bodies = _sim->visWorld()->bodies();
+
+	sprintf(name, "%sframe_%06d.pov", _prefix, _frame);
 	std::ofstream ofs(name);
 	ofs << "#include \"camera.inc\"\n";
-	for(int i=0;i<(int)(*_bodies).size();i++) {
-		if ((*_bodies)[i]) {
+
+    int i = 0;
+    for_each(std::list<VisBody *>::const_iterator, bodies){
+		if (*it) {
 			sprintf(name,"object_%06d.inc",i);
 			ofs << "#include \"" << name << "\"\n";
+            i++;
 		}
 	}
 
-	for(int i=0;i<(int)(*_bodies).size();i++) {
-		if ((*_bodies)[i]) {
+    i = 0;
+    for_each(std::list<VisBody *>::const_iterator, bodies){
+		if (*it) {
 			sprintf(name,"object_%06d",i);
 			ofs << "object {" << name << "\n";
-			((*_bodies)[i])->exportToPovray(ofs,POVRAY_TRANSFORM);
+			(*it)->exportToPovray(ofs,POVRAY_TRANSFORM);
 			ofs << "}\n";
+            i++;
 		}
 	}
 	ofs.close();
 
-	frame++;
-
+	_frame++;
 }
 
 }

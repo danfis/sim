@@ -493,9 +493,8 @@ class SimTestFormace : public sim::Sim {
 	
 		createRobotCarlike();
 
-//		sim::PovrayComponent *pc = new sim::PovrayComponent(&bodies);
-//		addComponent(pc);
-//		regPostStep(pc);
+		sim::PovrayComponent *pc = new sim::PovrayComponent("povray/");
+		addComponent(pc);
 
     }
 
