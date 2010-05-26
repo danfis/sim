@@ -9,7 +9,7 @@
 #include "msg.hpp"
 //#include "meshes/ardrone.h"
 #include "meshes/jezek.h"
-#include "meshes/surface.h"
+////#include "meshes/surface.h"
 #include "meshes/plane.h"
 #include "sim/comp/povray.hpp"
 #include "sim/comp/snake.hpp"
@@ -482,11 +482,10 @@ class SimTestFormace : public sim::Sim {
 		//createArdrone();
 	//	createJezek();
 		createPlane();
-//		createSurface();
+	//	createSurface();
 //		createRobotCarlike();
-
-
-		createSnake();
+//		createSnake();
+		createSnake3();
 
 		sim::comp::Povray *pc = new sim::comp::Povray("povray/");
 		addComponent(pc);
@@ -514,11 +513,134 @@ class SimTestFormace : public sim::Sim {
 
   protected:
 
+
+	void createSnake3() {
+
+		const double posx = 0;
+		const double posy = 0;
+		const double posz = 2.1;
+		const double width = 1;
+		const double gap = width*1.5;
+		const double mass = 0.5;
+
+		/** scheme: 
+		  *               b9
+		  *               b8
+		  *         b1 b2 b3 b4 b5
+		  *               b6
+		  *               b7
+			*/
+
+        sim::Body *b1 = world()->createBodyCube(width,mass);
+		b1->setPos(sim::Vec3(posx,posy,posz));
+		b1->visBody()->setColor(1,1,1,1);
+
+        sim::Body *b2 = world()->createBodyCube(width,mass);
+		b2->setPos(sim::Vec3(posx+1*gap,posy,posz));
+		b2->visBody()->setColor(1,0,1,1);
+
+        sim::Body *b3 = world()->createBodyCube(width,mass);
+		b3->setPos(sim::Vec3(posx+2*gap,posy,posz));
+		b3->visBody()->setColor(0.15,0.7,0.6,1);
+
+        sim::Body *b4 = world()->createBodyCube(width,mass);
+		b4->setPos(sim::Vec3(posx+3*gap,posy,posz));
+		b4->visBody()->setColor(0.2,0.3,0.11,1);
+
+        sim::Body *b5 = world()->createBodyCube(width,mass);
+		b5->setPos(sim::Vec3(posx+4*gap,posy,posz));
+		b5->visBody()->setColor(0.5,0,0.2,1);
+
+		sim::Body *b6 = world()->createBodyCube(width,mass);
+		b6->setPos(sim::Vec3(posx+2*gap,posy-1*gap,posz));
+		b6->visBody()->setColor(0.05,0,0.2,1);
+		
+		sim::Body *b7 = world()->createBodyCube(width,mass);
+		b7->setPos(sim::Vec3(posx+2*gap,posy-2*gap,posz));
+		b7->visBody()->setColor(0.05,0,0.7,0.8);
+
+		sim::Body *b8 = world()->createBodyCube(width,mass);
+		b8->setPos(sim::Vec3(posx+2*gap,posy+1*gap,posz));
+		b8->visBody()->setColor(0.05,0,0.2,1);
+		
+		sim::Body *b9 = world()->createBodyCube(width,mass);
+		b9->setPos(sim::Vec3(posx+2*gap,posy+2*gap,posz));
+		b9->visBody()->setColor(0.05,0,0.7,0.8);
+
+
+		sim::Joint *j1 = world()->createJointHinge2(b1,b2,b1->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0));
+		sim::Joint *j2 = world()->createJointHinge2(b2,b3,b2->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0));
+		sim::Joint *j3 = world()->createJointHinge2(b3,b4,b3->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0));
+		sim::Joint *j4 = world()->createJointHinge2(b4,b5,b4->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0));
+		
+		sim::Joint *j5 = world()->createJointHinge2(b3,b6,b3->pos(),sim::Vec3(1,0,0),sim::Vec3(0,1,0));
+		sim::Joint *j6 = world()->createJointHinge2(b6,b7,b6->pos(),sim::Vec3(1,0,0),sim::Vec3(0,1,0));
+		sim::Joint *j7 = world()->createJointHinge2(b3,b8,b3->pos(),sim::Vec3(1,0,0),sim::Vec3(0,1,0));
+		sim::Joint *j8 = world()->createJointHinge2(b8,b9,b8->pos(),sim::Vec3(1,0,0),sim::Vec3(0,1,0));
+
+		const double minAxis1 = -45*M_PI/180.0;
+		const double maxAxis1 = 45*M_PI/180.0;
+		
+		const double minAxis2 = -45*M_PI/180.0;
+		const double maxAxis2 = 45*M_PI/180.0;
+
+		j1->setParamLimitLoHi(minAxis1,maxAxis1);
+		j2->setParamLimitLoHi(minAxis1,maxAxis1);
+		j3->setParamLimitLoHi(minAxis1,maxAxis1);
+		j4->setParamLimitLoHi(minAxis1,maxAxis1);
+		j5->setParamLimitLoHi(minAxis1,maxAxis1);
+		j6->setParamLimitLoHi(minAxis1,maxAxis1);
+		j7->setParamLimitLoHi(minAxis1,maxAxis1);
+		j8->setParamLimitLoHi(minAxis1,maxAxis1);
+
+		j1->setParamLimitLoHi2(minAxis2,maxAxis2);
+		j2->setParamLimitLoHi2(minAxis2,maxAxis2);
+		j3->setParamLimitLoHi2(minAxis2,maxAxis2);
+		j4->setParamLimitLoHi2(minAxis2,maxAxis2);
+		j5->setParamLimitLoHi2(minAxis2,maxAxis2);
+		j6->setParamLimitLoHi2(minAxis2,maxAxis2);
+		j7->setParamLimitLoHi2(minAxis2,maxAxis2);
+		j8->setParamLimitLoHi2(minAxis2,maxAxis2);
+
+
+
+		b1->activate();
+		b2->activate();
+		b3->activate();
+		b4->activate();
+		b5->activate();
+		b6->activate();
+		b7->activate();
+		b8->activate();
+		b9->activate();
+		
+		j1->activate();
+		j2->activate();
+		j3->activate();
+		j4->activate();
+		j5->activate();
+		j6->activate();
+		j7->activate();
+		j8->activate();
+
+
+		snakeJoints.push_back(j1);
+		snakeJoints.push_back(j2);
+		snakeJoints.push_back(j3);
+		snakeJoints.push_back(j4);
+		snakeJoints.push_back(j5);
+		snakeJoints.push_back(j6);
+		snakeJoints.push_back(j7);
+		snakeJoints.push_back(j8);
+
+	}
+
+
 	void createSnake() {
 
 		const double posx = 0;
 		const double posy = 0;
-		const double posz = 1.1;
+		const double posz = 2.1;
 		const double width = 1;
 		const double gap = width*1.5;
 		const double mass = 0.5;
@@ -836,17 +958,17 @@ class SimTestFormace : public sim::Sim {
         obj->visBody()->setColor(0.4, 1, 0.4, 1.);
         obj->activate();
     }
-	
+/*	
 	void createSurface()
     {
         sim::Body *obj;
 
         obj = world()->createBodyTriMesh(surface_verts,surface_verts_len,surface_ids,surface_ids_len,0.);
 		obj->setPos(0,0,-2);
-        obj->visBody()->setColor(0.4, 1, 0.4, 1.);
+        obj->visBody()->setColor((12*16+12)/255.0, (9*16+9)/255.0, (3*16+3)/255.0, 1.);
         obj->activate();
     }
-	
+*/	
 	void createPlane()
     {
         sim::Body *obj;

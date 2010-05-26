@@ -251,11 +251,17 @@ void VisBodyCube::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
             osg::Drawable *d = g->getDrawable(i);
             if (d) {
                 osg::Box *b = (osg::Box *)d->getShape();
+                osg::ShapeDrawable *sd = (osg::ShapeDrawable *)d;
                 Vec3 center(b->getCenter());
                 Vec3 lengths(b->getHalfLengths());
                 ofs << "box { <" << center[0]-lengths[0] << "," << center[1]-lengths[1] << "," << center[2]-lengths[2] << ">,";
                 ofs << " <" << center[0]+lengths[0] << "," << center[1]+lengths[1] << "," << center[2]+lengths[2] << "> ";
+ 				ofs << " pigment {";
+                povColor(ofs,sd->getColor());
+                ofs << "} ";
                 ofs << "}\n";
+
+
             }
         }
     } 
