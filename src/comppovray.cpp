@@ -39,7 +39,7 @@ void PovrayComponent::init(sim::Sim *sim){
 			std::ofstream ofs(name);
 			sprintf(name,"object_%06d",i);
 			ofs << "#declare "<<name<<"=";
-            (*it)->exportToPovray(ofs,POVRAY_GEOM);
+            (*it)->exportToPovray(ofs, VisBody::POVRAY_GEOM);
 			ofs.close();
             i++;
         }
@@ -74,7 +74,7 @@ void PovrayComponent::cbPostStep(){
 		if (*it) {
 			sprintf(name,"object_%06d",i);
 			ofs << "object {" << name << "\n";
-			(*it)->exportToPovray(ofs,POVRAY_TRANSFORM);
+			(*it)->exportToPovray(ofs, VisBody::POVRAY_TRANSFORM);
 			ofs << "}\n";
             i++;
 		}

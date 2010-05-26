@@ -11,15 +11,6 @@
 
 namespace sim {
 
-/** 
-  * define modef for exporting objects to povray.
-  */
-typedef enum EPovrayMode {
-	POVRAY_GEOM = 0, // export only geometry of object 
-	POVRAY_TRANSFORM, // export only transformation matrix (rotation+translation) of the object
-	POVRAY_GEOMTRANSFROM // export both geometry and transformation
-} TPovrayMode;
-
 /**
  * Visual representation of body.
  */
@@ -30,6 +21,17 @@ class VisBody {
     osg::ref_ptr<osg::Geode> _text;
     osg::ref_ptr<osg::Node> _node;
     Vec3 _offset;
+
+  public:
+    /**
+     * Used by exportToPovray() method. Defines which property of body
+     * should be exported.
+     */
+    enum PovrayMode {
+        POVRAY_GEOM = 0, //!< export only geometry of object 
+        POVRAY_TRANSFORM, //!< export only transformation matrix (rotation+translation) of the object
+        POVRAY_GEOMTRANSFROM //!< export both geometry and transformation
+    };
 
   public:
     VisBody();
@@ -94,7 +96,7 @@ class VisBody {
     virtual void setOsgText(osg::ref_ptr<osgText::TextBase> t);
     virtual void setText(const char *text, float size = 1.,
                          const osg::Vec4 &color = osg::Vec4(0., 0., 0., 1.)) {}
-	virtual void exportToPovray(std::ofstream &ofs, const TPovrayMode mode);
+	virtual void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 
   protected:
     /**
@@ -124,7 +126,7 @@ class VisBodyShape : public VisBody {
 	  * 1 .. export only position and rotations of the object 
 	  * 2 .. export geometry+position+rotations
 	  */
-	virtual void exportToPovray(std::ofstream &ofs, const TPovrayMode mode);
+	virtual void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 
 
   protected:
@@ -142,7 +144,7 @@ class VisBodyShape : public VisBody {
 class VisBodyBox : public VisBodyShape {
   public:
     VisBodyBox(Vec3 dim);
-	void exportToPovray(std::ofstream &ofs, const TPovrayMode mode);
+	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 };
 
 /**
@@ -152,7 +154,7 @@ class VisBodyBox : public VisBodyShape {
 class VisBodyCube : public VisBodyBox {
   public:
     VisBodyCube(Scalar width) : VisBodyBox(Vec3(width, width, width)) {}
-	void exportToPovray(std::ofstream &ofs, const TPovrayMode mode);
+	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 };
 
 /**
@@ -161,7 +163,7 @@ class VisBodyCube : public VisBodyBox {
 class VisBodySphere : public VisBodyShape {
   public:
     VisBodySphere(Scalar radius);
-	void exportToPovray(std::ofstream &ofs, const TPovrayMode mode);
+	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 };
 
 /**
@@ -170,7 +172,7 @@ class VisBodySphere : public VisBodyShape {
 class VisBodyCylinder : public VisBodyShape {
   public:
     VisBodyCylinder(Scalar radius, Scalar height);
-	void exportToPovray(std::ofstream &ofs, const TPovrayMode mode);
+	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 };
 
 /**
@@ -179,7 +181,7 @@ class VisBodyCylinder : public VisBodyShape {
 class VisBodyCone : public VisBodyShape {
   public:
     VisBodyCone(Scalar radius, Scalar height);
-	void exportToPovray(std::ofstream &ofs, const TPovrayMode mode);
+	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 };
 
 
@@ -189,7 +191,7 @@ class VisBodyTriMesh : public VisBody {
     VisBodyTriMesh(const sim::Vec3 *coords, size_t coords_len,
                    const unsigned int *indices, size_t indices_len);
     void setColor(const osg::Vec4 &c);
-	void exportToPovray(std::ofstream &ofs, const TPovrayMode mode);
+	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 };
 
 } /* namespace sim */
