@@ -516,34 +516,39 @@ class SimTestFormace : public sim::Sim {
         b->activate();
 		bodies.push_back(b->visBody());
 
-		b = w->createBodyBox(sim::Vec3(3., 2., 1.), 0.8);
+		b = w->createBodyBox(sim::Vec3(3., 2., 1.), 1.8);
         b->visBody()->setColor(osg::Vec4(1.0, 0.63, 0.32, 1.));
         b->setPos(-3, 4., 5);
         b->activate();
 		bodies.push_back(b->visBody());
 
 
-/*
         b = w->createBodyCube(1., 1.);
         b->visBody()->setColor(osg::Vec4(0., 0., 0., 1.));
         b->setPos(-3., 0.2, 3.);
         b->activate();
+		bodies.push_back(b->visBody());
 
+	
         b = w->createBodyCylinderZ(.5, 1., 3.);
         b->visBody()->setTexture("wood.ppm");
         b->visBody()->setColor(1., 0., 0., 1.);
-        b->setPos(3., 0., 0.);
+        b->setPos(3., 0., 2);
         b->activate();
+		bodies.push_back(b->visBody());
 
         b = w->createBodyCylinderX(.5, 1., 3.);
-        b->setPos(0., 3., 0.);
+        b->setPos(0., 3., 1.5);
         b->activate();
+		bodies.push_back(b->visBody());
 
         b = w->createBodyCylinderY(.5, 1., 3.);
-        b->setPos(0., -3., 0.);
+        b->setPos(3., 0., 10);
+        b->visBody()->setColor(1., 1, 0., 0.5);
         b->activate();
+		bodies.push_back(b->visBody());
 
-*/
+
         //createRobot(bodies);
 		//createArdrone();
 	//	createJezek();
@@ -555,18 +560,6 @@ class SimTestFormace : public sim::Sim {
 		sim::PovrayComponent *pc = new sim::PovrayComponent(&bodies);
 		addComponent(pc);
 		regPostStep(pc);
-
-		char name[200];
-		sprintf(name,"all.pov");
-		ofstream ofs(name);
-		for(int i=0;i<(int)bodies.size();i++) {
-			cerr << "*Exporting body: " << i << "\n";
-			if (bodies[i]) {
-				cerr << "*Exporting body: " << i << "\n";
-				bodies[i]->exportToPovray(ofs,2);
-			}
-		}
-		ofs.close();
 
     }
 
@@ -738,44 +731,7 @@ class SimTestFormace : public sim::Sim {
 
         chasis->visBody()->setText("Robot", 1., osg::Vec4(0.5, 0.6, 0.3, 1.));
     }
-
-    void createRobotMove()
-    {
-        sim::Vec3 pos(10., -10., -4.9);
-        sim::Body *chasis;
-        sim::ActuatorWheelCylinderX *w[4];
-        size_t i;
-
-        chasis = world()->createBodyBox(sim::Vec3(.6, 1., 0.4), 1.);
-        for (i = 0; i < 4; i++){
-            w[i] = world()->createActuatorWheelCylinderX(0.2, 0.2, 1.);
-        }
-
-        chasis->setPos(pos);
-        w[0]->setPos(pos.x() + 0.415, pos.y() + 0.4, pos.z() - 0.2);
-        w[1]->setPos(pos.x() - 0.415, pos.y() + 0.4, pos.z() - 0.2);
-        w[2]->setPos(pos.x() + 0.415, pos.y() - 0.4, pos.z() - 0.2);
-        w[3]->setPos(pos.x() - 0.415, pos.y() - 0.4, pos.z() - 0.2);
-
-        for (i = 0; i < 4; i++){
-            w[i]->connectToChasis(chasis);
-            ((ActuatorWheelCylinderX *)w[i])->joint()->setParamLimitLoHi(-0.0001, 0.0001);
-        }
-
-        ((ActuatorWheelCylinderX *)w[0])->joint()->setParamVel2(5.);
-        ((ActuatorWheelCylinderX *)w[0])->joint()->setParamFMax2(10.);
-        ((ActuatorWheelCylinderX *)w[1])->joint()->setParamVel2(5.);
-        ((ActuatorWheelCylinderX *)w[1])->joint()->setParamFMax2(10.);
-
-        chasis->activate();
-        for (i = 0; i < 4; i++){
-            w[i]->activate();
-        }
-
-        chasis->visBody()->setText("Robot move", 1., osg::Vec4(0.5, 0.6, 0.3, 1.));
-    }
-
-	/*
+/*
     void createBunny()
     {
         sim::Body *bunny;
@@ -786,8 +742,10 @@ class SimTestFormace : public sim::Sim {
         bunny->visBody()->setColor(0.4, 0.4, 0.4, 1.);
         bunny->setRot(sim::Quat(Vec3(1., 0., 0.), M_PI * 0.5));
         bunny->activate();
+
+		bodies->push_back(bunny->visBody());
     }
-	*/
+*/
 
 	/*
     void createArdrone()
@@ -810,6 +768,7 @@ class SimTestFormace : public sim::Sim {
 		obj->setPos(2,4,2);
         obj->visBody()->setColor(0.4, 1, 0.4, 1.);
         obj->activate();
+		bodies.push_back(obj->visBody());
     }
 	
 	void createPlane()

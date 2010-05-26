@@ -106,7 +106,7 @@ void VisBody::setOsgText(osg::ref_ptr<osgText::TextBase> t)
     }
 }
 
-void VisBody::exportToPovray(std::ofstream &ofs, const int type) {
+void VisBody::exportToPovray(std::ofstream &ofs, const TPovrayMode mode) {
 }
 
 
@@ -182,7 +182,7 @@ void VisBodyShape::_setShape(osg::Shape *shape)
     setColor(osg::Vec4(0.5, 0.5, 0.5, 1.));
 }
 
-void VisBodyShape::exportToPovray(std::ofstream &ofs, const int type) {
+void VisBodyShape::exportToPovray(std::ofstream &ofs, const TPovrayMode mode) {
 
 }
 
@@ -193,14 +193,14 @@ VisBodyBox::VisBodyBox(Vec3 dim)
     _setShape(new osg::Box(osg::Vec3(0., 0., 0.), dim.x(), dim.y(), dim.z()));
 }
 
-void VisBodyBox::exportToPovray(std::ofstream &ofs, const int type) {
+void VisBodyBox::exportToPovray(std::ofstream &ofs, const TPovrayMode mode) {
 	osg::Geode *g = _node->asGeode();
 
 	if (!g) {
 		return;
 	}
 
-	if (type == 0 || type == 2) {
+	if (mode == POVRAY_GEOM || mode == POVRAY_GEOMTRANSFROM) {
 		for(int i=0;i<(int)g->getNumDrawables();i++) {
 			osg::Drawable *d = g->getDrawable(i);
 			if (d) {
@@ -220,7 +220,7 @@ void VisBodyBox::exportToPovray(std::ofstream &ofs, const int type) {
 		}
 	} 
 
-	if (type == 1 || type == 2) {
+	if (mode == POVRAY_TRANSFORM || mode == POVRAY_GEOMTRANSFROM) {
 //		ofs << "translate ";
 //		povCoords(ofs,pos());
 //		ofs << "\n";
@@ -230,14 +230,14 @@ void VisBodyBox::exportToPovray(std::ofstream &ofs, const int type) {
 
 }
 
-void VisBodyCube::exportToPovray(std::ofstream &ofs, const int type) {
+void VisBodyCube::exportToPovray(std::ofstream &ofs, const TPovrayMode mode) {
 	osg::Geode *g = _node->asGeode();
 
 	if (!g) {
 		return;
 	}
 
-	if (type == 0 || type == 2) {
+	if (mode == POVRAY_GEOM || mode == POVRAY_GEOMTRANSFROM) {
 		for(int i=0;i<(int)g->getNumDrawables();i++) {
 			osg::Drawable *d = g->getDrawable(i);
 			if (d) {
@@ -251,7 +251,7 @@ void VisBodyCube::exportToPovray(std::ofstream &ofs, const int type) {
 		}
 	} 
 
-	if (type == 1 || type == 2) {
+	if (mode == POVRAY_TRANSFORM || mode == POVRAY_GEOMTRANSFROM) {
 		ofs << "translate ";
 		povCoords(ofs,pos());
 		ofs << "\n";
@@ -269,14 +269,14 @@ VisBodySphere::VisBodySphere(Scalar radius)
 }
 
 
-void VisBodySphere::exportToPovray(std::ofstream &ofs, const int type) {
+void VisBodySphere::exportToPovray(std::ofstream &ofs, const TPovrayMode mode) {
 	osg::Geode *g = _node->asGeode();
 
 	if (!g) {
 		return;
 	}
 
-	if (type == 0 || type == 2) {
+	if (mode == POVRAY_GEOM || mode == POVRAY_GEOMTRANSFROM) {
 		for(int i=0;i<(int)g->getNumDrawables();i++) {
 			osg::Drawable *d = g->getDrawable(i);
 			if (d) {
@@ -296,7 +296,7 @@ void VisBodySphere::exportToPovray(std::ofstream &ofs, const int type) {
 		}
 	} 
 
-	if (type == 1 || type == 2) {
+	if (mode == POVRAY_TRANSFORM || mode == POVRAY_GEOMTRANSFROM) {
 		ofs << "translate ";
 		povCoords(ofs,pos());
 		ofs << "\n";
@@ -311,14 +311,14 @@ VisBodyCylinder::VisBodyCylinder(Scalar radius, Scalar height)
     _setShape(new osg::Cylinder(Vec3(0., 0., 0.), radius, height));
 }
 
-void VisBodyCylinder::exportToPovray(std::ofstream &ofs, const int type) {
+void VisBodyCylinder::exportToPovray(std::ofstream &ofs, const TPovrayMode mode) {
 	osg::Geode *g = _node->asGeode();
 
 	if (!g) {
 		return;
 	}
 
-	if (type == 0 || type == 2) {
+	if (mode == POVRAY_GEOM || mode == POVRAY_GEOMTRANSFROM) {
 		for(int i=0;i<(int)g->getNumDrawables();i++) {
 			osg::Drawable *d = g->getDrawable(i);
 			if (d) {
@@ -340,7 +340,7 @@ void VisBodyCylinder::exportToPovray(std::ofstream &ofs, const int type) {
 		}
 	} 
 
-	if (type == 1 || type == 2) {
+	if (mode == POVRAY_TRANSFORM || mode == POVRAY_GEOMTRANSFROM) {
 		ofs << "translate ";
 		povCoords(ofs,pos());
 		ofs << "\n";
@@ -354,6 +354,47 @@ VisBodyCone::VisBodyCone(Scalar radius, Scalar height)
 {
     _setShape(new osg::Cone(Vec3(0., 0., 0.), radius, height));
 }
+
+
+void VisBodyCone::exportToPovray(std::ofstream &ofs, const TPovrayMode mode) {
+	/*
+	osg::Geode *g = _node->asGeode();
+
+	if (!g) {
+		return;
+	}
+
+	if (mode == POVRAY_GEOM || mode == POVRAY_GEOMTRANSFROM) {
+		for(int i=0;i<(int)g->getNumDrawables();i++) {
+			osg::Drawable *d = g->getDrawable(i);
+			if (d) {
+				osg::Cylinder *b = (osg::Cylinder *)d->getShape();
+				osg::ShapeDrawable *sd = (osg::ShapeDrawable *)d;
+				Vec3 center(b->getCenter());
+				double radius = b->getRadius();
+				double height = b->getHeight();
+				ofs << "cylinder { ";
+				ofs << "<" << center[0] << "," << center[1] <<"," << center[2]-height/2.0 << ">,";
+				ofs << "<" << center[0] << "," << center[1] <<"," << center[2]+height/2.0 << ">,";
+				ofs << radius << "\n";
+
+				ofs << " pigment {";
+				povColor(ofs,sd->getColor());
+				ofs << "} ";
+				ofs << "}\n";
+			}
+		}
+	} 
+
+	if (mode == POVRAY_TRANSFORM || mode == POVRAY_GEOMTRANSFROM) {
+		ofs << "translate ";
+		povCoords(ofs,pos());
+		ofs << "\n";
+	} 
+	*/
+}
+
+
 
 
 VisBodyTriMesh::VisBodyTriMesh(const sim::Vec3 *coords, size_t coords_len,
@@ -396,7 +437,7 @@ void VisBodyTriMesh::setColor(const osg::Vec4 &c)
     g->setColorBinding(osg::Geometry::BIND_OVERALL);
 }
 
-void VisBodyTriMesh::exportToPovray(std::ofstream &ofs, const int type) {
+void VisBodyTriMesh::exportToPovray(std::ofstream &ofs, const TPovrayMode mode) {
 	
 	osg::Geode *g = _node->asGeode();
 
@@ -404,7 +445,7 @@ void VisBodyTriMesh::exportToPovray(std::ofstream &ofs, const int type) {
 		return;
 	}
 
-	if (type == 0 || type == 2) {
+	if (mode == POVRAY_GEOM || mode == POVRAY_GEOMTRANSFROM) {
 		ofs << "mesh {";
 		for(int i=0;i<(int)g->getNumDrawables();i++) {
 			osg::Drawable *d = g->getDrawable(i);
@@ -437,7 +478,7 @@ void VisBodyTriMesh::exportToPovray(std::ofstream &ofs, const int type) {
 		ofs << "}\n";
 	} 
 
-	if (type == 1 || type == 2) {
+	if (mode == POVRAY_TRANSFORM || mode == POVRAY_GEOMTRANSFROM) {
 		ofs << "translate ";
 		povCoords(ofs,pos());
 		ofs << "\n";
