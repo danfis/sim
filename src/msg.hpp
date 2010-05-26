@@ -41,4 +41,8 @@
     std::cerr << "Error: " << str << std::endl; \
     std::cerr.flush()
 
+#define MSG(str) \
+    std::cerr << str << std::endl; \
+    std::cerr.flush()
+
 #endif

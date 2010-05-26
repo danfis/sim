@@ -48,19 +48,21 @@ endif
 
 CXXFLAGS += $(SYSTEM_CXXFLAGS)
 
-HAS_ODE ?= no
-HAS_BT  ?= no
-HAS_OSG ?= no
+HAVE_ODE ?= no
+HAVE_BT  ?= no
+HAVE_OSG ?= no
+HAVE_SDL ?= no
 WANT_ODE ?= yes
 WANT_OSG ?= yes
 # Disable Bullet for now
 WANT_BT  ?= no
+WANT_SDL ?= yes
 
 # Try to find ODE
 ifeq '$(WANT_ODE)' 'yes'
-  ifeq '$(HAS_ODE)' 'no'
-    HAS_ODE := $(shell if pkg-config ode --exists; then echo "yes"; else echo "no"; fi;)
-    ifeq '$(HAS_ODE)' 'yes'
+  ifeq '$(HAVE_ODE)' 'no'
+    HAVE_ODE := $(shell if pkg-config ode --exists; then echo "yes"; else echo "no"; fi;)
+    ifeq '$(HAVE_ODE)' 'yes'
       ODE_CXXFLAGS = $(shell pkg-config ode --cflags)
       ODE_LDFLAGS  = $(shell pkg-config ode --libs)
     endif
@@ -69,9 +71,9 @@ endif
 
 # Try to find OSG
 ifeq '$(WANT_OSG)' 'yes'
-  ifeq '$(HAS_OSG)' 'no'
-    HAS_OSG = $(shell if pkg-config openscenegraph --exists; then echo "yes"; else echo "no"; fi;)
-    ifeq '$(HAS_OSG)' 'yes'
+  ifeq '$(HAVE_OSG)' 'no'
+    HAVE_OSG = $(shell if pkg-config openscenegraph --exists; then echo "yes"; else echo "no"; fi;)
+    ifeq '$(HAVE_OSG)' 'yes'
       OSG_CXXFLAGS = $(shell pkg-config openscenegraph --cflags)
       OSG_LDFLAGS  = $(shell pkg-config openscenegraph --libs)
     endif
@@ -80,37 +82,71 @@ endif
 
 # Try to find Bullet
 ifeq '$(WANT_BT)' 'yes'
-  ifeq '$(HAS_BT)' 'no'
-    HAS_BT = $(shell if pkg-config bullet --exists; then echo "yes"; else echo "no"; fi;)
-    ifeq '$(HAS_BT)' 'yes'
+  ifeq '$(HAVE_BT)' 'no'
+    HAVE_BT = $(shell if pkg-config bullet --exists; then echo "yes"; else echo "no"; fi;)
+    ifeq '$(HAVE_BT)' 'yes'
       BT_CXXFLAGS  = $(shell pkg-config bullet --cflags)
       BT_LDFLAGS   = $(shell pkg-config bullet --libs)
     endif
   endif
 endif
 
+# Try to find SDL
+ifeq '$(WANT_SDL)' 'yes'
+  ifeq '$(HAVE_SDL)' 'no'
+    HAVE_SDL = $(shell if pkg-config sdl --exists; then echo "yes"; else echo "no"; fi;)
+    ifeq '$(HAVE_SDL)' 'yes'
+      SDL_CXXFLAGS  = $(shell pkg-config sdl --cflags)
+      SDL_LDFLAGS   = $(shell pkg-config sdl --libs)
+
+      SDL_CXXFLAGS += -DHAVE_SDL
+    endif
+  endif
+endif
+
 check-dep-osg:
 	@echo "Checking Openscenegraph..."
-	@if [ "$(HAS_OSG)" != "yes" ]; then echo "Dependecy error: pkg-config can't find openscenegraph package"; exit 1; fi;
+	@if [ "$(HAVE_OSG)" != "yes" ]; then echo "Dependecy error: pkg-config can't find openscenegraph package"; exit 1; fi;
 	@echo "Openscenegraph found:"
 	@echo "  OSG_CXXFLAGS = $(OSG_CXXFLAGS)"
 	@echo "  OSG_LDFLAGS  = $(OSG_LDFLAGS)"
 
 check-dep-bt:
 	@echo "Checking Bullet..."
-	@if [ "$(HAS_BT)" != "yes" ]; then echo "Dependecy error: pkg-config can't find bullet package"; exit 1; fi;
+	@if [ "$(HAVE_BT)" != "yes" ]; then echo "Dependecy error: pkg-config can't find bullet package"; exit 1; fi;
 	@echo "Bullet found"
 	@echo "  BT_CXXFLAGS = $(BT_CXXFLAGS)"
 	@echo "  BT_LDFLAGS  = $(BT_LDFLAGS)"
 
 check-dep-ode:
 	@echo "Checking ODE..."
-	@if [ "$(HAS_ODE)" != "yes" ]; then echo "Dependecy error: pkg-config can't find ode package"; exit 1; fi;
+	@if [ "$(HAVE_ODE)" != "yes" ]; then echo "Dependecy error: pkg-config can't find ode package"; exit 1; fi;
 	@echo "ODE found"
 	@echo "  ODE_CXXFLAGS = $(ODE_CXXFLAGS)"
 	@echo "  ODE_LDFLAGS  = $(ODE_LDFLAGS)"
+
+check-dep-sdl:
+	@echo "Checking SDL..."
+	@if [ "$(HAVE_SDL)" != "yes" ]; then echo "Dependecy error: pkg-config can't find sdl package"; exit 1; fi;
+	@echo "SDL found"
+	@echo "  SDL_CXXFLAGS = $(SDL_CXXFLAGS)"
+	@echo "  SDL_LDFLAGS  = $(SDL_LDFLAGS)"
 	
-check-dep: check-dep-osg check-dep-bt check-dep-ode
+CHECKTARGETS = 
+ifeq '$(WANT_OSG)' 'yes'
+  CHECKTARGETS += check-dep-osg
+endif
+ifeq '$(WANT_ODE)' 'yes'
+  CHECKTARGETS += check-dep-ode
+endif
+ifeq '$(WANT_BT)' 'yes'
+  CHECKTARGETS += check-dep-bt
+endif
+ifeq '$(WANT_SDL)' 'yes'
+  CHECKTARGETS += check-dep-sdl
+endif
+
+check-dep: $(CHECKTARGETS)
 
 showvars:
 	@echo "SYSTEM = "$(SYSTEM)
@@ -135,17 +171,21 @@ showvars:
 	@echo "LDFLAGS  = $(LDFLAGS)"
 	@echo ""
 	@echo "WANT_ODE     = $(WANT_ODE)"
-	@echo "HAS_ODE      = $(HAS_ODE)"
+	@echo "HAVE_ODE     = $(HAVE_ODE)"
 	@echo "ODE_CXXFLAGS = $(ODE_CXXFLAGS)"
 	@echo "ODE_LDFLAGS  = $(ODE_LDFLAGS)"
 	@echo "WANT_BT      = $(WANT_BT)"
-	@echo "HAS_BT       = $(HAS_BT)"
+	@echo "HAVE_BT      = $(HAVE_BT)"
 	@echo "BT_CXXFLAGS  = $(BT_CXXFLAGS)"
 	@echo "BT_LDFLAGS   = $(BT_LDFLAGS)"
 	@echo "WANT_OSG     = $(WANT_ODE)"
-	@echo "HAS_OSG      = $(HAS_OSG)"
+	@echo "HAVE_OSG     = $(HAVE_OSG)"
 	@echo "OSG_CXXFLAGS = $(OSG_CXXFLAGS)"
 	@echo "OSG_LDFLAGS  = $(OSG_LDFLAGS)"
+	@echo "WANT_SDL     = $(WANT_ODE)"
+	@echo "HAVE_SDL     = $(HAVE_SDL)"
+	@echo "SDL_CXXFLAGS = $(SDL_CXXFLAGS)"
+	@echo "SDL_LDFLAGS  = $(SDL_LDFLAGS)"
 
 .DEFAULT_GOAL := all
-.PHONY: showvars check-dep-osg check-dep-bt check-dep
+.PHONY: showvars check-dep-osg check-dep-bt check-dep-ode check-dep-sdl

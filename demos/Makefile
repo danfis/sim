@@ -41,7 +41,7 @@ demo_base_ode: demo_base_ode.cpp $(LIBDEPS_ODE)
 	$(CXX) $(CXXFLAGS_ODE) -o $@ $< $(LDFLAGS_ODE)
 
 demo_syrotek: $(OBJS_SYROTEK) $(LIBDEPS_ODE)
-	$(CXX) $(CXXFLAGS_ODE) -o $@ $(OBJS_SYROTEK) $(LDFLAGS_ODE) -lSDL
+	$(CXX) $(CXXFLAGS_ODE) $(SDL_CXXFLAGS) -o $@ $(OBJS_SYROTEK) $(LDFLAGS_ODE) $(SDL_LDFLAGS) -lSDL
 
 
 clean:

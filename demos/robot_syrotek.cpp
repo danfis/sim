@@ -7,55 +7,14 @@ using sim::Scalar;
 
 
 RobotSyrotekComp::RobotSyrotekComp()
-    : sim::Component(), _sim(0), _robot(0),
-      _joystick(0)
+    : sim::Component(), _sim(0), _robot(0)
 {
-    int initialized = false;
-
-    if (SDL_WasInit(SDL_INIT_JOYSTICK) == 0){
-        if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0){
-            ERR("Can't initialize Joystick!");
-        }else{
-            initialized = true;
-        }
-    }else{
-        initialized = true;
-    }
-
-    if (initialized){
-        _joystick_delay = sim::Time(0, 100000000UL);
-        _joystick_last = sim::Time::cur();
-
-        _joystick = SDL_JoystickOpen(0);
-        SDL_JoystickEventState(SDL_IGNORE);
-
-#ifndef NDEBUG
-        {
-            DBG("Joystick:");
-            int num;
-            num = SDL_NumJoysticks();
-            DBG("  " << num << " joysticks found");
-            for (int i = 0; i < num; i++){
-                DBG("    " << i << ": " << SDL_JoystickName(i));
-            }
-            DBG("  Num axes: " << SDL_JoystickNumAxes(_joystick));
-            DBG("  Num buttons: " << SDL_JoystickNumButtons(_joystick));
-            DBG("  Num hats: " << SDL_JoystickNumHats(_joystick));
-            DBG("  Num balls: " << SDL_JoystickNumBalls(_joystick));
-        }
-#endif /* NDEBUG */
-    }
 }
 
 RobotSyrotekComp::~RobotSyrotekComp()
 {
     if (_robot)
         delete _robot;
-
-    if (_joystick){
-        SDL_JoystickClose(_joystick);
-        SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
-    }
 }
 
 void RobotSyrotekComp::init(sim::Sim *sim)
@@ -77,8 +36,15 @@ void RobotSyrotekComp::init(sim::Sim *sim)
 
     _robot->activate();
 
+    /*
     if (_joystick)
         sim->regPreStep(this);
+    */
+    {
+        sim::comp::Joystick *j = new sim::comp::Joystick(0);
+        sim->addComponent(j);
+        sim->regMessage(this, sim::comp::JoystickMessage::Type);
+    }
 
     sim->regMessage(this, sim::MessageKeyPressed::Type);
 }
@@ -89,6 +55,7 @@ void RobotSyrotekComp::finish()
 
 void RobotSyrotekComp::cbPreStep()
 {
+    /*
     if (!_joystick)
         return;
 
@@ -111,26 +78,55 @@ void RobotSyrotekComp::cbPreStep()
         _robot->addVelRight(0.1);
     }
     DBG("Velocity: " << _robot->velLeft() << " " << _robot->velRight());
+    */
 }
 
-void RobotSyrotekComp::processMessage(const sim::Message &_msg)
+void RobotSyrotekComp::processMessage(const sim::Message &msg)
 {
-    if (_msg.type() == sim::MessageKeyPressed::Type){
-        const sim::MessageKeyPressed &msg = (const sim::MessageKeyPressed &)_msg;
-        int key = msg.key();
-
-        //DBG("Component: " << this << " - key pressed: " << msg.key());
-
-        if (key == 'h'){
-            _robot->addVelLeft(0.1);
-        }else if (key == 'j'){
-            _robot->addVelLeft(-0.1);
-        }else if (key == 'k'){
-            _robot->addVelRight(0.1);
-        }else if (key == 'l'){
-            _robot->addVelRight(-0.1);
-        }
-
-        DBG("Velocity: " << _robot->velLeft() << " " << _robot->velRight());
+    if (msg.type() == sim::MessageKeyPressed::Type){
+        _keyPressed((const sim::MessageKeyPressed &)msg);
+    }else if (msg.type() == sim::comp::JoystickMessage::Type){
+        _joystick((const sim::comp::JoystickMessage &)msg);
     }
+}
+
+void RobotSyrotekComp::_keyPressed(const sim::MessageKeyPressed &msg)
+{
+    int key = msg.key();
+
+    //DBG("Component: " << this << " - key pressed: " << msg.key());
+
+    if (key == 'h'){
+        _robot->addVelLeft(0.1);
+    }else if (key == 'j'){
+        _robot->addVelLeft(-0.1);
+    }else if (key == 'k'){
+        _robot->addVelRight(0.1);
+    }else if (key == 'l'){
+        _robot->addVelRight(-0.1);
+    }
+    DBG("Velocity: " << _robot->velLeft() << " " << _robot->velRight());
+}
+
+void RobotSyrotekComp::_joystick(const sim::comp::JoystickMessage &msg)
+{
+    if (msg.button(0)){
+        _robot->setVelLeft(0.);
+        _robot->setVelRight(0.);
+    }else if (msg.button(2)){
+        _robot->addVelLeft(0.1);
+        _robot->addVelRight(0.1);
+    }else if (msg.button(3)){
+        _robot->addVelLeft(-0.1);
+        _robot->addVelRight(-0.1);
+    }else if (msg.button(6)){
+        _robot->addVelLeft(0.1);
+    }else if (msg.button(7)){
+        _robot->addVelLeft(-0.1);
+    }else if (msg.button(5)){
+        _robot->addVelRight(0.1);
+    }else if (msg.button(4)){
+        _robot->addVelRight(-0.1);
+    }
+    DBG("Velocity: " << _robot->velLeft() << " " << _robot->velRight());
 }

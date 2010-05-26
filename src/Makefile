@@ -2,6 +2,10 @@
 -include ../Makefile.include
 CXXFLAGS += -I. $(OSG_CXXFLAGS)
 
+ifeq '$(HAVE_SDL)' 'yes'
+  CXXFLAGS += $(SDL_CXXFLAGS)
+endif
+
 SUBTARGETS =
 
 ifeq '$(WANT_ODE)' 'yes'
@@ -18,6 +22,10 @@ OBJS = visbody.o visworld.o body.o joint.o sim.o component.o message.o \
 OBJS += sensor/camera.o
 OBJS += comp/povray.o
 OBJS += robot/syrotek.o
+
+ifeq '$(HAVE_SDL)' 'yes'
+  OBJS += comp/joystick.o
+endif
 
 all: $(TARGETS) $(SUBTARGETS)
 
@@ -37,6 +45,7 @@ bullet: libsim.a
 
 clean:
 	rm -f *.o *~ *.a
+	rm -f $(OBJS)
 	rm -f $(TARGETS)
 	$(MAKE) -C bullet clean
 	$(MAKE) -C ode clean
