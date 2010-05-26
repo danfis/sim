@@ -1,5 +1,3 @@
-
-
 #include <iostream>
 #include <unistd.h>
 #include <fstream>
@@ -12,7 +10,7 @@
 //#include "meshes/ardrone.h"
 #include "meshes/jezek.h"
 #include "meshes/plane.h"
-#include "sim/comppovray.hpp"
+#include "sim/comp/povray.hpp"
 
 int counter = 0;
 #define intro counter++; if (id == -1) std::cerr << counter << " :"<< __FUNCTION__ << "\n"; if (id != counter) return;
@@ -493,7 +491,7 @@ class SimTestFormace : public sim::Sim {
 	
 		createRobotCarlike();
 
-		sim::PovrayComponent *pc = new sim::PovrayComponent("povray/");
+		sim::comp::Povray *pc = new sim::comp::Povray("povray/");
 		addComponent(pc);
 
     }

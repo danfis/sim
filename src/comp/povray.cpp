@@ -1,18 +1,20 @@
-#include "comppovray.hpp"
+#include "povray.hpp"
 #include "sim/common.hpp"
 
 namespace sim {
 
-PovrayComponent::PovrayComponent(const char *prefix)
+namespace comp {
+
+Povray::Povray(const char *prefix)
     : sim::Component(), _frame(0), _prefix(prefix)
 {
 }
 
-PovrayComponent::~PovrayComponent()
+Povray::~Povray()
 {
 }
 
-void PovrayComponent::init(sim::Sim *sim){
+void Povray::init(sim::Sim *sim){
 	char name[200];
 
 	_sim = sim;
@@ -48,10 +50,10 @@ void PovrayComponent::init(sim::Sim *sim){
     _sim->regPostStep(this);
 }
 
-void PovrayComponent::finish(){
+void Povray::finish(){
 }
 
-void PovrayComponent::cbPostStep(){
+void Povray::cbPostStep(){
 
 	char name[200];
     const std::list<VisBody *> &bodies = _sim->visWorld()->bodies();
@@ -86,3 +88,4 @@ void PovrayComponent::cbPostStep(){
 
 }
 
+}

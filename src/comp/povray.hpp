@@ -1,8 +1,7 @@
-#ifndef _SIM_POVRAY_COMPONENT_H_
-#define _SIM_POVRAY_COMPONENT_H_
+#ifndef _SIM_COMP_POVRAY_HPP_
+#define _SIM_COMP_POVRAY_HPP_
 
-#include "sim/ode/world.hpp"
-#include "sim/sim.hpp"
+#include <sim/sim.hpp>
 #include <vector>
 #include <string>
 
@@ -37,22 +36,24 @@
 
 namespace sim {
 
-class PovrayComponent : public sim::Component {
+namespace comp {
+
+class Povray : public sim::Component {
 	sim::Sim *_sim;
 	int _frame;
     const char *_prefix;
 
 	public:
-	PovrayComponent(const char *prefix = "");
-	~PovrayComponent();
+	Povray(const char *prefix = "");
+	~Povray();
 
 	void init(sim::Sim *sim);
 	void finish();
 	void cbPostStep();
 };
 
-}
+} /* namespace comp */
 
-#endif
+} /* namespace sim */
 
-
+#endif /* _SIM_COMP_POVRAY_HPP_ */
