@@ -7,7 +7,6 @@
 #include "sim/world.hpp"
 #include "sim/ode/body.hpp"
 #include "sim/ode/joint.hpp"
-#include "sim/ode/actuator.hpp"
 
 namespace sim {
 
@@ -233,9 +232,6 @@ class World : public sim::World {
                                  const Vec3 &anchor, const Vec3 &axis);
     sim::Joint *createJointHinge2(sim::Body *A, sim::Body *oB, const Vec3 &anchor,
                                   const Vec3 &axis1, const Vec3 &axis2);
-
-    sim::ActuatorWheelCylinderX *createActuatorWheelCylinderX
-                                    (Scalar radius, Scalar height, Scalar mass);
 
   protected:
     void _contactEnableMode(int mode);

@@ -272,72 +272,6 @@ class SimTest1 : public sim::Sim {
         b2->activate();
     }
 
-    void createRobot()
-    {
-        sim::Vec3 pos(3. + 2., 3., -5.);
-        sim::Body *chasis;
-        sim::ActuatorWheelCylinderX *w[4];
-        size_t i;
-
-        chasis = world()->createBodyBox(sim::Vec3(.6, 1., 0.4), 1.);
-        for (i = 0; i < 4; i++){
-            w[i] = world()->createActuatorWheelCylinderX(0.2, 0.2, 1.);
-        }
-
-        chasis->setPos(pos);
-        w[0]->setPos(pos.x() + 0.415, pos.y() + 0.4, pos.z() - 0.2);
-        w[1]->setPos(pos.x() - 0.415, pos.y() + 0.4, pos.z() - 0.2);
-        w[2]->setPos(pos.x() + 0.415, pos.y() - 0.4, pos.z() - 0.2);
-        w[3]->setPos(pos.x() - 0.415, pos.y() - 0.4, pos.z() - 0.2);
-
-        for (i = 0; i < 4; i++){
-            w[i]->connectToChasis(chasis);
-            ((ActuatorWheelCylinderX *)w[i])->joint()->setParamLimitLoHi(-0.0001, 0.0001);
-        }
-
-        chasis->activate();
-        for (i = 0; i < 4; i++){
-            w[i]->activate();
-        }
-
-        chasis->visBody()->setText("Robot", 1., osg::Vec4(0.5, 0.6, 0.3, 1.));
-    }
-
-    void createRobotMove()
-    {
-        sim::Vec3 pos(10., -10., -4.9);
-        sim::Body *chasis;
-        sim::ActuatorWheelCylinderX *w[4];
-        size_t i;
-
-        chasis = world()->createBodyBox(sim::Vec3(.6, 1., 0.4), 1.);
-        for (i = 0; i < 4; i++){
-            w[i] = world()->createActuatorWheelCylinderX(0.2, 0.2, 1.);
-        }
-
-        chasis->setPos(pos);
-        w[0]->setPos(pos.x() + 0.415, pos.y() + 0.4, pos.z() - 0.2);
-        w[1]->setPos(pos.x() - 0.415, pos.y() + 0.4, pos.z() - 0.2);
-        w[2]->setPos(pos.x() + 0.415, pos.y() - 0.4, pos.z() - 0.2);
-        w[3]->setPos(pos.x() - 0.415, pos.y() - 0.4, pos.z() - 0.2);
-
-        for (i = 0; i < 4; i++){
-            w[i]->connectToChasis(chasis);
-            ((ActuatorWheelCylinderX *)w[i])->joint()->setParamLimitLoHi(-0.0001, 0.0001);
-        }
-
-        ((ActuatorWheelCylinderX *)w[0])->joint()->setParamVel2(5.);
-        ((ActuatorWheelCylinderX *)w[0])->joint()->setParamFMax2(10.);
-        ((ActuatorWheelCylinderX *)w[1])->joint()->setParamVel2(5.);
-        ((ActuatorWheelCylinderX *)w[1])->joint()->setParamFMax2(10.);
-
-        chasis->activate();
-        for (i = 0; i < 4; i++){
-            w[i]->activate();
-        }
-
-        chasis->visBody()->setText("Robot move", 1., osg::Vec4(0.5, 0.6, 0.3, 1.));
-    }
 
 	/*
     void createBunny()
@@ -785,39 +719,6 @@ class SimTestFormace : public sim::Sim {
 
 
 
-	void createRobot()
-    {
-        sim::Vec3 pos(3. + 2., 3., 2.5);
-        sim::Body *chasis;
-        sim::ActuatorWheelCylinderX *w[4];
-        size_t i;
-
-        chasis = world()->createBodyBox(sim::Vec3(.6, 1., 0.4), 1.);
-        for (i = 0; i < 4; i++){
-            w[i] = world()->createActuatorWheelCylinderX(0.2, 0.2, 1.);
-        }
-
-
-        chasis->setPos(pos);
-
-
-        w[0]->setPos(pos.x() + 0.415, pos.y() + 0.4, pos.z() - 0.2);
-        w[1]->setPos(pos.x() - 0.415, pos.y() + 0.4, pos.z() - 0.2);
-        w[2]->setPos(pos.x() + 0.415, pos.y() - 0.4, pos.z() - 0.2);
-        w[3]->setPos(pos.x() - 0.415, pos.y() - 0.4, pos.z() - 0.2);
-
-        for (i = 0; i < 4; i++){
-            w[i]->connectToChasis(chasis);
-            ((ActuatorWheelCylinderX *)w[i])->joint()->setParamLimitLoHi(-0.0001, 0.0001);
-        }
-
-        chasis->activate();
-        for (i = 0; i < 4; i++){
-            w[i]->activate();
-        }
-
-        chasis->visBody()->setText("Robot", 1., osg::Vec4(0.5, 0.6, 0.3, 1.));
-    }
 /*
     void createBunny()
     {

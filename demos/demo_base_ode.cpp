@@ -309,12 +309,13 @@ class S : public sim::Sim {
     {
         sim::Vec3 pos(3. + 2., 3., -5.);
         sim::Body *chasis;
-        sim::ActuatorWheelCylinderX *w[4];
+        sim::Body *w[4];
+        sim::Joint *jw[4];
         size_t i;
 
         chasis = world()->createBodyBox(sim::Vec3(.6, 1., 0.4), 1.);
         for (i = 0; i < 4; i++){
-            w[i] = world()->createActuatorWheelCylinderX(0.2, 0.2, 1.);
+            w[i] = world()->createBodyCylinderX(0.2, 0.2, 1.);
         }
 
         chasis->setPos(pos);
@@ -324,13 +325,13 @@ class S : public sim::Sim {
         w[3]->setPos(pos.x() - 0.415, pos.y() - 0.4, pos.z() - 0.2);
 
         for (i = 0; i < 4; i++){
-            w[i]->connectToChasis(chasis);
-            ((ActuatorWheelCylinderX *)w[i])->joint()->setParamLimitLoHi(-0.0001, 0.0001);
+            jw[i] = world()->createJointHinge(chasis, w[i], w[i]->pos(), Vec3(-1., 0., 0.));
         }
 
         chasis->activate();
         for (i = 0; i < 4; i++){
             w[i]->activate();
+            jw[i]->activate();
         }
 
         chasis->visBody()->setText("Robot", 1., osg::Vec4(0.5, 0.6, 0.3, 1.));
@@ -340,12 +341,13 @@ class S : public sim::Sim {
     {
         sim::Vec3 pos(10., -10., -4.9);
         sim::Body *chasis;
-        sim::ActuatorWheelCylinderX *w[4];
+        sim::Body *w[4];
+        sim::Joint *jw[4];
         size_t i;
 
         chasis = world()->createBodyBox(sim::Vec3(.6, 1., 0.4), 1.);
         for (i = 0; i < 4; i++){
-            w[i] = world()->createActuatorWheelCylinderX(0.2, 0.2, 1.);
+            w[i] = world()->createBodyCylinderX(0.2, 0.2, 1.);
         }
 
         chasis->setPos(pos);
@@ -355,18 +357,18 @@ class S : public sim::Sim {
         w[3]->setPos(pos.x() - 0.415, pos.y() - 0.4, pos.z() - 0.2);
 
         for (i = 0; i < 4; i++){
-            w[i]->connectToChasis(chasis);
-            ((ActuatorWheelCylinderX *)w[i])->joint()->setParamLimitLoHi(-0.0001, 0.0001);
+            jw[i] = world()->createJointHinge(chasis, w[i], w[i]->pos(), Vec3(1., 0., 0.));
         }
 
-        ((ActuatorWheelCylinderX *)w[0])->joint()->setParamVel2(5.);
-        ((ActuatorWheelCylinderX *)w[0])->joint()->setParamFMax2(10.);
-        ((ActuatorWheelCylinderX *)w[1])->joint()->setParamVel2(5.);
-        ((ActuatorWheelCylinderX *)w[1])->joint()->setParamFMax2(10.);
+        ((JointHinge *)jw[0])->setParamVel(5.);
+        ((JointHinge *)jw[0])->setParamFMax(10.);
+        ((JointHinge *)jw[1])->setParamVel(5.);
+        ((JointHinge *)jw[1])->setParamFMax(10.);
 
         chasis->activate();
         for (i = 0; i < 4; i++){
             w[i]->activate();
+            jw[i]->activate();
         }
 
         chasis->visBody()->setText("Robot move", 1., osg::Vec4(0.5, 0.6, 0.3, 1.));

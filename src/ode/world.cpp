@@ -457,13 +457,6 @@ sim::Joint *World::createJointHinge2(sim::Body *oA, sim::Body *oB, const Vec3 &a
 }
 
 
-sim::ActuatorWheelCylinderX *World::createActuatorWheelCylinderX
-                                (Scalar radius, Scalar height, Scalar mass)
-{
-    return new ActuatorWheelCylinderX(this, radius, height, mass);
-}
-
-
 } /* namespace ode */
 
 } /* namespace sim */

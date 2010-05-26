@@ -3,7 +3,6 @@
 
 #include "sim/body.hpp"
 #include "sim/joint.hpp"
-#include "sim/actuator.hpp"
 #include "sim/visworld.hpp"
 #include "sim/time.hpp"
 
@@ -79,11 +78,6 @@ class World {
         { return 0; }
     virtual Joint *createJointHinge2(Body *A, Body *oB, const Vec3 &anchor,
                                      const Vec3 &axis1, const Vec3 &axis2)
-        { return 0; }
-
-    virtual ActuatorWheelCylinderX *createActuatorWheelCylinderX
-                                        (Scalar radius, Scalar height,
-                                         Scalar mass)
         { return 0; }
     /* \} */
 };
