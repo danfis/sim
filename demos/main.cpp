@@ -9,6 +9,7 @@
 #include "msg.hpp"
 //#include "meshes/ardrone.h"
 #include "meshes/jezek.h"
+#include "meshes/surface.h"
 #include "meshes/plane.h"
 #include "sim/comp/povray.hpp"
 
@@ -420,12 +421,11 @@ void printTree(osg::Node *node) {
 
 
 class SimTestFormace : public sim::Sim {
-  std::vector<sim::VisBody *> bodies;
   public:
     SimTestFormace	()
         : Sim()
     {
-        setTimeStep(sim::Time::fromMs(10));
+        setTimeStep(sim::Time::fromMs(20));
         setTimeSubSteps(2);
 
 
@@ -441,26 +441,23 @@ class SimTestFormace : public sim::Sim {
         //w->setContactApprox2(false);
         //w->setContactBounce(0.1, 0.1);
     
-        
+/*        
         b = w->createBodyBox(sim::Vec3(2., 2., 1.), 0.4);
         b->visBody()->setColor(osg::Vec4(1,0.8,0.4, 1.));
         b->setPos(3, 4., 5);
         b->setRot(sim::Quat(Vec3(1., 1., 0.), M_PI * 0.3));
         b->activate();
-		bodies.push_back(b->visBody());
 
 		b = w->createBodyBox(sim::Vec3(3., 2., 1.), 1.8);
         b->visBody()->setColor(osg::Vec4(1.0, 0.63, 0.32, 1.));
         b->setPos(-3, 4., 5);
         b->activate();
-		bodies.push_back(b->visBody());
 
 
         b = w->createBodyCube(1., 1.);
         b->visBody()->setColor(osg::Vec4(0., 0., 0., 1.));
         b->setPos(-3., 0.2, 3.);
         b->activate();
-		bodies.push_back(b->visBody());
 
 	
         b = w->createBodyCylinderZ(.5, 1., 3.);
@@ -468,27 +465,22 @@ class SimTestFormace : public sim::Sim {
         b->visBody()->setColor(1., 0., 0., 1.);
         b->setPos(3., 0., 2);
         b->activate();
-		bodies.push_back(b->visBody());
 
         b = w->createBodyCylinderX(.5, 1., 3.);
         b->setPos(0., 3., 1.5);
         b->activate();
-		bodies.push_back(b->visBody());
 
         b = w->createBodyCylinderY(.5, 1., 3.);
         b->setPos(3., 0., 10);
         b->visBody()->setColor(1., 1, 0., 0.5);
         b->activate();
-		bodies.push_back(b->visBody());
-
+*/
 
         //createRobot(bodies);
 		//createArdrone();
 	//	createJezek();
 		createPlane();
-
-//		printTree(_visworld->sceneRoot());
-	
+//		createSurface();
 		createRobotCarlike();
 
 		sim::comp::Povray *pc = new sim::comp::Povray("povray/");
@@ -499,7 +491,7 @@ class SimTestFormace : public sim::Sim {
     void init()
     {
         sim::Sim::init();
-        for (size_t i = 0; i < 300; i++){
+        for (size_t i = 0; i < 150; i++){
             visWorld()->step();
             std::cerr << i << "\r";
             usleep(5000);
@@ -633,12 +625,12 @@ class SimTestFormace : public sim::Sim {
 
 	void createRobotCarlike()
     {
-		const double robotWidth = 1;
-		const double robotLength = 2;
+		const double robotWidth = 2;
+		const double robotLength = 3;
 		const double robotHeight = 0.6;
 		const double wheelRadius = 0.8;
 		const double wheelWidth = 0.2;
-		sim::Vec3 pos(5,2,1.2);
+		sim::Vec3 pos(5,2,2.6);
 
         sim::Body *chasis, *w1,*w2,*w3,*w4;
 
@@ -669,11 +661,6 @@ class SimTestFormace : public sim::Sim {
 
 
         chasis->setPos(pos);
-		bodies.push_back(chasis->visBody());
-		bodies.push_back(w1->visBody());
-		bodies.push_back(w2->visBody());
-		bodies.push_back(w3->visBody());
-		bodies.push_back(w4->visBody());
 
 		// joint between chassis and wheels
 		sim::Joint *j1 = world()->createJointHinge2(chasis,w1,
@@ -697,10 +684,13 @@ class SimTestFormace : public sim::Sim {
 				sim::Vec3(0,1,0));
 
 		const double angle = 15*M_PI/180.0;
-		j1->setParamLimitLoHi(-angle,angle);
-		j2->setParamLimitLoHi(-angle,angle);
+//		j1->setParamLimitLoHi(-angle,angle);
+//		j2->setParamLimitLoHi(-angle,angle);
 		j3->setParamLimitLoHi(-0.001,0.001);
 		j4->setParamLimitLoHi(-0.001,0.001);
+		
+		j1->setParamLimitLoHi(-0.001,0.001);
+		j2->setParamLimitLoHi(-0.001,0.001);
 
         chasis->activate();
 
@@ -715,6 +705,18 @@ class SimTestFormace : public sim::Sim {
 		j4->activate();
 
         chasis->visBody()->setText("Robot", 1., osg::Vec4(0.5, 0.6, 0.3, 1.));
+
+		// front wheel
+		j1->setParamVel2(-5);
+		j1->setParamFMax2(50);
+		j2->setParamVel2(-5);
+		j2->setParamFMax2(50);
+
+		j1->setParamVel(0);
+//		j1->setParamFMax(25);
+		j2->setParamVel(0);
+//		j2->setParamFMax(25);
+
     }
 
 
@@ -756,7 +758,16 @@ class SimTestFormace : public sim::Sim {
 		obj->setPos(2,4,2);
         obj->visBody()->setColor(0.4, 1, 0.4, 1.);
         obj->activate();
-		bodies.push_back(obj->visBody());
+    }
+	
+	void createSurface()
+    {
+        sim::Body *obj;
+
+        obj = world()->createBodyTriMesh(surface_verts,surface_verts_len,surface_ids,surface_ids_len,0.);
+		obj->setPos(0,0,-2);
+        obj->visBody()->setColor(0.4, 1, 0.4, 1.);
+        obj->activate();
     }
 	
 	void createPlane()
@@ -767,7 +778,6 @@ class SimTestFormace : public sim::Sim {
 		obj->setPos(0,0,0);
         obj->visBody()->setColor(0.7, 1, 0.2, 1.);
         obj->activate();
-		bodies.push_back(obj->visBody());
     }
 	
 
@@ -781,9 +791,6 @@ void testFormace(const int argc, char **argv, const int id) {
 	s.run();
 
 }
-
-
-
 
 
 
