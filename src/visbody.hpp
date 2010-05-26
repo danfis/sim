@@ -4,12 +4,12 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/Geode>
 #include <osgText/TextBase>
-
+#include <osg/Vec4f>
 #include "math.hpp"
 #include <fstream>
 
-
 namespace sim {
+
 
 /**
  * Visual representation of body.
@@ -90,6 +90,8 @@ class VisBody {
     virtual void setColor(const osg::Vec4 &c) {}
     virtual void setColor(float r, float g, float b, float a)
         { setColor(osg::Vec4(r, g, b, a)); }
+
+	const osg::Vec4& getColor() const;
 
     virtual void setTexture(const std::string &fn) {}
 

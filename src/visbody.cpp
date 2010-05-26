@@ -115,6 +115,12 @@ void VisBody::setOsgText(osg::ref_ptr<osgText::TextBase> t)
 void VisBody::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
 }
 
+const osg::Vec4 &VisBody::getColor() const {
+    osg::ShapeDrawable *draw;
+    draw = (osg::ShapeDrawable *)((osg::Geode *)_node.get())->getDrawable(0);
+
+	return draw->getColor();
+}
 
 void VisBodyShape::setColor(const osg::Vec4 &c)
 {
