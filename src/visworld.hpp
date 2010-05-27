@@ -59,7 +59,7 @@ class VisWorld {
     /**
      * Returns root of scene graph.
      */
-    osg::Node *sceneRoot() { return _root; }
+    osg::Node *sceneRoot() { return _root_vis; }
 
     /**
      * Adds visualisable object.

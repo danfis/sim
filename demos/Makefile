@@ -13,6 +13,7 @@ LIBDEPS_ODE = ../src/libsim.a ../src/ode/libsim-ode.a
 
 OBJS_SYROTEK = demo_syrotek.cpp robot_syrotek.cpp
 OBJS_FOLLOW_COLOR = demo_follow_color.cpp robot_syrotek.cpp
+OBJS_INTERSECTION = demo_intersection.cpp
 
 TARGETS =
 
@@ -25,6 +26,7 @@ ifeq '$(WANT_ODE)' 'yes'
   TARGETS += demo_syrotek
   TARGETS += demo_follow_color
   TARGETS += main
+  TARGETS += demo_intersection
 endif
 
 all: $(TARGETS)
@@ -43,9 +45,11 @@ demo_base_ode: demo_base_ode.cpp $(LIBDEPS_ODE)
 	$(CXX) $(CXXFLAGS_ODE) -o $@ $< $(LDFLAGS_ODE)
 
 demo_syrotek: $(OBJS_SYROTEK) $(LIBDEPS_ODE)
-	$(CXX) $(CXXFLAGS_ODE) $(SDL_CXXFLAGS) -o $@ $(OBJS_SYROTEK) $(LDFLAGS_ODE) $(SDL_LDFLAGS) -lSDL
+	$(CXX) $(CXXFLAGS_ODE) $(SDL_CXXFLAGS) -o $@ $(OBJS_SYROTEK) $(LDFLAGS_ODE) $(SDL_LDFLAGS)
 demo_follow_color: $(OBJS_FOLLOW_COLOR) $(LIBDEPS_ODE)
-	$(CXX) $(CXXFLAGS_ODE) $(SDL_CXXFLAGS) -o $@ $(OBJS_FOLLOW_COLOR) $(LDFLAGS_ODE) $(SDL_LDFLAGS) -lSDL
+	$(CXX) $(CXXFLAGS_ODE) $(SDL_CXXFLAGS) -o $@ $(OBJS_FOLLOW_COLOR) $(LDFLAGS_ODE) $(SDL_LDFLAGS)
+demo_intersection: $(OBJS_INTERSECTION) $(LIBDEPS_ODE)
+	$(CXX) $(CXXFLAGS_ODE) -o $@ $(OBJS_INTERSECTION) $(LDFLAGS_ODE)
 
 
 clean:
