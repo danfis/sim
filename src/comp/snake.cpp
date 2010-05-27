@@ -1,5 +1,7 @@
 #include "snake.hpp"
 #include <sim/msg.hpp>
+#include <osgGA/GUIEventAdapter>
+
 
 namespace sim {
 
@@ -39,11 +41,11 @@ void Snake::processMessage(const Message &msg) {
 
 	if (msg.type() == MessageKeyPressed::Type) {
 		const MessageKeyPressed &m = (const MessageKeyPressed &)msg;
-		if (m.key() == 110) {
+		if (m.key() == 'n') {
 			// 'n'
 			selectedRobot=++selectedRobot % _snakeBodies.size();
 			DBG("Body " << selectedRobot << " is selected");
-		} else if (m.key() == 109) {
+		} else if (m.key() == 'm') {
 			// 'm'
 			selectedRobot--;
 			if (selectedRobot < 0) {
@@ -51,16 +53,16 @@ void Snake::processMessage(const Message &msg) {
 			}
 			DBG("Body " << selectedRobot << " is selected");
 
-		} else if (m.key() == 65362) {
+		} else if (m.key() == osgGA::GUIEventAdapter::KEY_Up) {
 			// up
 			vel1[selectedRobot]+= step;
-		} else if (m.key() == 65364) {
-			vel1[selectedRobot]-= step;
+		} else if (m.key() == osgGA::GUIEventAdapter::KEY_Down) {
 			// down
-		} else if (m.key() == 65361) {
+			vel1[selectedRobot]-= step;
+		} else if (m.key() == osgGA::GUIEventAdapter::KEY_Left) {
 			// left
 			vel2[selectedRobot]+= step;
-		} else if (m.key() == 65363) {
+		} else if (m.key() == osgGA::GUIEventAdapter::KEY_Right) {
 			// right 
 			vel2[selectedRobot]-= step;
 		} else {
