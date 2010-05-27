@@ -18,7 +18,7 @@ ifeq '$(SYSTEM)' 'FreeBSD'
 else
   AWK ?= awk
   SED ?= sed
-  SYSTEM_LDFLAGS = -lrt
+  SYSTEM_LDFLAGS = -lrt -pthread
 endif
 
 NOWALL ?= no

@@ -240,6 +240,8 @@ class Sim {
     World *_world;
     VisWorld *_visworld;
     pthread_mutex_t _step_lock; //!< Sync lock for World/VisWorld steps
+    pthread_t _th_step_world; //!< Thread for World's steps
+    pthread_t _th_step_visworld; //!< Thread for VisWorld's steps
 
     std::list<Component *> _cs; //!< List of all components
     std::list<Component *> _cs_uninit; //!< List of uninitialized components
@@ -261,10 +263,13 @@ class Sim {
     Timer _timer_real;
     Time _time_simulated;
 
-    Time _time_step;
-    unsigned int _time_substeps;
+    Time _time_step; //!< Length of simulation steps
+    unsigned int _time_substeps; //!< Number of sim. substeps
+    Time _vis_time_step; //!< Delay between VisWorld's steps
 
-    bool _simulate;
+    bool _simulate; //!< True if simulation is running
+    bool _simulate_real; //!< True if simulator should try to synchorinze
+                         //!< real time with simulated
 
   protected:
     typedef std::list<Component *>::iterator cit_t; //!< Component list iterator
@@ -287,8 +292,14 @@ class Sim {
     void setTimeStep(const Time &t) { _time_step = t; }
     void setTimeSubSteps(unsigned int ss) { _time_substeps = ss; }
 
+    const Time &visTimeStep() const { return _vis_time_step; }
+
+    /**
+     * Sets up delay between VisWorld's steps.
+     */
+    void setVisTimeStep(const Time &t) { _vis_time_step = t; }
+
     virtual void init();
-    virtual void step();
     virtual void finish();
     virtual bool done();
 
@@ -364,6 +375,9 @@ class Sim {
         { if (_simulate) pauseSimulation();
           else continueSimulation(); }
 
+    bool simulateReal() const { return _simulate_real; }
+    void setSimulateReal(bool yes = true) { _simulate_real = yes; }
+
   protected:
     void _initComponents();
     void _finishComponents();
@@ -399,6 +413,20 @@ class Sim {
      * Performs step of visual world.
      */
     void _stepVisWorld();
+
+    /**
+     * Starts threads performing World and VisWorlds' steps.
+     */
+    void _runStepThreads();
+
+    /**
+     * Joins step threads started by _runStepThreads().
+     */
+    void _joinStepThreads();
+
+
+    static void *_worldStepsThread(void *);
+    static void *_visWorldStepsThread(void *);
 
     /**
      * Calls all Component::cbPreStep() methods on all registered

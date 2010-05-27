@@ -158,7 +158,8 @@ void SimComponentMessageRegistry::deliverAssignedMessages(Component *c,
 Sim::Sim(World *world, VisWorld *visworld)
     : _world(world), _visworld(visworld),
       _time_step(0, 20000000), _time_substeps(10),
-      _simulate(true)
+      _vis_time_step(0, 50000000),
+      _simulate(true), _simulate_real(true)
 {
     if (!_visworld)
         _visworld = new VisWorld();
@@ -224,20 +225,6 @@ void Sim::init()
     std::cerr << "Real time / Simulated time: " << std::endl;
 }
 
-void Sim::step()
-{
-    if (_simulate)
-        _stepWorld();
-    _stepVisWorld();
-
-    std::cerr << timeReal() << " / " << timeSimulated() << "\r";
-
-    if (timeSimulated() > timeReal()){
-        Time tdiff = Time::diff(timeReal(), timeSimulated());
-        Time::sleep(tdiff);
-    }
-}
-
 void Sim::_stepWorld()
 {
     if (!_world){
@@ -287,14 +274,77 @@ void Sim::_stepVisWorld()
     pthread_mutex_unlock(&_step_lock);
 }
 
+
+void *Sim::_worldStepsThread(void *_sim)
+{
+    Sim *sim = (Sim *)_sim;
+
+    while (!sim->done()){
+        if (sim->_simulate){
+            sim->_stepWorld();
+
+            std::cerr << sim->timeReal() << " / " << sim->timeSimulated() << "\r";
+
+            // Try to align simulated time with real time.
+            // Obviously this happens only when simulation is faster then
+            // real time.
+            if (sim->_simulate_real && sim->timeSimulated() > sim->timeReal()){
+                Time tdiff = Time::diff(sim->timeReal(), sim->timeSimulated());
+                Time::sleep(tdiff);
+            }
+        }else{
+            std::cerr << sim->timeReal() << " / " << sim->timeSimulated() << "\r";
+
+            // is simulation stalled wait simulation time and then test if
+            // was simulation unpaused again
+            Time::sleep(sim->_time_step);
+        }
+
+        //DBG(Time::cur());
+    }
+
+    return NULL;
+}
+
+void *Sim::_visWorldStepsThread(void *_sim)
+{
+    Sim *sim = (Sim *)_sim;
+
+    while (!sim->done()){
+        sim->_stepVisWorld();
+        Time::sleep(sim->_vis_time_step);
+        //DBG(Time::cur());
+    }
+
+    return NULL;
+}
+
+void Sim::_runStepThreads()
+{
+    pthread_create(&_th_step_world, NULL, _worldStepsThread, this);
+    pthread_create(&_th_step_visworld, NULL, _visWorldStepsThread, this);
+}
+
+void Sim::_joinStepThreads()
+{
+    pthread_join(_th_step_world, NULL);
+    pthread_join(_th_step_visworld, NULL);
+}
+
 bool Sim::done()
 {
-    if (_visworld)
-        return _visworld->done();
-    if (_world)
-        return _world->done();
+    bool done = false;
 
-    return false;
+    pthread_mutex_lock(&_step_lock);
+
+    if (_visworld)
+        done = _visworld->done();
+    if (!done && _world)
+        done = _world->done();
+
+    pthread_mutex_unlock(&_step_lock);
+
+    return done;
 }
 
 void Sim::finish()
@@ -312,31 +362,39 @@ void Sim::finish()
 void Sim::run()
 {
     init();
-    while (!done()){
-        step();
-    }
+
+    _runStepThreads();
+
+    _joinStepThreads();
+
     finish();
 }
 
 bool Sim::pressedKey(int key)
 {
-    DBG("Pressed key: " << key << " " << (char)key);
-
     if (key == 'w'){
-        if (_visworld)
+        if (_visworld){
             _visworld->toggleWireframe();
-	} else if (key == 'a') {
+            return true;
+        }
+    }else if (key == 'a') {
 		if (_visworld) {
 			_visworld->toggleAlpha();
+            return true;
 		}
-	} else if (key == 'x') {
+	}else if (key == 'x') {
 		if (_visworld) {
 			_visworld->toggleAxis();
+            return true;
 		}
-	} else if (key == 'p'){
+	}else if (key == 'p'){
         toggleSimulation();
+        return true;
     }else{
-        sendMessage(new MessageKeyPressed(key));
+        if (_simulate){
+            sendMessage(new MessageKeyPressed(key));
+            return true;
+        }
     }
 
     return false;

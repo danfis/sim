@@ -33,7 +33,9 @@ void Camera::init(sim::Sim *sim)
     _sim = sim;
 
 
-    _sim->regPreStep(this);
+    if (_dump_prefix)
+        _sim->regPreStep(this);
+
     _sim->regPostStep(this);
 
     _createCamera();
