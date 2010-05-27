@@ -51,7 +51,7 @@ double evaluate(const Particle &p) {
 
 int main(int argc, char **argv) {
 
-    const int populationSize = 10;
+    const int populationSize = 30;
     const int generationCount = 10;
 
     const int numJoints = 4;
@@ -63,11 +63,11 @@ int main(int argc, char **argv) {
     for(int i=0;i<populationSize;i++) {
         vector<double> data;
         for(int j=0;j<numJoints;j++) {
-            data.push_back(getRandom(0,2));
-            data.push_back(getRandom(0,2*M_PI*10));
+            data.push_back(getRandom(0,3));
+            data.push_back(getRandom(0,2*M_PI*5));
             data.push_back(getRandom(-2*M_PI,2*M_PI));
-            data.push_back(getRandom(0,2));
-            data.push_back(getRandom(0,2*M_PI*10));
+            data.push_back(getRandom(0,3));
+            data.push_back(getRandom(0,2*M_PI*5));
             data.push_back(getRandom(-2*M_PI,2*M_PI));
         }
         population.push_back(Particle(data,-1));
@@ -83,6 +83,7 @@ int main(int argc, char **argv) {
         for(int i=0;i<(int)population.size();i++) {
             population[i].fit = evaluate(population[i]);
             ofl << "p[" << i << "].fit=" << population[i].fit << "\n";
+            ofl.flush();
         }
 
 

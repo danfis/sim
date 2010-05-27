@@ -42,7 +42,7 @@ void Frequency::cbPreStep() {
     const double ts = t.inSF();
 
 
-    if (ts > 2) {
+    if (ts > 1) {
 		const double newVel = _amplitude*sin(ts*_frequency + _phase);
 
 		if (_type == 0) {

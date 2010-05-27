@@ -52,10 +52,10 @@ class SimMovementTunning : public sim::Sim {
     void init()
     {
         sim::Sim::init();
-        for (size_t i = 0; i < 70; i++){
+        for (size_t i = 0; i < 5; i++){
             visWorld()->step();
             std::cerr << i << "\r";
-            usleep(5000);
+            usleep(1000);
         }
         std::cerr << std::endl;
 
