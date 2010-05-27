@@ -4,6 +4,7 @@
 #include <sim/msg.hpp>
 #include <sim/sensor/camera.hpp>
 
+#include "sim/comp/povray.hpp"
 #include "robot_syrotek.hpp"
 
 using namespace sim::ode;
@@ -35,6 +36,9 @@ class S : public sim::Sim {
         createArena();
         createRobot();
 
+		sim::comp::Povray *pc = new sim::comp::Povray("povray/");
+		addComponent(pc);
+		regPostStep(pc);
 
 
     }
@@ -91,7 +95,7 @@ class S : public sim::Sim {
             b->activate();
 
             b = w->createBodySphere(0.1, 0.1);
-            b->setPos(0.35, 0.4, .5);
+            b->setPos(0.15, 0.4, .4);
             b->activate();
         }
     }
