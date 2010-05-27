@@ -13,6 +13,7 @@
 #include "meshes/plane.h"
 #include "sim/comp/povray.hpp"
 #include "sim/comp/snake.hpp"
+#include "sim/comp/frequency.hpp"
 
 int counter = 0;
 #define intro counter++; if (id == -1) std::cerr << counter << " :"<< __FUNCTION__ << "\n"; if (id != counter) return;
@@ -485,11 +486,13 @@ class SimTestFormace : public sim::Sim {
 		createPlane();
 //		createSurface();
 //		createRobotCarlike();
-//		createSnake();
+		createSnake();
 //		createSnake3();
-		createSnake32();
+//		createSnake32();
 
  //       createMaze();
+
+
 
 		sim::comp::Povray *pc = new sim::comp::Povray("povray/");
 		addComponent(pc);
@@ -904,8 +907,8 @@ class SimTestFormace : public sim::Sim {
 		snakeJoints.push_back(j3);
 		snakeJoints.push_back(j4);
 
-		j3->setParamVel(1);
-		j3->setParamFMax(10);
+        sim::comp::Frequency *fc = new sim::comp::Frequency(j1,2*M_PI*1,0,0);
+
 
 	}
 
