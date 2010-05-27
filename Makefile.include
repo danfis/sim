@@ -9,6 +9,7 @@ CONVERT ?= convert
 SYSTEM = $(shell uname)
 
 SYSTEM_CXXFLAGS =
+SYSTEM_LDFLAGS =
 
 ifeq '$(SYSTEM)' 'FreeBSD'
   AWK ?= gawk
@@ -17,6 +18,7 @@ ifeq '$(SYSTEM)' 'FreeBSD'
 else
   AWK ?= awk
   SED ?= sed
+  SYSTEM_LDFLAGS = -lrt
 endif
 
 NOWALL ?= no
@@ -47,6 +49,7 @@ ifneq '$(NOPEDANTIC)' 'yes'
 endif
 
 CXXFLAGS += $(SYSTEM_CXXFLAGS)
+LDFLAGS += $(SYSTEM_LDFLAGS)
 
 HAVE_ODE ?= no
 HAVE_BT  ?= no

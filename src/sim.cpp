@@ -224,23 +224,9 @@ void Sim::init()
 
 void Sim::step()
 {
-    _cbPreStep();
-
-    _cbMessages();
-
-    timeRealNow();
-
-    if (_world && _simulate){
-        _world->step(_time_step, _time_substeps);
-        _time_simulated += _time_step;
-    }
-
-    timeRealNow();
-
-    _cbPostStep();
-
-    if (_visworld)
-        _visworld->step();
+    if (_simulate)
+        _stepWorld();
+    _stepVisWorld();
 
     std::cerr << timeReal() << " / " << timeSimulated() << "\r";
 
@@ -248,6 +234,45 @@ void Sim::step()
         Time tdiff = Time::diff(timeReal(), timeSimulated());
         Time::sleep(tdiff);
     }
+}
+
+void Sim::_stepWorld()
+{
+    if (!_world){
+        ERR("I have no World! Can't simulate physics!");
+        return;
+    }
+
+    // simulation is stalled - simply silently skip the step
+    if (!_simulate)
+        return;
+
+    // call pre step callbacks
+    if (_cs_pre.size() > 0)
+        _cbPreStep();
+
+    // deliver all messages
+    _cbMessages();
+
+    // recompute real time
+    timeRealNow();
+
+    // perform simulation
+    _world->step(_time_step, _time_substeps);
+    _time_simulated += _time_step;
+
+    // recompute real time
+    timeRealNow();
+
+    // call post step callbacks
+    if (_cs_post.size() > 0)
+        _cbPostStep();
+}
+
+void Sim::_stepVisWorld()
+{
+    if (_visworld)
+        _visworld->step();
 }
 
 bool Sim::done()

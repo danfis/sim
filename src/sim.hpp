@@ -388,6 +388,17 @@ class Sim {
     bool _isComponentInList(const Component *c,
                             const std::list<Component *> &list) const;
 
+
+    /**
+     * Performes simulation step of physical world.
+     */
+    void _stepWorld();
+
+    /**
+     * Performs step of visual world.
+     */
+    void _stepVisWorld();
+
     /**
      * Calls all Component::cbPreStep() methods on all registered
      * components.
