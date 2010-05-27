@@ -504,6 +504,20 @@ const VisBody *BodyCompound::visBody(int id) const
     return s->vis;
 }
 
+void BodyCompound::visBodyAll(std::list<const VisBody *> *list) const
+{
+    for_each(_shapes_cit_t, _shapes){
+        list->push_back(it->second->vis);
+    }
+}
+
+void BodyCompound::visBodyAll(std::list<VisBody *> *list)
+{
+    for_each(_shapes_cit_t, _shapes){
+        list->push_back(it->second->vis);
+    }
+}
+
 
 void BodyCompound::_applyGeomsToVis()
 {

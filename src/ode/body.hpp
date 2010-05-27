@@ -217,6 +217,8 @@ class BodyCompound : public Body {
      */
     VisBody *visBody(int ID);
     const VisBody *visBody(int ID) const;
+    void visBodyAll(std::list<const VisBody *> *list) const;
+    void visBodyAll(std::list<VisBody *> *list);
 
     void activate();
 

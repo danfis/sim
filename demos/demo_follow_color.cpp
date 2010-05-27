@@ -3,6 +3,7 @@
 #include <sim/ode/world.hpp>
 #include <sim/msg.hpp>
 #include <sim/sensor/camera.hpp>
+#include <sim/comp/povray.hpp>
 
 #include "robot_syrotek.hpp"
 
@@ -47,7 +48,7 @@ class FollowComp : public sim::Component {
         _cam->visBodyEnable();
         _cam->setWidthHeight(300, 300);
         _cam->setBgColor(0., 0., 0., 1.);
-        //cam->enableDump("cam/");
+        _cam->enableDump("cam/");
         _cam->enableView();
         sim->addComponent(_cam);
 
@@ -115,7 +116,7 @@ class FollowComp : public sim::Component {
             return;
 
         osg::Vec2 mean = _findMean(image);
-        Scalar kf = 1., ko = 1.;
+        Scalar kf = 0.5, ko = 0.3;
         Scalar vleft, vright;
 
         //DBG(mean.x() << " " << mean.y());
@@ -156,6 +157,9 @@ class S : public sim::Sim {
         createArena();
         createRobot();
         createFollower();
+
+        sim::comp::Povray *pov = new sim::comp::Povray("povray/");
+        addComponent(pov);
     }
 
     void createArena()
@@ -167,22 +171,57 @@ class S : public sim::Sim {
 
         c = (BodyCompound *)w->createBodyCompound();
         id = c->addBox(Vec3(2., 2., 0.1));
-        c->visBody(id)->setColor(color);
-        c->visBody(id)->setTexture("wood.ppm");
         id = c->addBox(Vec3(0.1, 2., 0.5), SIM_BODY_DEFAULT_VIS, Vec3(-1., 0., .25));
-        c->visBody(id)->setColor(color);
-        c->visBody(id)->setTexture("wood.ppm");
-        id = c->addBox(Vec3(0.1, 2., 0.5), SIM_BODY_DEFAULT_VIS, Vec3(1., 0., .25));
-        c->visBody(id)->setColor(color);
-        c->visBody(id)->setTexture("wood.ppm");
         id = c->addBox(Vec3(2., .1, 0.3), SIM_BODY_DEFAULT_VIS, Vec3(0., 1., .25));
-        c->visBody(id)->setColor(color);
-        c->visBody(id)->setTexture("wood.ppm");
         id = c->addBox(Vec3(2., .1, 0.3), SIM_BODY_DEFAULT_VIS, Vec3(0., -1., .25));
-        c->visBody(id)->setColor(color);
-        c->visBody(id)->setTexture("wood.ppm");
+
+        id = c->addBox(Vec3(3., 1., 0.1), SIM_BODY_DEFAULT_VIS, Vec3(2.5, 0., 0.));
+
+        id = c->addBox(Vec3(2., 2., 0.1), SIM_BODY_DEFAULT_VIS, Vec3(5., 0., 0.));
+        id = c->addBox(Vec3(2., .1, 0.3), SIM_BODY_DEFAULT_VIS, Vec3(5., 1., .25));
+        id = c->addBox(Vec3(2., .1, 0.3), SIM_BODY_DEFAULT_VIS, Vec3(5., -1., .25));
+        id = c->addBox(Vec3(0.1, 2., 0.5), SIM_BODY_DEFAULT_VIS, Vec3(6., 0., .25));
+        {
+            std::list<sim::VisBody *> list;
+            std::list<sim::VisBody *>::iterator it, it_end;
+            c->visBodyAll(&list);
+
+            it = list.begin();
+            it_end = list.end();
+            for (; it != it_end; ++it){
+                (*it)->setColor(color);
+                (*it)->setTexture("wood.ppm");
+            }
+        }
+
 
         id = c->addCube(.2, SIM_BODY_DEFAULT_VIS, Vec3(0.5, 0.5, .1));
+        c->visBody(id)->setColor(0., .1, .8, 1.);
+        c->visBody(id)->setTexture("wood.ppm");
+        c->activate();
+
+        id = c->addCube(.2, SIM_BODY_DEFAULT_VIS, Vec3(5., 0., .1));
+        c->visBody(id)->setColor(0., .1, .8, 1.);
+        c->visBody(id)->setTexture("wood.ppm");
+        c->activate();
+
+        id = c->addCube(.1, SIM_BODY_DEFAULT_VIS, Vec3(1., 0., .1));
+        c->visBody(id)->setColor(0., .1, .8, 1.);
+        c->visBody(id)->setTexture("wood.ppm");
+        c->activate();
+
+        id = c->addBox(Vec3(.1, .1, 1.), SIM_BODY_DEFAULT_VIS, Vec3(2.5, 0., .5));
+        c->visBody(id)->setColor(0., .1, .8, 1.);
+        c->visBody(id)->setTexture("wood.ppm");
+        c->activate();
+
+        id = c->addCube(.1, SIM_BODY_DEFAULT_VIS, Vec3(3.5, 0., .1));
+        c->visBody(id)->setColor(0., .1, .8, 1.);
+        c->visBody(id)->setTexture("wood.ppm");
+        c->activate();
+
+        id = c->addBox(Vec3(0.5, .1, .2), SIM_BODY_DEFAULT_VIS,
+                       Vec3(2., 0., .1), Quat(Vec3(0., 0., 1.), M_PI / 4.));
         c->visBody(id)->setColor(0., .1, .8, 1.);
         c->visBody(id)->setTexture("wood.ppm");
         c->activate();

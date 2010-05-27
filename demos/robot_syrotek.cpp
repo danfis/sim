@@ -31,7 +31,7 @@ void RobotSyrotekComp::init(sim::Sim *sim)
     cam->visBodyEnable();
     cam->setWidthHeight(300, 300);
     cam->setBgColor(0., 0., 0., 1.);
-    //cam->enableDump("cam/");
+    cam->enableDump("cam-syrotek/");
     cam->enableView();
     sim->addComponent(cam);
 
