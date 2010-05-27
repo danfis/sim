@@ -14,6 +14,7 @@
 #include "sim/comp/povray.hpp"
 #include "sim/comp/snake.hpp"
 #include "sim/comp/frequency.hpp"
+#include "sim/comp/watchdog.hpp"
 
 int counter = 0;
 #define intro counter++; if (id == -1) std::cerr << counter << " :"<< __FUNCTION__ << "\n"; if (id != counter) return;
@@ -502,6 +503,7 @@ class SimTestFormace : public sim::Sim {
 		addComponent(sc);
 		regMessage(sc,sim::MessageKeyPressed::Type);
 
+
     }
 
     void init()
@@ -890,6 +892,8 @@ class SimTestFormace : public sim::Sim {
 		b4->activate();
 		b5->activate();
 
+        sim::comp::Watchdog *wc = new sim::comp::Watchdog(b3,5);
+        addComponent(wc);
 
         const double angleMin1 = -45*M_PI/180.0;
         const double angleMax1 =  45*M_PI/180.0;
@@ -907,7 +911,7 @@ class SimTestFormace : public sim::Sim {
         for(int i=0;i<(int)joints.size();i++) {
             const double ph1 = M_PI/4*(1.0*rand()/RAND_MAX - 1.0*rand()/RAND_MAX);
             const double ph2 = M_PI/4*(1.0*rand()/RAND_MAX - 1.0*rand()/RAND_MAX);
-            sim::comp::Frequency *fc1 = new sim::comp::Frequency(joints[i],amp,2*M_PI*1  ,ph1,0);
+            sim::comp::Frequency *fc1 = new sim::comp::Frequency(joints[i],amp,3*M_PI*1  ,ph1,0);
             sim::comp::Frequency *fc2 = new sim::comp::Frequency(joints[i],amp,2*M_PI*0.6,ph2,1);
             addComponent(fc1);
             addComponent(fc2);

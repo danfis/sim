@@ -43,14 +43,13 @@ void Frequency::cbPreStep() {
 
 
     if (ts > 2) {
-    const double newVel = _amplitude*sin(ts*_frequency + _phase);
+		const double newVel = _amplitude*sin(ts*_frequency + _phase);
 
-    DBG("Setting vel " << newVel << " in time " << ts);
-    if (_type == 0) {
-        _joint->setParamVel(newVel);
-    } else {
-        _joint->setParamVel2(newVel);
-    }
+		if (_type == 0) {
+			_joint->setParamVel(newVel);
+		} else {
+			_joint->setParamVel2(newVel);
+		}
     }
    
 }
