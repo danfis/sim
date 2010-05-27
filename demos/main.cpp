@@ -494,8 +494,8 @@ class SimTestFormace : public sim::Sim {
 
 
 
-		sim::comp::Povray *pc = new sim::comp::Povray("povray/");
-		addComponent(pc);
+//		sim::comp::Povray *pc = new sim::comp::Povray("povray/");
+//		addComponent(pc);
 
 
 		sim::comp::Snake *sc = new sim::comp::Snake(snakeJoints);
@@ -883,10 +883,18 @@ class SimTestFormace : public sim::Sim {
 		joints.push_back(world()->createJointHinge2(b3,b4,b3->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0)));
 		joints.push_back(world()->createJointHinge2(b4,b5,b4->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0)));
 
-        const double angleMin1 = -200*M_PI/180.0;
-        const double angleMax1 = 200*M_PI/180.0;
-        const double angleMin2 = -200*M_PI/180.0;
-        const double angleMax2 = 200*M_PI/180.0;
+
+        b1->activate();
+		b2->activate();
+		b3->activate();
+		b4->activate();
+		b5->activate();
+
+
+        const double angleMin1 = -45*M_PI/180.0;
+        const double angleMax1 =  45*M_PI/180.0;
+        const double angleMin2 = -45*M_PI/180.0;
+        const double angleMax2 =  45*M_PI/180.0;
         for(int i=0;i<(int)joints.size();i++) {
             joints[i]->setParamLimitLoHi(angleMin1,angleMax1);
             joints[i]->setParamLimitLoHi2(angleMin2,angleMax2);
@@ -894,16 +902,15 @@ class SimTestFormace : public sim::Sim {
             snakeJoints.push_back(joints[i]);
         }
 
-		b1->activate();
-		b2->activate();
-		b3->activate();
-		b4->activate();
-		b5->activate();
-
-        const double amp = 1;
+		
+        const double amp = 3;
         for(int i=0;i<(int)joints.size();i++) {
-            sim::comp::Frequency *fc1 = new sim::comp::Frequency(joints[i],amp,2*M_PI*1,0,0);
-            sim::comp::Frequency *fc2 = new sim::comp::Frequency(joints[i],amp,2*M_PI*0.6,M_PI/6,1);
+            const double ph1 = M_PI/4*(1.0*rand()/RAND_MAX - 1.0*rand()/RAND_MAX);
+            const double ph2 = M_PI/4*(1.0*rand()/RAND_MAX - 1.0*rand()/RAND_MAX);
+            sim::comp::Frequency *fc1 = new sim::comp::Frequency(joints[i],amp,2*M_PI*1  ,ph1,0);
+            sim::comp::Frequency *fc2 = new sim::comp::Frequency(joints[i],amp,2*M_PI*0.6,ph2,1);
+            addComponent(fc1);
+            addComponent(fc2);
         }
 
 

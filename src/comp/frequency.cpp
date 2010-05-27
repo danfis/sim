@@ -22,8 +22,13 @@ Frequency::~Frequency(){
 
 void Frequency::init(sim::Sim *sim) {
 	_sim = sim;
-    _joint->setParamFMax(10);
-    _joint->setParamFMax2(10);
+    if (_type == 0) {
+        _joint->setParamFMax(20);
+        _joint->setParamVel(0);
+    } else {
+        _joint->setParamFMax2(20);
+        _joint->setParamVel2(0);
+    }
     _sim->regPreStep(this);
 
 }
@@ -33,25 +38,25 @@ void Frequency::finish(){
 
 void Frequency::cbPreStep() {
 
-    
-
-
-
-}
-
-void Frequency::processMessage(const Message &msg) {
-    
-    sim::Time t = _sim->timeReal();
+     sim::Time t = _sim->timeReal();
     const double ts = t.inSF();
 
+
+    if (ts > 2) {
     const double newVel = _amplitude*sin(ts*_frequency + _phase);
 
-    DBG("Setting vel " << newVel);
+    DBG("Setting vel " << newVel << " in time " << ts);
     if (_type == 0) {
         _joint->setParamVel(newVel);
     } else {
         _joint->setParamVel2(newVel);
     }
+    }
+   
+}
+
+void Frequency::processMessage(const Message &msg) {
+    
 }
 
 
