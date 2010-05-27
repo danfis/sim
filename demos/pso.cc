@@ -15,7 +15,7 @@ class Particle {
         double fit;
         double localBestFit;
         Particle(const std::vector<double> &d, const double fitness = 0)
-            :data(d),localBest(d),velocity(d),fit(fitness),localBest(fit) {}
+            :data(d),localBest(d),velocity(d),fit(fitness),localBestFit(fit) {}
         Particle(const Particle &p)
             :data(p.data),localBest(p.localBest),velocity(p.velocity),fit(p.fit),localBestFit(p.localBestFit) {}
 };
@@ -41,7 +41,7 @@ double evaluate(const Particle &p) {
         double x,y,z;
         ifs >> x >> y >> z;
         fit = sqrt((7-x)*(7-x) + (0-y)*(0-y)+(z-0.5)*(z-0.5));
-        cerr << "Fitness is " fit << "\n";
+        cerr << "Fitness is " << fit << "\n";
     } else {
         cerr << "Cannot evaluate candidate!\n";
         exit(0);
@@ -51,10 +51,13 @@ double evaluate(const Particle &p) {
 
 int main(int argc, char **argv) {
 
-    const int populationSize = 20;
-    const int generationCount = 30;
+    const int populationSize = 10;
+    const int generationCount = 10;
 
     const int numJoints = 4;
+
+    ofstream ofl("pso.log");
+    ofl <<"Staring .. \n";
 
     vector<Particle> population;
     for(int i=0;i<populationSize;i++) {
@@ -67,22 +70,27 @@ int main(int argc, char **argv) {
             data.push_back(getRandom(0,2*M_PI*10));
             data.push_back(getRandom(-2*M_PI,2*M_PI));
         }
-        population.push_back(Particle(data),-1);
+        population.push_back(Particle(data,-1));
     }
 
 
-    Particle global;
+    Particle global(std::vector<double>(4*2*3,0),-1);
 
     for(int iter = 0; iter < generationCount;iter++) {
+        ofl << "generation " << iter << "\n";
+
 
         for(int i=0;i<(int)population.size();i++) {
-            population.fit = evaluate(population[i]);
+            population[i].fit = evaluate(population[i]);
+            ofl << "p[" << i << "].fit=" << population[i].fit << "\n";
         }
 
+
+
         for(int i=0;i<(int)population.size();i++) {
-            if (population[i].fit < global.fit)
+            if (population[i].fit < global.fit || global.fit == -1) {
                 global.data = population[i].data;
-                globa.fit = population[i].fit;
+                global.fit = population[i].fit;
             }
             if (population[i].fit < population[i].localBestFit || population[i].localBestFit == -1) {
                 population[i].localBest = population[i].data;
@@ -91,6 +99,12 @@ int main(int argc, char **argv) {
         }
 
         cerr << "Best particle is " << global.fit << "\n";
+        ofl << "Best particle is " << global.fit << ": ";
+        for(int i=0;i<global.data.size();i++) {
+            ofl << global.data[i] << " ";
+        }
+        ofl << "\n";
+        ofl.flush();
 
         for(int i=0;i<(int)population.size();i++) {
             for(int j=0;j<population[i].data.size();i++) {

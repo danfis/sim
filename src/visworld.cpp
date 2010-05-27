@@ -132,7 +132,8 @@ void VisWorld::init()
             }
         }
 
-        _view_main->setUpViewInWindow(0, 0, 1200, 800);
+        _view_main->setUpViewInWindow(20, 20, 120, 80);
+        //_view_main->setUpViewInWindow(0, 0, 1200, 800);
     }
 
     _viewer->addView(_view_main);
