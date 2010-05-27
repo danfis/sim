@@ -32,6 +32,11 @@ void Watchdog::cbPostStep() {
     const double ts = t.inSF();
     if (ts > _timeout ) {
         DBG("Watchdog:  time: " << ts << " reaches timeout: " << _timeout);
+        std::ofstream ofs("result.txt");
+        sim::Vec3 pos(_body->pos());
+        ofs << pos[0] << " " << pos[1] << " " << pos[2] << "\n";
+        ofs.close();
+        exit(0); // stopping the simulartor is not implemented yet, so we use this really ugly hack
     }
    
 }

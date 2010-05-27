@@ -29,6 +29,7 @@ ifeq '$(WANT_ODE)' 'yes'
   TARGETS += main
   TARGETS += demo_intersection
   TARGETS += demo_sssa
+  TARGETS += demo_movement_tunning
 endif
 
 all: $(TARGETS)
@@ -54,6 +55,9 @@ demo_intersection: $(OBJS_INTERSECTION) $(LIBDEPS_ODE)
 	$(CXX) $(CXXFLAGS_ODE) -o $@ $(OBJS_INTERSECTION) $(LDFLAGS_ODE)
 demo_sssa: $(OBJS_SSSA) $(LIBDEPS_ODE)
 	$(CXX) $(CXXFLAGS_ODE) $(SDL_CXXFLAGS) -o $@ $(OBJS_SSSA) $(LDFLAGS_ODE) $(SDL_LDFLAGS)
+
+demo_movement_tunning: demo_movement_tunning.cpp $(LIBDEPS_ODE)
+	$(CXX) $(CXXFLAGS_ODE) -o $@ $< $(LDFLAGS_ODE)
 
 
 clean:
