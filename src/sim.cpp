@@ -378,6 +378,17 @@ void Sim::unregMessage(Component *c, unsigned long msg_type)
     _reg.unregComponent(c, msg_type);
 }
 
+void Sim::pauseSimulation()
+{
+    _simulate = false;
+    _timer_real.pause();
+}
+
+void Sim::continueSimulation()
+{
+    _simulate = true;
+    _timer_real.unpause();
+}
 
 void Sim::_initComponents()
 {

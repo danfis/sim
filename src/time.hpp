@@ -157,6 +157,7 @@ std::ostream& operator<<(std::ostream &out, const Time &t);
 
 class Timer {
     Time _start, _stop, _elapsed;
+    bool _paused;
 
   public:
     Timer() {}
@@ -168,17 +169,35 @@ class Timer {
     /**
      * Starts timer. Returns start time.
      */
-    const Time &start()
-        { Time::cur(&_start); _stop = _start; _elapsed.setInMs(0); return _start; }
+    inline const Time &start()
+        { _paused = false; Time::cur(&_start);
+          _stop = _start; _elapsed.setInMs(0); return _start; }
 
     /**
      * Stops timer. Returns elapsed time from start.
      * This method can be called repeatedly and time will be meassured
      * always from last call of start().
      */
-    const Time &stop()
-        { Time::cur(&_stop); Time::diff(_start, _stop, &_elapsed);
+    inline const Time &stop()
+        { if (_paused) return _elapsed;
+          Time::cur(&_stop); Time::diff(_start, _stop, &_elapsed);
           return _elapsed; }
+
+    /**
+     * Pauses timer.
+     */
+    inline void pause()
+        { if (_paused) return;
+          _paused = true; stop(); }
+
+    /**
+     * Unpauses timer and returns elapsed time.
+     */
+    inline const Time &unpause()
+        { if (!_paused) return stop();
+          _paused = false;
+          Time diff; Time::diff(_stop, Time::cur(), &diff);
+          _start += diff; return stop(); }
 };
 
 } /* namespace sim */

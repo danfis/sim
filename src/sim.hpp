@@ -357,9 +357,11 @@ class Sim {
     const Time &timeRealNow() { return _timer_real.stop(); }
     const Time &timeSimulated() const { return _time_simulated; }
 
-    void pauseSimulation() { _simulate = false; }
-    void continueSimulation() { _simulate = true; }
-    void toggleSimulation() { _simulate = !_simulate; }
+    void pauseSimulation();
+    void continueSimulation();
+    void toggleSimulation()
+        { if (_simulate) pauseSimulation();
+          else continueSimulation(); }
 
   protected:
     void _initComponents();
