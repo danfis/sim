@@ -164,6 +164,8 @@ Sim::Sim(World *world, VisWorld *visworld)
         _visworld = new VisWorld();
 
     _timer_real.start();
+
+    pthread_mutex_init(&_step_lock, NULL);
 }
 
 Sim::~Sim()
@@ -247,6 +249,8 @@ void Sim::_stepWorld()
     if (!_simulate)
         return;
 
+    pthread_mutex_lock(&_step_lock);
+
     // call pre step callbacks
     if (_cs_pre.size() > 0)
         _cbPreStep();
@@ -267,12 +271,20 @@ void Sim::_stepWorld()
     // call post step callbacks
     if (_cs_post.size() > 0)
         _cbPostStep();
+
+    pthread_mutex_unlock(&_step_lock);
 }
 
 void Sim::_stepVisWorld()
 {
-    if (_visworld)
-        _visworld->step();
+    if (!_visworld)
+        return;
+
+    pthread_mutex_lock(&_step_lock);
+
+    _visworld->step();
+
+    pthread_mutex_unlock(&_step_lock);
 }
 
 bool Sim::done()

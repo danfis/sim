@@ -239,6 +239,7 @@ class Sim {
   protected:
     World *_world;
     VisWorld *_visworld;
+    pthread_mutex_t _step_lock; //!< Sync lock for World/VisWorld steps
 
     std::list<Component *> _cs; //!< List of all components
     std::list<Component *> _cs_uninit; //!< List of uninitialized components
