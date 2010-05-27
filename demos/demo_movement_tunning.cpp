@@ -52,7 +52,7 @@ class SimMovementTunning : public sim::Sim {
     void init()
     {
         sim::Sim::init();
-        for (size_t i = 0; i < 150; i++){
+        for (size_t i = 0; i < 70; i++){
             visWorld()->step();
             std::cerr << i << "\r";
             usleep(5000);
@@ -109,7 +109,7 @@ class SimMovementTunning : public sim::Sim {
 		b4->activate();
 		b5->activate();
 
-        sim::comp::Watchdog *wc = new sim::comp::Watchdog(b3,5);
+        sim::comp::Watchdog *wc = new sim::comp::Watchdog(b3,10);
         addComponent(wc);
 
         const double angleMin1 = -45*M_PI/180.0;
