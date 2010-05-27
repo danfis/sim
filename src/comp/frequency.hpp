@@ -14,12 +14,13 @@ namespace comp {
 class Frequency : public sim::Component {
 	sim::Sim *_sim;
 	sim::Joint * _joint;
+    double _amplitude;
     double _frequency;
     double _phase;
     int _type;
 
 	public:
-	Frequency(sim::Joint *jointm, const double frequency, const double phase, const int type);
+	Frequency(sim::Joint *jointm, const double amplitude, const double frequency, const double phase, const int type);
 	~Frequency();
 
 

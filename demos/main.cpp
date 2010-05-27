@@ -856,6 +856,8 @@ class SimTestFormace : public sim::Sim {
 		const double gap = width*1.5;
 		const double mass = 0.5;
 
+        vector<sim::Joint *> joints;
+
         sim::Body *b1 = world()->createBodyCube(width,mass);
 		b1->setPos(sim::Vec3(posx,posy,posz));
 		b1->visBody()->setColor(1,1,1,1);
@@ -876,38 +878,34 @@ class SimTestFormace : public sim::Sim {
 		b5->setPos(sim::Vec3(posx+4*gap,posy,posz));
 		b5->visBody()->setColor(0.5,0,0.2,1);
 
-		sim::Joint *j1 = world()->createJointHinge2(b1,b2,b1->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0));
-		sim::Joint *j2 = world()->createJointHinge2(b2,b3,b2->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0));
-		sim::Joint *j3 = world()->createJointHinge2(b3,b4,b3->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0));
-		sim::Joint *j4 = world()->createJointHinge2(b4,b5,b4->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0));
+        joints.push_back(world()->createJointHinge2(b1,b2,b1->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0)));
+		joints.push_back(world()->createJointHinge2(b2,b3,b2->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0)));
+		joints.push_back(world()->createJointHinge2(b3,b4,b3->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0)));
+		joints.push_back(world()->createJointHinge2(b4,b5,b4->pos(),sim::Vec3(0,1,0),sim::Vec3(1,0,0)));
 
-		j1->setParamLimitLoHi(0,90*M_PI/180.0);
-		j2->setParamLimitLoHi(0,90*M_PI/180.0);
-		j3->setParamLimitLoHi(0,90*M_PI/180.0);
-		j4->setParamLimitLoHi(0,90*M_PI/180.0);
-
-		j1->setParamLimitLoHi(-45*M_PI/180.0,45*M_PI/180.0);
-		j2->setParamLimitLoHi(-45*M_PI/180.0,45*M_PI/180.0);
-		j3->setParamLimitLoHi(-45*M_PI/180.0,45*M_PI/180.0);
-		j4->setParamLimitLoHi(-45*M_PI/180.0,45*M_PI/180.0);
-
+        const double angleMin1 = -200*M_PI/180.0;
+        const double angleMax1 = 200*M_PI/180.0;
+        const double angleMin2 = -200*M_PI/180.0;
+        const double angleMax2 = 200*M_PI/180.0;
+        for(int i=0;i<(int)joints.size();i++) {
+            joints[i]->setParamLimitLoHi(angleMin1,angleMax1);
+            joints[i]->setParamLimitLoHi2(angleMin2,angleMax2);
+            joints[i]->activate();
+            snakeJoints.push_back(joints[i]);
+        }
 
 		b1->activate();
 		b2->activate();
 		b3->activate();
 		b4->activate();
 		b5->activate();
-		j1->activate();
-		j2->activate();
-		j3->activate();
-		j4->activate();
 
-		snakeJoints.push_back(j1);
-		snakeJoints.push_back(j2);
-		snakeJoints.push_back(j3);
-		snakeJoints.push_back(j4);
+        const double amp = 1;
+        for(int i=0;i<(int)joints.size();i++) {
+            sim::comp::Frequency *fc1 = new sim::comp::Frequency(joints[i],amp,2*M_PI*1,0,0);
+            sim::comp::Frequency *fc2 = new sim::comp::Frequency(joints[i],amp,2*M_PI*0.6,M_PI/6,1);
+        }
 
-        sim::comp::Frequency *fc = new sim::comp::Frequency(j1,2*M_PI*1,0,0);
 
 
 	}

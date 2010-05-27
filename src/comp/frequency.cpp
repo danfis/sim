@@ -8,8 +8,9 @@ namespace sim {
 
 namespace comp {
 
-Frequency::Frequency(sim::Joint *joint, const double frequency, const double phase, const int type){
+Frequency::Frequency(sim::Joint *joint, const double amplitude, const double frequency, const double phase, const int type){
     _joint = joint;
+    _amplitude = amplitude;
     _frequency = frequency;
     _phase = phase;
     _type = type;
@@ -21,9 +22,10 @@ Frequency::~Frequency(){
 
 void Frequency::init(sim::Sim *sim) {
 	_sim = sim;
-    _joint->setParamFMax(40);
-    _joint->setParamFMax2(40);
+    _joint->setParamFMax(10);
+    _joint->setParamFMax2(10);
     _sim->regPreStep(this);
+
 }
 
 void Frequency::finish(){
@@ -42,8 +44,9 @@ void Frequency::processMessage(const Message &msg) {
     sim::Time t = _sim->timeReal();
     const double ts = t.inSF();
 
-    const double newVel = 5*sin(ts*_frequency + _phase);
+    const double newVel = _amplitude*sin(ts*_frequency + _phase);
 
+    DBG("Setting vel " << newVel);
     if (_type == 0) {
         _joint->setParamVel(newVel);
     } else {
