@@ -25,22 +25,33 @@ static double getRandom(const double from, const double to) {
 }
 
 
-double evaluate(const Particle &p) {
-    ofstream ofs("param.txt");
+void saveParam(const char *filename, const Particle &p) {
+    ofstream ofs(filename);
     for(int i=0;i<p.data.size()/3;i++) {
         ofs << p.data[3*i+0] << " "<< p.data[3*i+1] << " " << p.data[3*i+2] << "\n";
     }
     ofs.close();
+ 
+}
+
+double evaluate(const Particle &p) {
+    
+    saveParam("param.txt",p);
+    
     char name[200];
     sprintf(name,"./demo_movement_tunning param.txt");
     system(name);
+
+    const double posx = 8;
+    const double posy = 0;
+    const double posz = 0.5;
 
     double fit = -1;
     ifstream ifs("result.txt");
     if (ifs) {
         double x,y,z;
         ifs >> x >> y >> z;
-        fit = sqrt((7-x)*(7-x) + (0-y)*(0-y)+(z-0.5)*(z-0.5));
+        fit = sqrt((posx-x)*(posx-x) + (posy-y)*(posy-y)+(posz-z)*(posz-z));
         cerr << "Fitness is " << fit << "\n";
     } else {
         cerr << "Cannot evaluate candidate!\n";
@@ -51,8 +62,8 @@ double evaluate(const Particle &p) {
 
 int main(int argc, char **argv) {
 
-    const int populationSize = 30;
-    const int generationCount = 10;
+    const int populationSize = 40;
+    const int generationCount = 40;
 
     const int numJoints = 4;
 
@@ -71,10 +82,14 @@ int main(int argc, char **argv) {
             data.push_back(getRandom(-2*M_PI,2*M_PI));
         }
         population.push_back(Particle(data,-1));
+        for(int j=0;j<population.back().velocity.size();j++) {
+            population.back().velocity[j] = 0;
+        }
     }
 
 
     Particle global(std::vector<double>(4*2*3,0),-1);
+    global.fit = -1;
 
     for(int iter = 0; iter < generationCount;iter++) {
         ofl << "generation " << iter << "\n";
@@ -92,6 +107,10 @@ int main(int argc, char **argv) {
             if (population[i].fit < global.fit || global.fit == -1) {
                 global.data = population[i].data;
                 global.fit = population[i].fit;
+                global.localBestFit = population[i].localBestFit;
+                global.localBest = population[i].localBest;
+                global.velocity = population[i].velocity;
+                saveParam("global.best.txt",global);
             }
             if (population[i].fit < population[i].localBestFit || population[i].localBestFit == -1) {
                 population[i].localBest = population[i].data;
@@ -109,7 +128,7 @@ int main(int argc, char **argv) {
 
         for(int i=0;i<(int)population.size();i++) {
             for(int j=0;j<population[i].data.size();i++) {
-                population[j].velocity[j] = getRandom(0.0,1.0)*population[j].velocity[j]+
+                population[j].velocity[j] = 0.2*getRandom(0.0,1.0)*population[j].velocity[j]+
                     2*getRandom(0.0,1.0)*(population[i].localBest[j]-population[i].data[j])+
                     2*getRandom(0.0,1.0)*(global.data[j] - population[i].data[j]);
                 population[j].data[j] += population[i].velocity[j];
