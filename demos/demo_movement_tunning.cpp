@@ -69,7 +69,7 @@ class SimMovementTunning : public sim::Sim {
 
 		const double posx = 0;
 		const double posy = 0;
-		const double posz = 1.1;
+		const double posz = 0.7;
 		const double width = 1;
 		const double gap = width*1.5;
 		const double mass = 0.5;
