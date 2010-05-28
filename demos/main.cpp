@@ -892,7 +892,7 @@ class SimTestFormace : public sim::Sim {
 		b4->activate();
 		b5->activate();
 
-        sim::comp::Watchdog *wc = new sim::comp::Watchdog(b3,5);
+        sim::comp::Watchdog *wc = new sim::comp::Watchdog(b3,5,"par");
         addComponent(wc);
 
         const double angleMin1 = -45*M_PI/180.0;

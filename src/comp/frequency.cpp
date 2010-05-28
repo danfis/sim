@@ -43,7 +43,18 @@ void Frequency::cbPreStep() {
 
 
     if (ts > 1) {
-		const double newVel = _amplitude*sin(ts*_frequency + _phase);
+		double arg = ts*_frequency + _phase;
+		if (arg > 2*M_PI) {
+			arg = arg - (2*M_PI*floor(arg/(2*M_PI)));
+		} 
+		if (arg < -2*M_PI) {
+			arg = -arg;
+			arg = arg - (2*M_PI*floor(arg/(2*M_PI)));
+			arg = -arg;
+
+		}
+		//const double newVel = _amplitude*sin(ts*_frequency + _phase);
+		const double newVel = _amplitude*sin(arg);
 
 		if (_type == 0) {
 			_joint->setParamVel(newVel);

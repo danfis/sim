@@ -15,8 +15,9 @@ class Watchdog : public sim::Component {
 	sim::Sim *_sim;
 	sim::Body *_body;
     double _timeout;
+	const char *_paramFile;
 	public:
-	Watchdog(sim::Body *body, const double timeout);
+	Watchdog(sim::Body *body, const double timeout, const char *paramFile);
 	~Watchdog();
 
 

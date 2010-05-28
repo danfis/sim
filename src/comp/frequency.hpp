@@ -11,6 +11,17 @@ namespace sim {
 
 namespace comp {
 
+
+/** Frequency component
+  *
+  * it can be used for controlling a hinge2 joint by applying a sinus function as its velocity
+  * if form velocity(t) = A*sin(freq*t + phase)
+  * where frequency 'freq', amplitude 'A' and 'phase' are given in constructor.
+  *
+  * As the hinge2 joint has two axis, the last parameter 'type' specifies whil axis will be controlled:
+  * type=0 means that axis1
+  * type=1 means that axis2 
+  */
 class Frequency : public sim::Component {
 	sim::Sim *_sim;
 	sim::Joint * _joint;
@@ -20,7 +31,7 @@ class Frequency : public sim::Component {
     int _type;
 
 	public:
-	Frequency(sim::Joint *jointm, const double amplitude, const double frequency, const double phase, const int type);
+	Frequency(sim::Joint *joint, const double amplitude, const double frequency, const double phase, const int type);
 	~Frequency();
 
 

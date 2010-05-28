@@ -69,7 +69,7 @@ class SimMovementTunning : public sim::Sim {
 
 		const double posx = 0;
 		const double posy = 0;
-		const double posz = 2.1;
+		const double posz = 1.1;
 		const double width = 1;
 		const double gap = width*1.5;
 		const double mass = 0.5;
@@ -109,7 +109,7 @@ class SimMovementTunning : public sim::Sim {
 		b4->activate();
 		b5->activate();
 
-        sim::comp::Watchdog *wc = new sim::comp::Watchdog(b3,20);
+        sim::comp::Watchdog *wc = new sim::comp::Watchdog(b3,10,paramFile);
         addComponent(wc);
 
         const double angleMin1 = -45*M_PI/180.0;

@@ -8,9 +8,10 @@ namespace sim {
 
 namespace comp {
 
-Watchdog::Watchdog(sim::Body *body, const double timeout){
+Watchdog::Watchdog(sim::Body *body, const double timeout, const char *paramFile){
     _body = body;
     _timeout = timeout;
+	_paramFile = paramFile;
 }
 
 Watchdog::~Watchdog(){
@@ -32,7 +33,9 @@ void Watchdog::cbPostStep() {
     const double ts = t.inSF();
     if (ts > _timeout ) {
         DBG("Watchdog:  time: " << ts << " reaches timeout: " << _timeout);
-        std::ofstream ofs("result.txt");
+		char name[200];
+		sprintf(name,"%s.result",_paramFile);
+        std::ofstream ofs(name);
         sim::Vec3 pos(_body->pos());
         ofs << pos[0] << " " << pos[1] << " " << pos[2] << "\n";
         ofs.close();

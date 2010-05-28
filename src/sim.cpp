@@ -302,7 +302,9 @@ void *Sim::_worldStepsThread(void *_sim)
             Time::sleep(sim->_time_step);
         }
 
-        //DBG(Time::cur());
+    if (timeSimulated() > timeReal()){
+        Time tdiff = Time::diff(timeReal(), timeSimulated());
+       // Time::sleep(tdiff);
     }
 
     return NULL;
