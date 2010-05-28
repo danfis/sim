@@ -58,7 +58,24 @@ double evaluate(const Particle &p) {
         exit(0);
     }
     return fit;
-}   
+}  
+
+void printParticle(ofstream &ofs, const Particle &p) {
+    ofs << "Velocity: ";
+    for(int i=0;i<p.velocity.size();i++) {
+        ofs << p.velocity[i] << " ";
+    }
+    ofs << "\nData: ";
+    for(int i=0;i<p.data.size();i++) {
+        ofs << p.data[i] << " ";
+    }
+    ofs << "\nLocalBest: ";
+    for(int i=0;i<p.localBest.size();i++) {
+        ofs << p.localBest[i] << " ";
+    }
+    ofs << "\n";
+}
+
 
 int main(int argc, char **argv) {
 
@@ -116,6 +133,7 @@ int main(int argc, char **argv) {
                 population[i].localBest = population[i].data;
                 population[i].localBestFit = population[i].fit;
             } 
+            printParticle(ofl,population[i]);
         }
 
         cerr << "Best particle is " << global.fit << "\n";
@@ -127,11 +145,11 @@ int main(int argc, char **argv) {
         ofl.flush();
 
         for(int i=0;i<(int)population.size();i++) {
-            for(int j=0;j<population[i].data.size();i++) {
-                population[j].velocity[j] = 0.2*getRandom(0.0,1.0)*population[j].velocity[j]+
+            for(int j=0;j<population[i].data.size();j++) {
+                population[i].velocity[j] = 0.2*getRandom(0.0,1.0)*population[i].velocity[j]+
                     2*getRandom(0.0,1.0)*(population[i].localBest[j]-population[i].data[j])+
                     2*getRandom(0.0,1.0)*(global.data[j] - population[i].data[j]);
-                population[j].data[j] += population[i].velocity[j];
+                population[i].data[j] += population[i].velocity[j];
             }
         }
 
