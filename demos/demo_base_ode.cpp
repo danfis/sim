@@ -20,6 +20,8 @@ class S : public sim::Sim {
         setTimeStep(sim::Time::fromMs(20));
         setTimeSubSteps(2);
 
+        setTimeLimit(sim::Time::fromMs(100000));
+
         World *w = new World();
         sim::Body *b;
 

@@ -271,6 +271,9 @@ class Sim {
     bool _simulate_real; //!< True if simulator should try to synchorinze
                          //!< real time with simulated
 
+    Time _time_limit; //!< Max simulated time
+    bool _time_limit_enabled; //!< True if _time_limit is considered
+
   protected:
     typedef std::list<Component *>::iterator cit_t; //!< Component list iterator
     typedef std::list<Component *>::const_iterator const_cit_t;
@@ -298,6 +301,12 @@ class Sim {
      * Sets up delay between VisWorld's steps.
      */
     void setVisTimeStep(const Time &t) { _vis_time_step = t; }
+
+
+    const Time &timeLimit() const { return _time_limit; }
+    bool timeLimitEnabled() const { return _time_limit_enabled; }
+    void setTimeLimit(const Time &t) { _time_limit = t; _time_limit_enabled = true; }
+    void resetTimeLimit() { _time_limit_enabled = false; }
 
     virtual void init();
     virtual void finish();
