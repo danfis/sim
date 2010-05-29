@@ -42,6 +42,9 @@ VisWorld::VisWorld()
     _setUpLights();
 
 	_axisCreated = false;
+
+    // set up viewer to run in single thread
+    _viewer->setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
 }
 
 VisWorld::~VisWorld()
