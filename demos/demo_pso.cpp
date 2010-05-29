@@ -8,9 +8,25 @@
 using namespace std;
 
 
+/** this program provides searching for parameters of movement of a simple organism
+  *
+  * lest suppose we have an organism with N joints. We will
+  * control a velocity of i-th joint by function: f_i(x) = A_i * sin (f_i*t + phase_i)
+  * where amplitude A_i, frewquency f_i and phase phase_i are different for each joint.
+  *
+  * Now we want to find such a set of A_i,f_i,phase_i, i=1..N such that move the robot
+  * towards a predefined goal state. 
+  *
+  * We will employ a simple Particle Swarm Optimization technique to find such parameters.
+  * To measure a fitness we will use a simulator to run a short simulation,e.g for 20 second
+  * After that the distance between organism center and desired goal determines the value of
+  * the fitness function.
+  */
+
+
 const double amplitude = 3;
-const double frequencyMin = -2*10*M_PI; // in rad
-const double frequencyMax = 2*10*M_PI;
+const double frequencyMin = -2*20*M_PI; // in rad
+const double frequencyMax = 2*20*M_PI;
 const double phaseMin = -2*M_PI; // in rad
 const double phaseMax= 2*M_PI;
 
@@ -40,7 +56,7 @@ static void limit(double &val, const double max, const double min) {
 }
 
 void Particle::normalize(){
-	for(int i=0;i<data.size()/3;i++) {
+	for(int i=0;i<(int)data.size()/3;i++) {
 		limit(data[3*i+0],-amplitude,amplitude);
 		limit(data[3*i+1],frequencyMin,frequencyMax);
 		limit(data[3*i+2],phaseMin,phaseMax);
@@ -55,21 +71,21 @@ static double getRandom(const double from, const double to) {
 
 void saveParam(const char *filename, const Particle &p) {
     ofstream ofs(filename);
-    for(int i=0;i<p.data.size()/3;i++) {
+    for(int i=0;i<(int)p.data.size()/3;i++) {
         ofs << p.data[3*i+0] << " "<< p.data[3*i+1] << " " << p.data[3*i+2] << "\n";
     }
     ofs.close();
  
 }
 
-double evaluate(const char *paramFile, const Particle &p, const int evaluateIters) {
+double evaluate(const char *binPath, const char *paramFile, const Particle &p, const int evaluateIters) {
     
     saveParam(paramFile,p);
 
 	double sumFit = 0;	
 	for(int it = 0; it < evaluateIters; it++) {
 		char name[200];
-		sprintf(name,"./demo_movement_tunning %s",paramFile);
+		sprintf(name,"%s %s",binPath,paramFile);
 		system(name);
 
 		const double posx = 8;
@@ -96,15 +112,15 @@ double evaluate(const char *paramFile, const Particle &p, const int evaluateIter
 
 void printParticle(ofstream &ofs, const Particle &p) {
     ofs << "Velocity: ";
-    for(int i=0;i<p.velocity.size();i++) {
+    for(int i=0;i<(int)p.velocity.size();i++) {
         ofs << p.velocity[i] << " ";
     }
     ofs << "\nData: ";
-    for(int i=0;i<p.data.size();i++) {
+    for(int i=0;i<(int)p.data.size();i++) {
         ofs << p.data[i] << " ";
     }
     ofs << "\nLocalBest: ";
-    for(int i=0;i<p.localBest.size();i++) {
+    for(int i=0;i<(int)p.localBest.size();i++) {
         ofs << p.localBest[i] << " ";
     }
     ofs << "\n";
@@ -113,13 +129,15 @@ void printParticle(ofstream &ofs, const Particle &p) {
 
 int main(int argc, char **argv) {
 
-	if (argc < 2) {
-		cerr << "usage: " << argv[0] << " <paramFile> \n";
-		cerr << "paramFile   ..   name of file that will be used for passing parameters to demo_movement_tunning \n";
+	if (argc < 3) {
+		cerr << "usage: " << argv[0] << " <demo_movement_tunning> <paramFile> \n";
+		cerr << "demo_movement_tunning   .. path to a bin file\n";
+		cerr << "paramFile               ..   name of file that will be used for passing parameters to demo_movement_tunning \n";
 		exit(0);
 	}
 
-	const char *paramFile = argv[1];
+	const char *binPath = argv[1];
+	const char *paramFile = argv[2];
 
     const int populationSize = 40;
     const int generationCount = 40;
@@ -133,7 +151,7 @@ int main(int argc, char **argv) {
     ofl <<"Staring .. \n";
 
     vector<Particle> population;
-    for(int i=0;i<populationSize;i++) {
+    for(int i=0;i<(int)populationSize;i++) {
         vector<double> data;
         for(int j=0;j<numJoints;j++) {
             data.push_back(getRandom(-amplitude,amplitude));
@@ -144,7 +162,7 @@ int main(int argc, char **argv) {
             data.push_back(getRandom(phaseMin,phaseMax));
         }
         population.push_back(Particle(data,-1));
-        for(int j=0;j<population.back().velocity.size();j++) {
+        for(int j=0;j<(int)population.back().velocity.size();j++) {
             population.back().velocity[j] = 0;
         }
     }
@@ -158,7 +176,7 @@ int main(int argc, char **argv) {
 
 
         for(int i=0;i<(int)population.size();i++) {
-            population[i].fit = evaluate(paramFile,population[i],evaluateIters);
+            population[i].fit = evaluate(binPath,paramFile,population[i],evaluateIters);
             ofl << "p[" << i << "].fit=" << population[i].fit << "\n";
             ofl.flush();
         }
@@ -185,14 +203,14 @@ int main(int argc, char **argv) {
 
         cerr << "Best particle is " << global.fit << "\n";
         ofl << "Best particle is " << global.fit << ": ";
-        for(int i=0;i<global.data.size();i++) {
+        for(int i=0;i<(int)global.data.size();i++) {
             ofl << global.data[i] << " ";
         }
         ofl << "\n";
         ofl.flush();
 
         for(int i=0;i<(int)population.size();i++) {
-            for(int j=0;j<population[i].data.size();j++) {
+            for(int j=0;j<(int)population[i].data.size();j++) {
                 population[i].velocity[j] = 0.2*getRandom(0.0,1.0)*population[i].velocity[j]+
                     2*getRandom(0.0,1.0)*(population[i].localBest[j]-population[i].data[j])+
                     2*getRandom(0.0,1.0)*(global.data[j] - population[i].data[j]);

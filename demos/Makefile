@@ -30,6 +30,7 @@ ifeq '$(WANT_ODE)' 'yes'
   TARGETS += demo_intersection
   TARGETS += demo_sssa
   TARGETS += demo_movement_tunning
+  TARGETS += demo_pso
 endif
 
 all: $(TARGETS)
@@ -59,6 +60,8 @@ demo_sssa: $(OBJS_SSSA) $(LIBDEPS_ODE)
 demo_movement_tunning: demo_movement_tunning.cpp $(LIBDEPS_ODE)
 	$(CXX) $(CXXFLAGS_ODE) -o $@ $< $(LDFLAGS_ODE)
 
+demo_pso: demo_pso.cpp $(LIBDEPS_ODE)
+	$(CXX) $(CXXFLAGS_ODE) -o $@ $< $(LDFLAGS_ODE)
 
 clean:
 	rm -f *.o *~ *.a
