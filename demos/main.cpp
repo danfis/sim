@@ -16,6 +16,13 @@
 #include "sim/comp/frequency.hpp"
 #include "sim/comp/watchdog.hpp"
 
+#include "sssa/sssa_body.h"
+#include "sssa/sssa_arm.h"
+#include "sssa/sssa_active_wheel.h"
+#include "sssa/sssa_passive_wheel.h"
+#include "sssa/sssa_passive_wheel90.h"
+
+
 int counter = 0;
 #define intro counter++; if (id == -1) std::cerr << counter << " :"<< __FUNCTION__ << "\n"; if (id != counter) return;
 
@@ -485,9 +492,10 @@ class SimTestFormace : public sim::Sim {
 	//	createJezek();
 	//	createPlane();
 		createPlane();
+        createBoxPlane();
 //		createSurface();
 //		createRobotCarlike();
-		createSnake();
+//		createSnake();
 //		createSnake3();
 //		createSnake32();
 
@@ -503,7 +511,7 @@ class SimTestFormace : public sim::Sim {
 		addComponent(sc);
 		regMessage(sc,sim::MessageKeyPressed::Type);
 
-
+        createSSSA();
     }
 
     void init()
@@ -520,6 +528,107 @@ class SimTestFormace : public sim::Sim {
     }
 
   protected:
+
+
+    void createSSSA() {
+
+        const int posx = 0;
+        const int posy = 0;
+        const int posz = 1;
+
+        sim::Body *body = world()->createBodyTriMesh(sssa_body_verts,sssa_body_verts_len,sssa_body_ids,sssa_body_ids_len,0.2);
+		body->setPos(posx, posy, posz);
+        body->visBody()->setColor(1, 0, 0.4, 1.);
+        body->activate();
+		body->collSetDontCollideId(2);
+        
+
+
+        // loading wheels
+        if (1) {
+            // active wheel 1
+            sim::Body *wheel = world()->createBodyTriMesh(sssa_active_wheel_verts,sssa_active_wheel_verts_len,sssa_active_wheel_ids,sssa_active_wheel_ids_len,0.05);
+	    	wheel->setPos(posx+0.395,posy+0.351,posz+0.24);
+            wheel->visBody()->setColor(0, 0, 1, 1.);
+            wheel->activate();
+		    wheel->collSetDontCollideId(2);
+
+            sim::Joint *j1 = world()->createJointHinge(body, wheel, sim::Vec3(posx+0.395, posy+0.351, posz+0.24), sim::Vec3(0., 1., 0.));
+            j1->activate();
+
+
+
+            // active wheel 2
+            wheel = world()->createBodyTriMesh(sssa_active_wheel_verts,sssa_active_wheel_verts_len,sssa_active_wheel_ids,sssa_active_wheel_ids_len,0.05);
+	    	wheel->setPos(posx+0.395,posy-0.351,posz+0.24);
+            wheel->visBody()->setColor(0, 0, 1, 1.);
+            wheel->activate();
+		    wheel->collSetDontCollideId(2);
+            sim::Joint *j2 = world()->createJointHinge(body, wheel, sim::Vec3(posx+0.395, posy-0.351, posz+0.24), sim::Vec3(0., 1., 0.));
+            j2->activate();
+
+
+
+            // passive wheels on the left side
+            sim::Vec3 passiveWheelsPositions[] = {
+                sim::Vec3(-0.424,-0.458,0.269),
+                sim::Vec3(-0.419,-0.458,-0.160),
+                sim::Vec3(-0.159,-0.462,-0.425),
+                sim::Vec3( 0.159,-0.462,-0.425),
+                sim::Vec3( 0.419,-0.458,-0.160)
+            };
+
+            for(int i=0;i<5;i++) {
+                wheel = world()->createBodyTriMesh(sssa_passive_wheel_verts,sssa_passive_wheel_verts_len,sssa_passive_wheel_ids,sssa_passive_wheel_ids_len,0.05);
+	        	wheel->setPos(posx+passiveWheelsPositions[i][0],posy+passiveWheelsPositions[i][1],posz+passiveWheelsPositions[i][2]);
+                wheel->visBody()->setColor(0, 1, 0, 1.);
+                wheel->activate();
+		        wheel->collSetDontCollideId(2);
+
+
+                // create hinges for wheels
+                sim::Joint *j = world()->createJointHinge(body, wheel, 
+                    sim::Vec3(posx+passiveWheelsPositions[i][0], posy+passiveWheelsPositions[i][1], posz+passiveWheelsPositions[i][2]), sim::Vec3(0., 1., 0.));
+                j->activate();
+            }
+
+
+            // passiwe wheel on the right side
+            sim::Vec3 passiveWheelsPositions90[] = {
+                sim::Vec3(-0.424,0.514,0.269),
+                sim::Vec3(-0.419,0.458,-0.160),
+                sim::Vec3(-0.159,0.458,-0.425),
+                sim::Vec3( 0.159,0.458,-0.425),
+                sim::Vec3( 0.419,0.458,-0.160),
+            };
+
+            for(int i=0;i<5;i++) {
+                wheel = world()->createBodyTriMesh(sssa_passive_wheel90_verts,sssa_passive_wheel90_verts_len,sssa_passive_wheel90_ids,sssa_passive_wheel90_ids_len,0.05);
+	        	wheel->setPos(posx+passiveWheelsPositions90[i][0],posy+passiveWheelsPositions90[i][1],posz+passiveWheelsPositions90[i][2]);
+                wheel->visBody()->setColor(0, 1, 0, 1.);
+                wheel->activate();
+		        wheel->collSetDontCollideId(2);
+                
+                sim::Joint *j = world()->createJointHinge(body, wheel, 
+                        sim::Vec3(posx+passiveWheelsPositions90[i][0], posy+passiveWheelsPositions90[i][1], posz+passiveWheelsPositions90[i][2]), sim::Vec3(0., 1., 0.));
+                j->activate();
+            }
+        } // if make wheel
+
+
+        // make arm
+
+        sim::Body *arm = world()->createBodyTriMesh(sssa_arm_verts,sssa_arm_verts_len,sssa_arm_ids,sssa_arm_ids_len,0.4);
+		arm->setPos(posx, posy, posz);
+        arm->visBody()->setColor(0.3, 0.2, 0.7, 1.);
+        arm->activate();
+		arm->collSetDontCollideId(2);
+
+        sim::Joint *armJoint = world()->createJointHinge(body, arm, 
+                sim::Vec3(posx+0, posy+0, posz+0), sim::Vec3(0., 1., 0.));
+        armJoint->activate();
+
+    }
 
 
     void createSnake32() {
@@ -892,8 +1001,8 @@ class SimTestFormace : public sim::Sim {
 		b4->activate();
 		b5->activate();
 
-        sim::comp::Watchdog *wc = new sim::comp::Watchdog(b3,5,"par");
-        addComponent(wc);
+        //sim::comp::Watchdog *wc = new sim::comp::Watchdog(b3,5,"par");
+        //addComponent(wc);
 
         const double angleMin1 = -45*M_PI/180.0;
         const double angleMax1 =  45*M_PI/180.0;
@@ -1228,6 +1337,16 @@ class SimTestFormace : public sim::Sim {
         obj = world()->createBodyTriMesh(plane10_verts,plane10_verts_len,plane10_ids,plane10_ids_len,0);
 		obj->setPos(0,0,0);
         obj->visBody()->setColor(0.7, 1, 0.2, 1.);
+        obj->activate();
+    }
+	
+    void createBoxPlane()
+    {
+        sim::Body *obj;
+
+        obj = world()->createBodyBox(sim::Vec3(15,15,0.1),0.0);
+		obj->setPos(0,0,0);
+        obj->visBody()->setColor(0.2, 0.4, 0.4, 1.);
         obj->activate();
     }
 	

@@ -134,8 +134,10 @@ class SimMovementTunning : public sim::Sim {
                 for(int j=0;j<2;j++) {
                     double amp, freq, phase;
                     if (ifs >> amp >> freq >> phase) {
-                        sim::comp::Frequency *fc1 = new sim::comp::Frequency(joints[i],amp,freq,phase,j);
-                        addComponent(fc1);
+						if (1 || j == 0 || i==2) {
+                       		sim::comp::Frequency *fc1 = new sim::comp::Frequency(joints[i],amp,freq,phase,j);
+                        	addComponent(fc1);
+						}
                     } else {
                         std::cerr << "Cannot load frequency parametres for joint " << i << ",type " << j << "!\n";
                         exit(0);

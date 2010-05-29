@@ -25,12 +25,24 @@ using namespace std;
 
 
 const double amplitude = 3;
-const double frequencyMin = -2*20*M_PI; // in rad
-const double frequencyMax = 2*20*M_PI;
+const double frequencyMin = -2*0.5*M_PI; // in rad
+const double frequencyMax = 2*0.5*M_PI;
 const double phaseMin = -2*M_PI; // in rad
 const double phaseMax= 2*M_PI;
 
+const int populationSize = 20;
+const int generationCount = 40;
+const int evaluateIters = 6;
+const int numJoints = 4;
 
+	
+
+/** each particle represents A_i, f_i and phase_i
+  * for all joints.
+  * This parameters are stored in 'data'. Also each particle has to know its best 
+  * particle, which is in 'localBest'.
+  * The volocities of parameters in parameter space are store in 'velocity'
+  */
 class Particle {
     public:
         std::vector<double> data;
@@ -78,7 +90,7 @@ void saveParam(const char *filename, const Particle &p) {
  
 }
 
-double evaluate(const char *binPath, const char *paramFile, const Particle &p, const int evaluateIters) {
+static double evaluate(const char *binPath, const char *paramFile, const Particle &p, const int evaluateIters) {
     
     saveParam(paramFile,p);
 
@@ -110,7 +122,7 @@ double evaluate(const char *binPath, const char *paramFile, const Particle &p, c
 	return sumFit / evaluateIters;
 }  
 
-void printParticle(ofstream &ofs, const Particle &p) {
+static void printParticle(ofstream &ofs, const Particle &p) {
     ofs << "Velocity: ";
     for(int i=0;i<(int)p.velocity.size();i++) {
         ofs << p.velocity[i] << " ";
@@ -138,12 +150,6 @@ int main(int argc, char **argv) {
 
 	const char *binPath = argv[1];
 	const char *paramFile = argv[2];
-
-    const int populationSize = 40;
-    const int generationCount = 40;
-	const int evaluateIters = 10;
-
-    const int numJoints = 4;
 
 	char name[200];
 	sprintf(name,"%s.log",paramFile);

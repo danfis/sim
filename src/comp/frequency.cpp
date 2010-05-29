@@ -23,10 +23,10 @@ Frequency::~Frequency(){
 void Frequency::init(sim::Sim *sim) {
 	_sim = sim;
     if (_type == 0) {
-        _joint->setParamFMax(20);
+        _joint->setParamFMax(50);
         _joint->setParamVel(0);
     } else {
-        _joint->setParamFMax2(20);
+        _joint->setParamFMax2(50);
         _joint->setParamVel2(0);
     }
     _sim->regPreStep(this);

@@ -101,4 +101,21 @@ vector<sim::Vec3> loadTriangles(const char *filename, int **indices,  Vec3 **ver
 }
 
 
+int main(int argc, char **argv) {
+    if (argc < 4) {
+        cerr << "usage " << argv[0] << " <rawFile> <headerFile> <variableName>\n";
+        cerr << "rawFile        file in RAW format with mesh\n";
+        cerr << "headerFile     output file in c/c++ header file with definition of the object vertices\n";
+        cerr << "variableName   name of the output variable\n";
+        exit(0);
+    }
+
+    const char *inFile = argv[1];
+    const char *hFile = argv[2];
+    const char *varName = argv[3];
+
+
+}
+
+
 
