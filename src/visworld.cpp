@@ -2,6 +2,7 @@
 #include <osgDB/WriteFile>
 #include <osgViewer/PixelBufferX11>
 #include <osgViewer/Renderer>
+#include <osg/ShapeDrawable>
 #include <string.h>
 #include <stdio.h>
 #include <osg/AlphaFunc>
@@ -40,8 +41,7 @@ VisWorld::VisWorld()
 
     _setUpStateSet();
     _setUpLights();
-
-	_axisCreated = false;
+    _createCoordFrame();
 
     // set up viewer to run in single thread
     _viewer->setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
@@ -223,56 +223,53 @@ void VisWorld::toggleAlpha()
 	}
 }
 
-void VisWorld::toggleAxis() {
-
-	
-	if (!_axisCreated) {
-		const double axisHeight = 10;
-		const double axisRadius = 0.1;
-
-		// axis z
-		VisBody *b = new VisBodyCylinder(axisRadius,axisHeight);
-		b->setColor(osg::Vec4(0,0,1,1));
-		b->setPos(0,0,axisHeight/2);		
-		this->addBody(b);
-		_axisZ = b->node();
-
-		// axis x
-		b = new VisBodyCylinder(axisRadius,axisHeight);
-		b->setColor(osg::Vec4(1,0,0,1));
-		b->setPos(axisHeight/2,0,0);
-		osg::Quat q(M_PI/2,osg::Vec3(0,1,0));
-		b->setRot(q);
-		this->addBody(b);
-		_axisX = b->node();
-
-		// axis y
-		b = new VisBodyCylinder(axisRadius,axisHeight);
-		b->setColor(osg::Vec4(0,1,0,1));
-		b->setPos(0,axisHeight/2,0);
-		b->setRot(osg::Quat(M_PI/2,osg::Vec3(1,0,0)));
-		this->addBody(b);
-		_axisY = b->node();
-
-		_axisCreated = true;
-	} else {
-		
-		if (_axisX->getNodeMask()) {
-			_axisX->setNodeMask(0 );	
-			_axisY->setNodeMask(0);	
-			_axisZ->setNodeMask(0);
-		} else {
-			_axisX->setNodeMask(0xffffffff);	
-			_axisY->setNodeMask(0xffffffff);	
-			_axisZ->setNodeMask(0xffffffff);
-		}
-
-
-	}
-
-
+void VisWorld::toggleAxis()
+{
+    if (_coord_frame->getValue(0)){
+        _coord_frame->setAllChildrenOff();
+    }else{
+        _coord_frame->setAllChildrenOn();
+    }
 }
 
 
+void VisWorld::_createCoordFrame()
+{
+    Scalar height = 10;
+    Scalar radius = height / 50.;
+    osg::ref_ptr<osg::Cylinder> cyl;
+    osg::ref_ptr<osg::ShapeDrawable> draw;
+    osg::ref_ptr<osg::Geode> geode;
+
+    _coord_frame = new osg::Switch();
+
+    geode = new osg::Geode();
+    _coord_frame->addChild(geode);
+
+    cyl = new osg::Cylinder(Vec3(0., 0., 0.), radius, height);
+    cyl->setRotation(Quat(Vec3(0., 1., 0.), M_PI / 2.));
+    cyl->setCenter(Vec3(1., 0., 0.) * (height / 2.));
+    draw = new osg::ShapeDrawable(cyl);
+    draw->setColor(osg::Vec4(1., 0., 0., 1.));
+    geode->addDrawable(draw);
+
+    cyl = new osg::Cylinder(Vec3(0., 0., 0.), radius, height);
+    cyl->setRotation(Quat(Vec3(1., 0., 0.), M_PI / 2.));
+    cyl->setCenter(Vec3(0., 1., 0.) * (height / 2.));
+    draw = new osg::ShapeDrawable(cyl);
+    draw->setColor(osg::Vec4(0., 1., 0., 1.));
+    geode->addDrawable(draw);
+
+    cyl = new osg::Cylinder(Vec3(0., 0., 0.), radius, height);
+    cyl->setRotation(Quat(Vec3(0., 0., 1.), M_PI / 2.));
+    cyl->setCenter(Vec3(0., 0., 1.) * (height / 2.));
+    draw = new osg::ShapeDrawable(cyl);
+    draw->setColor(osg::Vec4(0., 0., 1., 1.));
+    geode->addDrawable(draw);
+
+    _coord_frame->setAllChildrenOff();
+
+    _root->addChild(_coord_frame);
+}
 
 }

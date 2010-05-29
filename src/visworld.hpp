@@ -36,10 +36,9 @@ class VisWorld {
 	osg::ref_ptr<osg::Node> _axisY;
 	osg::ref_ptr<osg::Node> _axisZ;
     bool _window; /*!< Show a window? */
+
+    osg::ref_ptr<osg::Switch> _coord_frame;
 	bool _axisCreated;
-//	osg::Node *_axisX;
-//	osg::Node *_axisY;
-//	osg::Node *_axisZ;
 
 
   public:
@@ -100,6 +99,7 @@ class VisWorld {
     void _setUpStateSet();
     void _setUpLights();
 
+    void _createCoordFrame();
 
 };
 
