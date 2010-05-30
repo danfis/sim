@@ -22,12 +22,29 @@ class RangeFinder : public sim::Component {
     Vec3 _offset_pos;
     Quat _offset_rot;
 
+    struct {
+        bool *detected; //!< Holds info whetever obstacle was detected by beam
+        Scalar *dist; //!< Distances of obstacles
+        Vec3 *point; //!< Actual points of where obstacles were detected
+                     //!< in global coordinates
+        Vec3 *local; //!< Same as .points but in local coordinates
+    } _data; //!< Measured data
+
   public:
     RangeFinder(Scalar max_range, size_t num_beams, Scalar angle_range);
     ~RangeFinder();
 
     size_t numBeams() const { return _num_beams; }
     Scalar angleRange() const { return _angle_range; }
+
+    const bool *detected() const { return _data.detected; }
+    bool detected(size_t i) const { return _data.detected[i]; }
+    const Scalar *distance() const { return _data.dist; }
+    Scalar distance(size_t i) const { return _data.dist[i]; }
+    const Vec3 *point() const { return _data.point; }
+    const Vec3 &point(size_t i) const { return _data.point[i]; }
+    const Vec3 *localPoint() const { return _data.local; }
+    const Vec3 &localPoint(size_t i) const { return _data.local[i]; }
 
     void setPosRot(const Vec3 &pos, const Quat &rot = Quat(0., 0., 0., 1.))
         { _offset_pos = pos; _offset_rot = rot; }

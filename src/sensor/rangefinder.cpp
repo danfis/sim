@@ -12,10 +12,23 @@ RangeFinder::RangeFinder(Scalar max_range, size_t num_beams, Scalar angle_range)
 {
     _intersectors = new osgUtil::IntersectorGroup;
     _visitor = new osgUtil::IntersectionVisitor(_intersectors);
+
+    _data.detected = new bool[_num_beams];
+    _data.dist = new Scalar[_num_beams];
+    _data.point = new Vec3[_num_beams];
+    _data.local = new Vec3[_num_beams];
+
+    for (size_t i = 0; i < _num_beams; i++){
+        _data.detected[i] = false;
+    }
 }
 
 RangeFinder::~RangeFinder()
 {
+    delete [] _data.detected;
+    delete [] _data.dist;
+    delete [] _data.point;
+    delete [] _data.local;
 }
 
 void RangeFinder::init(sim::Sim *sim)
@@ -32,6 +45,7 @@ void RangeFinder::init(sim::Sim *sim)
     }
 
     _createIntersectors();
+    _updatePosition();
 }
 
 void RangeFinder::finish()
@@ -47,60 +61,62 @@ void RangeFinder::cbPreStep()
         return;
     __C++;
 
-    _updatePosition();
+    if (_body)
+        _updatePosition();
 
     // get root of scene
     root = _sim->visWorld()->sceneRoot();
 
-    // start traversing of intersector
+    // traverse scene
     root->accept(*_visitor.get());
 
     DBG("");
 
+    // gather measured data
     osgUtil::LineSegmentIntersector *is;
+    osgUtil::LineSegmentIntersector::Intersection inter;
     osgUtil::IntersectorGroup::Intersectors &its = _intersectors->getIntersectors();
-    size_t i, len = its.size();
-    for (i = 0; i < len; i++){
+
+    for (size_t i = 0; i < _num_beams; i++){
         is = (osgUtil::LineSegmentIntersector *)its[i].get();
+
         if (is->containsIntersections()){
+            inter = is->getFirstIntersection();
+
+            _data.detected[i] = true;
+            _data.point[i] = inter.getWorldIntersectPoint();
+            _data.local[i] = inter.getLocalIntersectPoint();
+            _data.dist[i] = _data.local[i].length();
+
+            std::cerr << _data.detected[i] << ":" << _data.dist[i] << " ";
+            {
             Vec3 pos = is->getFirstIntersection().getWorldIntersectPoint();
             sim::Body *b = _sim->world()->createBodyCube(0.01, 0.);
             b->visBody()->setColor(1., 0., 0., 1.);
             b->setPos(pos);
             b->activate();
+            }
+        }else{
+            _data.detected[i] = false;
+            _data.dist[i] = _max_range;
+            _data.point[i].set(0., 0., 0.);
+            _data.local[i].set(0., 0., 0.);
         }
-        DBG(i << ": " << is->containsIntersections() << " " << is->getIntersections().size());
+        //DBG(i << ": " << is->containsIntersections() << " " << is->getIntersections().size());
 
         // clear list of intersections
         is->getIntersections().clear();
     }
+
+    std::cerr << std::endl;
 }
 
 
 void RangeFinder::_createIntersectors()
 {
-    Vec3 from, to, to_dir;
-    Scalar angle, angle_step;
-    size_t i;
     osgUtil::LineSegmentIntersector *beam;
 
-    //from = Vec3(0., 0., 0.);
-    from = _offset_pos;
-    to_dir = _offset_pos + Vec3(_max_range, 0., 0.);
-
-    angle = -_angle_range / 2.;
-    angle_step = _angle_range / (Scalar)(_num_beams - 1);
-
-    for (i = 0; i < _num_beams; i++){
-        /*
-        //to = Quat(Vec3(0., 0., 1.), angle) * Vec3(_max_range, 0., 0.);
-        to = (_offset_rot * Quat(Vec3(0., 0., 1.), angle)) * to_dir;
-
-        beam = new osgUtil::LineSegmentIntersector(from, to);
-        _intersectors->addIntersector(beam);
-
-        angle += angle_step;
-        */
+    for (size_t i = 0; i < _num_beams; i++){
         beam = new osgUtil::LineSegmentIntersector(Vec3(0., 0., 0.), Vec3(0., 0., 0.));
         _intersectors->addIntersector(beam);
     }

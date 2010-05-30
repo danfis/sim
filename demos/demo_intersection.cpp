@@ -124,9 +124,9 @@ class S : public sim::Sim {
         rf = new sim::sensor::RangeFinder(80., 181, M_PI);
         //rf->setPosRot(Vec3(0., 0., 0.2), Quat(Vec3(1., 0., 0.), M_PI / 4.));
         rf->setPosRot(Vec3(0., 0., 0.2));
-        rf->setPosRot(Vec3(0., 0., 0.2), Quat(Vec3(0., 0., 1.), M_PI / 4.));
-        rf->setPosRot(Vec3(0., 0., 0.2), Quat(Vec3(0., 0., 1.), -M_PI / 4.));
-        rf->setPosRot(Vec3(0., 0., 0.2), Quat(Vec3(1., 0., 0.), M_PI / 4.));
+        //rf->setPosRot(Vec3(0., 0., 0.2), Quat(Vec3(0., 0., 1.), M_PI / 4.));
+        //rf->setPosRot(Vec3(0., 0., 0.2), Quat(Vec3(0., 0., 1.), -M_PI / 4.));
+        //rf->setPosRot(Vec3(0., 0., 0.2), Quat(Vec3(1., 0., 0.), M_PI / 4.));
         addComponent(rf);
     }
 };
