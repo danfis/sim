@@ -4,7 +4,7 @@
 #include <sstream>
 #include <vector>
 #include <ctype.h>
-
+#include <iomanip>
 
 #include "sim/ode/world.hpp"
 #include "sim/sim.hpp"
@@ -434,6 +434,39 @@ void printTree(osg::Node *node) {
 
 }
 
+class DumpComp : public sim::Component {
+    sim::Sim *_sim;
+    sim::robot::SSSA *_robot;
+    public:
+
+        DumpComp(sim::robot::SSSA *r);
+        ~DumpComp();
+
+        void cbPostStep();
+        void init(sim::Sim *sim);
+};
+
+DumpComp::DumpComp(sim::robot::SSSA *r) {
+    _robot = r;
+}
+
+DumpComp::~DumpComp(){
+}
+
+void DumpComp::init(sim::Sim *sim){
+    _sim = sim;
+    sim->regPostStep(this);
+}
+
+void DumpComp::cbPostStep() {
+    sim::Vec3 s(_robot->socketPosition(0));
+    cerr << "Position socket1 = " << s[0] << "," << s[1] << "," << s[2] << "\n";
+    s = (_robot->socketPosition(1));
+    cerr << "Position socket2 = " << s[0] << "," << s[1] << "," << s[2] << "\n";
+    s = (_robot->socketPosition(2));
+    cerr << "Position socket3 = " << s[0] << "," << s[1] << "," << s[2] << "\n";
+}
+
 
 class SimTestFormace : public sim::Sim {
 	vector<sim::Joint *> snakeJoints;
@@ -538,8 +571,10 @@ class SimTestFormace : public sim::Sim {
 
 
     void createSSSARobotClass() {
-        sim::robot::SSSA *sssaRobot1 = new sim::robot::SSSA(world(),sim::Vec3(0,  0,0.65),osg::Vec4(0.7,0.3,0.4,1));
-        sim::robot::SSSA *sssaRobot2 = new sim::robot::SSSA(world(),sim::Vec3(1.26,0,0.65),osg::Vec4(0.7,0.3,0.4,1));
+
+        const double posz = 0.60;
+        sim::robot::SSSA *sssaRobot1 = new sim::robot::SSSA(world(),sim::Vec3(0,  0,posz),osg::Vec4(0.7,0.3,0.4,1));
+        sim::robot::SSSA *sssaRobot2 = new sim::robot::SSSA(world(),sim::Vec3(1.26,0,posz),osg::Vec4(0.7,0.3,0.4,1));
 
         sim::Joint *j = world()->createJointHinge(sssaRobot1->chassis(),sssaRobot2->chassis(),sssaRobot1->chassis()->pos(),sim::Vec3(1,0,0));
         j->setParamLimitLoHi(-90*M_PI/180,90*M_PI/180);
@@ -547,8 +582,10 @@ class SimTestFormace : public sim::Sim {
 
         snakeJoints.push_back(sssaRobot1->armJoint());
         snakeJoints.push_back(j);
-		
-        
+		    
+        DumpComp *dc = new DumpComp(sssaRobot1);
+        addComponent(dc);
+                
         sim::comp::Snake *sc = new sim::comp::Snake(snakeJoints);
 		addComponent(sc);
 		regMessage(sc,sim::MessageKeyPressed::Type);
@@ -1540,6 +1577,7 @@ void convertRawToHeader(int argc, char **argv, const int id) {
     vector<sim::Vec3> tri(loadTriangles(inFile,&indices, &vertices, indicesSize, verticesSize, originCount));
 
     ofstream ofs(hFile);
+    ofs << setprecision(20);
     char name[200];
     sprintf(name,"%s_H_",varName);
     for(int i=0;name[i];i++) {

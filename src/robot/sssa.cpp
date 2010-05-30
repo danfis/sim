@@ -100,7 +100,6 @@ int SSSA::canConnectTo(const sim::robot::SSSA &robot) const
         if (dist > max_dist)
             continue;
 
-
         // compute rotational difference as rotation from ball's direction
         // vector to socket direction vector - this is reason why is
         // socket's dir reversed
@@ -300,6 +299,44 @@ void SSSA::_createWheels()
     } // if make wheel
 #endif
 
+}
+
+/** return true if two robots can be connected.
+  * they can be conected if:
+  *  - current robot is not connected to other robot (_linkJoint == NULL) AND
+  *  - other robot is proper oriented and close enough 
+  */
+bool SSSA::canConnect(sim::robot::SSSA *robot) const {
+
+    for(int i=0;i<3;i++) {
+        sim::Vec3 otherSocket = robot->socketPosition(0);
+    }
+    return false;
+}
+
+    /** connects two robots */
+int SSSA::connect(sim::robot::SSSA *robot) {
+    return 0;
+}
+
+sim::Vec3 SSSA::socketPosition(const int idx) {
+    sim::Vec3 result;
+    if (idx == 0) {
+        result = _chasis->rot()*_socket1;
+    } else if (idx == 1) {
+        result = _chasis->rot()*_socket2;
+    } else {
+        result = _chasis->rot()*_socket3;
+    }
+
+    result += _chasis->pos();
+    return result;
+}
+
+sim::Vec3 SSSA::armPosition() const {
+    sim::Vec3 result = _chasis->rot()*(_arm->rot()*_armEnd);
+    result += _chasis->pos();
+    return result;
 }
 
 
