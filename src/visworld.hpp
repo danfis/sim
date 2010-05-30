@@ -32,6 +32,8 @@ class VisWorld {
 
     osg::ref_ptr<osg::Switch> _coord_frame;
 
+    osg::ref_ptr<osg::Group> _off_scene;
+
     std::list<VisBody *> _bodies;
 
     bool _window; /*!< Show a window? */
@@ -66,6 +68,9 @@ class VisWorld {
 
     void addCam(osg::Camera *cam);
     void rmCam(osg::Camera *cam);
+
+    void addOffScene(osg::Node *n);
+    void rmOffScene(osg::Node *n);
 
     /**
      * Initializes world.

@@ -30,12 +30,16 @@ class RangeFinder : public sim::Component {
         Vec3 *local; //!< Same as .points but in local coordinates
     } _data; //!< Measured data
 
+    osg::ref_ptr<osg::Group> _vis;
+    bool _vis_enabled;
+
   public:
     RangeFinder(Scalar max_range, size_t num_beams, Scalar angle_range);
     ~RangeFinder();
 
     size_t numBeams() const { return _num_beams; }
     Scalar angleRange() const { return _angle_range; }
+    void enableVis(bool yes = true) { _vis_enabled = yes; }
 
     const bool *detected() const { return _data.detected; }
     bool detected(size_t i) const { return _data.detected[i]; }
@@ -60,7 +64,9 @@ class RangeFinder : public sim::Component {
 
   protected:
     void _createIntersectors();
+    void _createVis();
     void _updatePosition();
+    void _updateVis();
 };
 
 } /* namespace sensor */

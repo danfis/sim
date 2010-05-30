@@ -1,3 +1,5 @@
+#include <osg/ShapeDrawable>
+
 #include "rangefinder.hpp"
 #include "sim/msg.hpp"
 
@@ -8,7 +10,8 @@ namespace sensor {
 RangeFinder::RangeFinder(Scalar max_range, size_t num_beams, Scalar angle_range)
     : sim::Component(),
       _max_range(max_range), _num_beams(num_beams), _angle_range(angle_range),
-      _offset_pos(0., 0., 0.), _offset_rot(0., 0., 0., 1.)
+      _offset_pos(0., 0., 0.), _offset_rot(0., 0., 0., 1.),
+      _vis_enabled(false)
 {
     _intersectors = new osgUtil::IntersectorGroup;
     _visitor = new osgUtil::IntersectionVisitor(_intersectors);
@@ -37,29 +40,26 @@ void RangeFinder::init(sim::Sim *sim)
 
     _sim->regPreStep(this);
 
-    {
-        sim::Body *b = _sim->world()->createBodyCube(0.03, 0.);
-        DBG(b);
-        b->setPos(_offset_pos + Vec3(-0.1, 0., 0.));
-        b->activate();
-    }
-
     _createIntersectors();
+
+    if (_vis_enabled)
+        _createVis();
+
+    if (_vis.valid())
+        _sim->visWorld()->addOffScene(_vis.get());
+
     _updatePosition();
 }
 
 void RangeFinder::finish()
 {
+    if (_vis.valid())
+        _sim->visWorld()->rmOffScene(_vis.get());
 }
 
 void RangeFinder::cbPreStep()
 {
-    static int __C = 0;
     osg::Node *root;
-
-    if (__C != 0)
-        return;
-    __C++;
 
     if (_body)
         _updatePosition();
@@ -69,8 +69,6 @@ void RangeFinder::cbPreStep()
 
     // traverse scene
     root->accept(*_visitor.get());
-
-    DBG("");
 
     // gather measured data
     osgUtil::LineSegmentIntersector *is;
@@ -88,27 +86,22 @@ void RangeFinder::cbPreStep()
             _data.local[i] = inter.getLocalIntersectPoint();
             _data.dist[i] = _data.local[i].length();
 
-            std::cerr << _data.detected[i] << ":" << _data.dist[i] << " ";
-            {
-            Vec3 pos = is->getFirstIntersection().getWorldIntersectPoint();
-            sim::Body *b = _sim->world()->createBodyCube(0.01, 0.);
-            b->visBody()->setColor(1., 0., 0., 1.);
-            b->setPos(pos);
-            b->activate();
-            }
+            //std::cerr << _data.detected[i] << ":" << _data.dist[i] << " ";
         }else{
             _data.detected[i] = false;
             _data.dist[i] = _max_range;
-            _data.point[i].set(0., 0., 0.);
-            _data.local[i].set(0., 0., 0.);
+            _data.point[i] = is->getEnd();
+            _data.local[i].set(0., 0., 0.); // TODO: This must be computed
         }
-        //DBG(i << ": " << is->containsIntersections() << " " << is->getIntersections().size());
 
         // clear list of intersections
         is->getIntersections().clear();
     }
 
-    std::cerr << std::endl;
+    //std::cerr << std::endl;
+
+    if (_vis.valid())
+        _updateVis();
 }
 
 
@@ -119,6 +112,35 @@ void RangeFinder::_createIntersectors()
     for (size_t i = 0; i < _num_beams; i++){
         beam = new osgUtil::LineSegmentIntersector(Vec3(0., 0., 0.), Vec3(0., 0., 0.));
         _intersectors->addIntersector(beam);
+    }
+}
+
+void RangeFinder::_createVis()
+{
+    Scalar size = 0.01;
+    osg::Box *box;
+    osg::ShapeDrawable *draw;
+    osg::Geode *geode;
+    osg::PositionAttitudeTransform *tr;
+
+    _vis = new osg::Group;
+
+    for (size_t i = 0; i < _num_beams; i++){
+        box = new osg::Box(Vec3(0., 0., 0.), size);
+
+        draw = new osg::ShapeDrawable(box);
+        draw->setColor(osg::Vec4(1., 0., 0., 1.));
+
+        geode = new osg::Geode;
+        geode->addDrawable(draw);
+
+        tr = new osg::PositionAttitudeTransform;
+        tr->setAttitude(Quat(0., 0., 0, 1.));
+        tr->setPosition(Vec3(0., 0., 0.));
+
+        tr->addChild(geode);
+
+        _vis->addChild(tr);
     }
 }
 
@@ -144,8 +166,7 @@ void RangeFinder::_updatePosition()
 
     osgUtil::LineSegmentIntersector *is;
     osgUtil::IntersectorGroup::Intersectors &its = _intersectors->getIntersectors();
-    size_t i, len = its.size();
-    for (i = 0; i < len; i++){
+    for (size_t i = 0; i < _num_beams; i++){
         is = (osgUtil::LineSegmentIntersector *)its[i].get();
 
         from = Vec3(0., 0., 0.);
@@ -163,6 +184,23 @@ void RangeFinder::_updatePosition()
     }
 }
 
+void RangeFinder::_updateVis()
+{
+    osg::PositionAttitudeTransform *tr;
+    osg::ShapeDrawable *draw;
+
+    for (size_t i = 0; i < _num_beams; i++){
+        tr = (osg::PositionAttitudeTransform *)_vis->getChild(i);
+        tr->setPosition(_data.point[i]);
+
+        draw = (osg::ShapeDrawable *)((osg::Geode *)tr->getChild(0))->getDrawable(0);
+        if (_data.detected[i]){
+            draw->setColor(osg::Vec4(1., 0., 0., 1.));
+        }else{
+            draw->setColor(osg::Vec4(1., 0., 1., 1.));
+        }
+    }
+}
 
 }
 }

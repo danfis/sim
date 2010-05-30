@@ -39,6 +39,9 @@ VisWorld::VisWorld()
     _lights = new osg::Group();
     _root_vis->addChild(_lights);
 
+    _off_scene = new osg::Group();
+    _root->addChild(_off_scene);
+
     _setUpStateSet();
     _setUpLights();
     _createCoordFrame();
@@ -88,6 +91,16 @@ void VisWorld::rmCam(osg::Camera *cam)
         _cams->removeChild(cam);
         cam->removeChild(_root_vis);
     }
+}
+
+void VisWorld::addOffScene(osg::Node *n)
+{
+    _off_scene->addChild(n);
+}
+
+void VisWorld::rmOffScene(osg::Node *n)
+{
+    _off_scene->removeChild(n);
 }
 
 void VisWorld::addView(osgViewer::View *view)
