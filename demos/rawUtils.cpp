@@ -5,7 +5,7 @@
 #include <math.h>
 #include <vector>
 #include "sim/sim.hpp"
-
+#include "rawUtils.hpp"
 
 using namespace sim::ode;
 using sim::Vec3;

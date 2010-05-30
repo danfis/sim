@@ -3,6 +3,8 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <ctype.h>
+
 
 #include "sim/ode/world.hpp"
 #include "sim/sim.hpp"
@@ -16,12 +18,11 @@
 #include "sim/comp/frequency.hpp"
 #include "sim/comp/watchdog.hpp"
 
-#include "sssa/sssa_body.h"
-#include "sssa/sssa_arm.h"
-#include "sssa/sssa_active_wheel.h"
-#include "sssa/sssa_passive_wheel.h"
-#include "sssa/sssa_passive_wheel90.h"
-
+#include "sssa/sssa_body.hpp"
+#include "sssa/sssa_arm.hpp"
+#include "sssa/sssa_active_wheel.hpp"
+#include "sssa/sssa_passive_wheel.hpp"
+#include "sssa/sssa_passive_wheel90.hpp"
 
 int counter = 0;
 #define intro counter++; if (id == -1) std::cerr << counter << " :"<< __FUNCTION__ << "\n"; if (id != counter) return;
@@ -441,7 +442,6 @@ class SimTestFormace : public sim::Sim {
 
 
         World *w = new World();
-        sim::Body *b;
 
         setWorld(w);
 //        w->setCFM(1e-3);
@@ -453,6 +453,7 @@ class SimTestFormace : public sim::Sim {
         //w->setContactBounce(0.1, 0.1);
     
 /*        
+        sim::Body *b;
         b = w->createBodyBox(sim::Vec3(2., 2., 1.), 0.4);
         b->visBody()->setColor(osg::Vec4(1,0.8,0.4, 1.));
         b->setPos(3, 4., 5);
@@ -1363,9 +1364,195 @@ void testFormace(const int argc, char **argv, const int id) {
 }
 
 
+template<typename T>
+std::vector<T> lineToNum(const std::string &line) {
+
+	std::vector<T> res;
+	std::stringstream iss(line);
+	double a;
+	while(iss >> a) {
+		res.push_back(a);
+	}
+	return res;
+}
 
 
 
+/** find a point p in given point array. if such a points does not exists, add it to the end of the array
+  * and return its index */
+int getIndex(vector<Vec3> &pts, const Vec3 &p) {
+	double mind = -1;
+	int minidx = -1;
+	double d;
+	const double distanceThreshold = 0.0001;
+	for(int i=0;i<(int)pts.size();i++) {
+		const double dx = pts[i][0] - p[0];
+		const double dy = pts[i][1] - p[1];
+		const double dz = pts[i][2] - p[2];
+		d = dx*dx + dy*dy + dz*dz;
+		if (d < mind || mind == -1) {
+			mind = d;
+			minidx = i;
+		}
+	}
+
+	if (minidx == -1 || mind > distanceThreshold*distanceThreshold) {
+		pts.push_back(p);
+		minidx = pts.size()-1;
+	}
+	return minidx;
+}
+
+
+static void printPercentStatus(const double actual, const double max, double &old, std::ostream &os) {
+
+	char tmp[20];
+	double n = 100*actual/max;
+	if (fabs(n-old) > 0.1) {
+		sprintf(tmp,"%.2lf%%   \r",n);
+		old = n;
+		os << tmp; 
+	}
+}
+
+
+
+
+vector<sim::Vec3> loadTriangles(const char *filename, int **indices,  Vec3 **vertices, int &indicesSize, int &verticesSize, 
+        int &originSize,
+        const double addX=0, const double addY=0, const double addZ=0) {
+
+    // first count numbewr of lines:
+    int numLines = 0;
+    {
+        string line;
+        ifstream ifs(filename);
+        while(ifs) {
+		    std::getline(ifs,line);
+            numLines++;
+        }
+        ifs.close();
+    }
+
+
+	ifstream ifs(filename);
+	string line;
+	vector<Vec3> points;
+	vector< vector<int> > iindices;
+
+	int discarded = 0;
+	//const double triangleAreaThreshold = -0.0005;
+    originSize = 0;
+    double oldShowVal = -1;
+	while(ifs) {
+		std::getline(ifs,line);
+		vector<double> vd(lineToNum<double>(line));
+		if (vd.size() == 9) {
+			Vec3 p1(vd[0]+addX,vd[1]+addY,vd[2]+addZ);
+			Vec3 p2(vd[3]+addX,vd[4]+addY,vd[5]+addZ);
+			Vec3 p3(vd[6]+addX,vd[7]+addY,vd[8]+addZ);
+//			if (triangleArea(p1,p2,p3) > triangleAreaThreshold) {
+			if (1 ) {
+				int idx1 = getIndex(points, p1);
+				int idx2 = getIndex(points, p2);
+				int idx3 = getIndex(points, p3);
+				vector<int> in;
+				in.push_back(idx1);
+				in.push_back(idx2);
+				in.push_back(idx3);
+				iindices.push_back(in);
+				in.clear();
+			} else {
+				discarded++;
+			}
+            originSize++;
+		}
+		vd.clear();
+        printPercentStatus(originSize,numLines,oldShowVal,std::cerr);
+	}
+	(*indices) = new int[iindices.size()*3];
+	(*vertices) = new Vec3[points.size()];
+	indicesSize = iindices.size()*3;
+	verticesSize = points.size();
+
+	for(int i=0;i<(int)points.size();i++) {
+		(*vertices)[i][0] = points[i][0];
+		(*vertices)[i][1] = points[i][1];
+		(*vertices)[i][2] = points[i][2];
+	}
+
+	int idx = 0;
+	for(int i=0;i<(int)iindices.size();i++) {
+		(*indices)[idx++] = iindices[i][0];
+		(*indices)[idx++] = iindices[i][1];
+		(*indices)[idx++] = iindices[i][2];
+	}
+	cerr << "Loaded " << points.size() << " points\n";
+	cerr << "Loaded " << iindices.size() << " triangles, discarded: "<< discarded << "\n";
+	iindices.clear();
+	return points;
+}
+
+
+
+void convertRawToHeader(int argc, char **argv, const int id) {
+    intro;
+    if (argc < 4) {
+        cerr << "usage " << argv[0] << " <rawFile> <headerFile> <variableName>\n";
+        cerr << "rawFile        file in RAW format with mesh\n";
+        cerr << "headerFile     output file in c/c++ header file with definition of the object vertices\n";
+        cerr << "variableName   name of the output variable\n";
+        exit(0);
+    }
+
+    const char *inFile = argv[1];
+    const char *hFile = argv[2];
+    const char *varName = argv[3];
+    
+    sim::Vec3 *vertices;
+    int *indices;
+    int indicesSize, verticesSize, originCount;
+    vector<sim::Vec3> tri(loadTriangles(inFile,&indices, &vertices, indicesSize, verticesSize, originCount));
+
+    ofstream ofs(hFile);
+    char name[200];
+    sprintf(name,"%s_H_",varName);
+    for(int i=0;name[i];i++) {
+        name[i] = toupper(name[i]);
+    }
+    ofs << "#ifndef " << name << "\n";
+    ofs << "#define " << name << "\n";
+
+    ofs << "#include <sim/math.hpp>\n";
+    sprintf(name,"%s_verts",varName);
+    ofs << "static sim::Vec3 " << name << "[] = {\n";
+    for(int i=0;i<verticesSize;i++) {
+        ofs << "sim::Vec3("<<vertices[i][0] << "," << vertices[i][1] << "," << vertices[i][2] << ")";
+        if (i < verticesSize-1) {
+            ofs << ",";
+        }
+        ofs << "\n";
+    }
+    ofs << "};\n\n";
+
+    sprintf(name,"%s",varName);
+    ofs << "const size_t " << name << "_verts_len = sizeof(" << name << "_verts)/sizeof(sim::Vec3);\n\n";
+
+    ofs << "unsigned int " << name << "_ids[] = {\n";
+    for(int i=0;i<indicesSize/3;i++) {
+        ofs << indices[3*i+0] << "," << indices[3*i+1] << "," << indices[3*i+2];
+        if (i < (indicesSize/3-1)) {
+               ofs << ",";
+        }
+        ofs << "\n";
+    }
+    ofs << "};\n\n";
+    ofs << "const size_t " << name << "_ids_len = sizeof(" << name << "_ids)/sizeof(unsigned int);\n\n"; 
+
+    ofs << "#endif\n";
+    ofs.close();
+
+}
 
 int main(int argc, char **argv) {
 
@@ -1380,6 +1567,7 @@ int main(int argc, char **argv) {
 	
 	testSim(argc,argv,k);
 	testFormace(argc,argv,k);
+    convertRawToHeader(argc,argv,k);
 	return 0;
 }
 
