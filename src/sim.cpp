@@ -301,10 +301,6 @@ void *Sim::_worldStepsThread(void *_sim)
             // was simulation unpaused again
             Time::sleep(sim->_time_step);
         }
-
-    if (timeSimulated() > timeReal()){
-        Time tdiff = Time::diff(timeReal(), timeSimulated());
-       // Time::sleep(tdiff);
     }
 
     return NULL;

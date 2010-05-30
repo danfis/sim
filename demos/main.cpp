@@ -10,7 +10,7 @@
 #include "sim/sim.hpp"
 #include "msg.hpp"
 //#include "meshes/ardrone.h"
-#include "meshes/jezek.h"
+//#include "meshes/jezek.h"
 //#include "meshes/surface.h"
 #include "meshes/plane.h"
 #include "sim/comp/povray.hpp"
@@ -18,11 +18,13 @@
 #include "sim/comp/frequency.hpp"
 #include "sim/comp/watchdog.hpp"
 
+/*
 #include "sssa/sssa_body.hpp"
 #include "sssa/sssa_arm.hpp"
 #include "sssa/sssa_active_wheel.hpp"
 #include "sssa/sssa_passive_wheel.hpp"
 #include "sssa/sssa_passive_wheel90.hpp"
+*/
 
 #include "sim/robot/sssa.hpp"
 
@@ -454,14 +456,13 @@ class SimTestFormace : public sim::Sim {
         //w->setContactApprox2(false);
         //w->setContactBounce(0.1, 0.1);
     
-/*        
+        
         sim::Body *b;
-        b = w->createBodyBox(sim::Vec3(2., 2., 1.), 0.4);
+        b = w->createBodyBox(sim::Vec3(1, 1, 1.), 0);
         b->visBody()->setColor(osg::Vec4(1,0.8,0.4, 1.));
-        b->setPos(3, 4., 5);
-        b->setRot(sim::Quat(Vec3(1., 1., 0.), M_PI * 0.3));
+        b->setPos(3, 0, 0.7);
         b->activate();
-
+/*
 		b = w->createBodyBox(sim::Vec3(3., 2., 1.), 1.8);
         b->visBody()->setColor(osg::Vec4(1.0, 0.63, 0.32, 1.));
         b->setPos(-3, 4., 5);
@@ -513,11 +514,11 @@ class SimTestFormace : public sim::Sim {
 //		addComponent(pc);
 
 
-		sim::comp::Snake *sc = new sim::comp::Snake(snakeJoints);
-		addComponent(sc);
-		regMessage(sc,sim::MessageKeyPressed::Type);
+		//sim::comp::Snake *sc = new sim::comp::Snake(snakeJoints);
+		//addComponent(sc);
+		//regMessage(sc,sim::MessageKeyPressed::Type);
 
-        createSSSA();
+        //createSSSA();
     }
 
     void init()
@@ -537,9 +538,25 @@ class SimTestFormace : public sim::Sim {
 
 
     void createSSSARobotClass() {
-        sim::robot::SSSA *sssaRobot = new sim::robot::SSSA(world(),sim::Vec3(5,0,1.2),osg::Vec4(0.7,0.3,0.4,1));
+        sim::robot::SSSA *sssaRobot1 = new sim::robot::SSSA(world(),sim::Vec3(0,  0,0.65),osg::Vec4(0.7,0.3,0.4,1));
+        sim::robot::SSSA *sssaRobot2 = new sim::robot::SSSA(world(),sim::Vec3(1.26,0,0.65),osg::Vec4(0.7,0.3,0.4,1));
+
+        sim::Joint *j = world()->createJointHinge(sssaRobot1->chassis(),sssaRobot2->chassis(),sssaRobot1->chassis()->pos(),sim::Vec3(1,0,0));
+        j->setParamLimitLoHi(-90*M_PI/180,90*M_PI/180);
+        j->activate();
+
+        snakeJoints.push_back(sssaRobot1->armJoint());
+        snakeJoints.push_back(j);
+		
+        
+        sim::comp::Snake *sc = new sim::comp::Snake(snakeJoints);
+		addComponent(sc);
+		regMessage(sc,sim::MessageKeyPressed::Type);
     }
 
+
+
+    /*
     void createSSSA() {
 
         const int posx = 0;
@@ -644,7 +661,7 @@ class SimTestFormace : public sim::Sim {
         armJoint->activate();
 
     }
-
+*/
 
     void createSnake32() {
 
@@ -1326,6 +1343,7 @@ class SimTestFormace : public sim::Sim {
     }
 	*/
 
+    /*
 	void createJezek()
     {
         sim::Body *obj;
@@ -1335,16 +1353,8 @@ class SimTestFormace : public sim::Sim {
         obj->visBody()->setColor(0.4, 1, 0.4, 1.);
         obj->activate();
     }
-/*	
-	void createSurface()
-    {
-        sim::Body *obj;
-        obj = world()->createBodyTriMesh(surface_verts,surface_verts_len,surface_ids,surface_ids_len,0.);
-		obj->setPos(0,0,-2);
-        obj->visBody()->setColor((12*16+12)/255.0, (9*16+9)/255.0, (3*16+3)/255.0, 1.);
-        obj->activate();
-    }
-*/	
+	*/
+	
 	void createPlane()
     {
         sim::Body *obj;
@@ -1359,8 +1369,9 @@ class SimTestFormace : public sim::Sim {
     {
         sim::Body *obj;
 
-        obj = world()->createBodyBox(sim::Vec3(15,15,0.1),0.0);
-		obj->setPos(0,0,0);
+        const double w = 0.1;
+        obj = world()->createBodyBox(sim::Vec3(15,15,w),0.0);
+		obj->setPos(0,0,-w/2);
         obj->visBody()->setColor(0.2, 0.4, 0.4, 1.);
         obj->activate();
     }

@@ -36,7 +36,6 @@ SSSA::SSSA(sim::World *w, const Vec3 &pos,
     _createWheels();
 }
 
-
 void SSSA::socketPosDir(size_t idx, Vec3 *pos, Vec3 *dir) const
 {
     if (idx >= 3)

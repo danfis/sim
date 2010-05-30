@@ -26,6 +26,7 @@ void Snake::init(sim::Sim *sim) {
 		_snakeBodies[i]->setParamVel(0);			
 		_snakeBodies[i]->setParamVel2(0);			
 	}
+
 }
 
 void Snake::finish(){
@@ -72,8 +73,8 @@ void Snake::processMessage(const Message &msg) {
 		for(int i=0;i<(int)_snakeBodies.size();i++) {
 			_snakeBodies[i]->setParamVel(vel1[i]);			
 			_snakeBodies[i]->setParamVel2(vel2[i]);	
-			_snakeBodies[i]->setParamFMax(20);	
-			_snakeBodies[i]->setParamFMax2(20);	
+			_snakeBodies[i]->setParamFMax(40);	
+			_snakeBodies[i]->setParamFMax2(40);	
 			DBG("Joint " << i << ", vel1=" << vel1[i] << ", vel2=" << vel2[i]);	
 		}
 	}	
