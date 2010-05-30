@@ -28,6 +28,11 @@ class SSSA {
 
     sim::robot::SSSA *_sock_conn[3]; //!< Robots connected to sockets
 
+    // noy NULL if the robotis iss connected to the referenced robot
+    sim::robot::SSSA *_socket1_connection;
+    sim::robot::SSSA *_socket2_connection;
+    sim::robot::SSSA *_socket3_connection;
+
   public:
     SSSA(sim::World *w, const sim::Vec3 &pos = sim::Vec3(0., 0., 0.08),
             const osg::Vec4 &chasis_color = osg::Vec4(0., 0.1, 0.7, 0.6));
@@ -84,6 +89,15 @@ class SSSA {
         { return _sock_conn[idx]; }
     sim::robot::SSSA *connectedRobotSocket(size_t idx)
         { return _sock_conn[idx]; }
+
+    /** true if given robot is cconected to this robot */
+    bool isConnectedTo(sim::robot::SSSA *robot) const;
+
+    /** true if given socket is connected to a robot */
+    bool isConnected(const int sockedIdx) const;
+
+    /** returns connected robot on socket 'i' */
+    sim::robot::SSSA *connectedRobot(const int idx) const; 
 
     void activate();
 

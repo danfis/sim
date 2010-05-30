@@ -455,7 +455,7 @@ DumpComp::~DumpComp(){
 
 void DumpComp::init(sim::Sim *sim){
     _sim = sim;
-    sim->regPostStep(this);
+    //sim->regPostStep(this);
 }
 
 void DumpComp::cbPostStep() {
@@ -465,6 +465,8 @@ void DumpComp::cbPostStep() {
     cerr << "Position socket2 = " << s[0] << "," << s[1] << "," << s[2] << "\n";
     s = (_robot->socketPosition(2));
     cerr << "Position socket3 = " << s[0] << "," << s[1] << "," << s[2] << "\n";
+    s = (_robot->armPosition());
+    cerr << "Arm position = " << s[0] << "," << s[1] << "," << s[2] << "\n";
 }
 
 
@@ -483,19 +485,19 @@ class SimTestFormace : public sim::Sim {
         setWorld(w);
 //        w->setCFM(1e-3);
 //      w->setCFM(0.01);
-        w->setERP(0.5);
+        w->setERP(0.8);
         //w->setContactSoftCFM(0.0000001);
         //w->setContactApprox1(false);
         //w->setContactApprox2(false);
         //w->setContactBounce(0.1, 0.1);
     
+/*
         
         sim::Body *b;
         b = w->createBodyBox(sim::Vec3(1, 1, 1.), 0);
         b->visBody()->setColor(osg::Vec4(1,0.8,0.4, 1.));
         b->setPos(3, 0, 0.7);
         b->activate();
-/*
 		b = w->createBodyBox(sim::Vec3(3., 2., 1.), 1.8);
         b->visBody()->setColor(osg::Vec4(1.0, 0.63, 0.32, 1.));
         b->setPos(-3, 4., 5);
@@ -543,8 +545,8 @@ class SimTestFormace : public sim::Sim {
 
         createSSSARobotClass();
 
-//		sim::comp::Povray *pc = new sim::comp::Povray("povray/");
-//		addComponent(pc);
+		sim::comp::Povray *pc = new sim::comp::Povray("povray/");
+		addComponent(pc);
 
 
 		//sim::comp::Snake *sc = new sim::comp::Snake(snakeJoints);
@@ -573,6 +575,7 @@ class SimTestFormace : public sim::Sim {
     void createSSSARobotClass() {
 
         const double posz = 0.60;
+        //const double posz = 0.9;
         sim::robot::SSSA *sssaRobot1 = new sim::robot::SSSA(world(),sim::Vec3(0,  0,posz),osg::Vec4(0.7,0.3,0.4,1));
         sim::robot::SSSA *sssaRobot2 = new sim::robot::SSSA(world(),sim::Vec3(1.26,0,posz),osg::Vec4(0.7,0.3,0.4,1));
 

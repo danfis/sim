@@ -340,6 +340,42 @@ sim::Vec3 SSSA::armPosition() const {
 }
 
 
+
+bool SSSA::isConnectedTo(sim::robot::SSSA *robot) const {
+    if (robot && (_socket1_connection == robot || _socket2_connection == robot || _socket3_connection == robot)) {
+        return true;
+    }
+    return false;
+}
+
+bool SSSA::isConnected(const int idx) const {
+    if (idx == 0 && _socket1_connection) {
+        return true;
+    }
+    if (idx == 1 && _socket2_connection) {
+        return true;
+    }
+
+    if (idx == 2 && _socket3_connection) {
+        return true;
+    }
+    return false;
+}
+
+sim::robot::SSSA *SSSA::connectedRobot(const int idx) const {
+    if (idx == 0) {
+        return _socket1_connection;
+    } else if (idx == 1) {
+        return _socket2_connection;
+    } else if (idx == 2) {
+        return _socket3_connection;
+    }
+    return NULL;
+}
+
+
+
+
 }
 
 }
