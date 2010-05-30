@@ -24,6 +24,8 @@
 #include "sssa/sssa_passive_wheel.hpp"
 #include "sssa/sssa_passive_wheel90.hpp"
 
+#include "sim/robot/sssa.hpp"
+
 int counter = 0;
 #define intro counter++; if (id == -1) std::cerr << counter << " :"<< __FUNCTION__ << "\n"; if (id != counter) return;
 
@@ -500,9 +502,12 @@ class SimTestFormace : public sim::Sim {
 //		createSnake3();
 //		createSnake32();
 
+
+
  //       createMaze();
 
 
+        createSSSARobotClass();
 
 //		sim::comp::Povray *pc = new sim::comp::Povray("povray/");
 //		addComponent(pc);
@@ -531,14 +536,21 @@ class SimTestFormace : public sim::Sim {
   protected:
 
 
+    void createSSSARobotClass() {
+        sim::robot::SSSA *sssaRobot = new sim::robot::SSSA(world(),sim::Vec3(5,0,1.2),osg::Vec4(0.7,0.3,0.4,1));
+    }
+
     void createSSSA() {
 
         const int posx = 0;
         const int posy = 0;
-        const int posz = 1;
+        const int posz = 1.63;
+
+        const sim::Quat rotation(sim::Vec3(0,1,0),M_PI/2);
 
         sim::Body *body = world()->createBodyTriMesh(sssa_body_verts,sssa_body_verts_len,sssa_body_ids,sssa_body_ids_len,0.2);
 		body->setPos(posx, posy, posz);
+        body->setRot(rotation);
         body->visBody()->setColor(1, 0, 0.4, 1.);
         body->activate();
 		body->collSetDontCollideId(2);
@@ -546,7 +558,7 @@ class SimTestFormace : public sim::Sim {
 
 
         // loading wheels
-        if (1) {
+        if (0) {
             // active wheel 1
             sim::Body *wheel = world()->createBodyTriMesh(sssa_active_wheel_verts,sssa_active_wheel_verts_len,sssa_active_wheel_ids,sssa_active_wheel_ids_len,0.05);
 	    	wheel->setPos(posx+0.395,posy+0.351,posz+0.24);
@@ -622,11 +634,13 @@ class SimTestFormace : public sim::Sim {
         sim::Body *arm = world()->createBodyTriMesh(sssa_arm_verts,sssa_arm_verts_len,sssa_arm_ids,sssa_arm_ids_len,0.4);
 		arm->setPos(posx, posy, posz);
         arm->visBody()->setColor(0.3, 0.2, 0.7, 1.);
+        arm->setRot(rotation);
         arm->activate();
 		arm->collSetDontCollideId(2);
 
         sim::Joint *armJoint = world()->createJointHinge(body, arm, 
                 sim::Vec3(posx+0, posy+0, posz+0), sim::Vec3(0., 1., 0.));
+        armJoint->setParamLimitLoHi(-90*M_PI/2,90*M_PI/2);
         armJoint->activate();
 
     }
