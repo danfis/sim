@@ -30,17 +30,11 @@ class VisWorld {
     osg::ref_ptr<osg::Group> _g_bodies; //!< Group of VisBodies
     osg::ref_ptr<osg::Group> _lights;
 
+    osg::ref_ptr<osg::Switch> _coord_frame;
+
     std::list<VisBody *> _bodies;
 
-	osg::ref_ptr<osg::Node> _axisX;
-	osg::ref_ptr<osg::Node> _axisY;
-	osg::ref_ptr<osg::Node> _axisZ;
     bool _window; /*!< Show a window? */
-	bool _axisCreated;
-//	osg::Node *_axisX;
-//	osg::Node *_axisY;
-//	osg::Node *_axisZ;
-
 
   public:
     VisWorld();
@@ -100,6 +94,7 @@ class VisWorld {
     void _setUpStateSet();
     void _setUpLights();
 
+    void _createCoordFrame();
 
 };
 
