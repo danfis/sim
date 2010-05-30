@@ -3,7 +3,7 @@
 #include <sim/ode/world.hpp>
 #include <sim/msg.hpp>
 #include <sim/sensor/camera.hpp>
-#include <osgUtil/LineSegmentIntersector>
+#include <sim/sensor/rangefinder.hpp>
 
 using namespace sim::ode;
 using sim::Scalar;
@@ -13,68 +13,6 @@ using sim::Time;
 using namespace std;
 
 
-class Inter : public sim::Component {
-    sim::Sim *_sim;
-    Vec3 _from, _to;
-    osg::ref_ptr<osgUtil::LineSegmentIntersector> _inter;
-    osg::ref_ptr<osgUtil::IntersectionVisitor> _inter_vis;
-
-  public:
-    Inter(const Vec3 &f, const Vec3 &to)
-        : sim::Component(),
-          _from(f), _to(to)
-    {
-    }
-
-    void init(sim::Sim *sim){
-        _sim = sim;
-
-        _inter = new osgUtil::LineSegmentIntersector(_from, _to);
-        _inter_vis = new osgUtil::IntersectionVisitor(_inter);
-
-        _sim->regPreStep(this);
-
-        {
-            sim::Body *b;
-
-            b = _sim->world()->createBodyCube(0.01, 0.);
-            b->visBody()->setColor(0., 1., 0., 1.);
-            b->setPos(_from + ((_from - _to) * 0.1));
-            b->activate();
-
-            b = _sim->world()->createBodyCube(0.01, 0.);
-            b->visBody()->setColor(0., 1., 0., 1.);
-            b->setPos(_to);
-            b->activate();
-        }
-    }
-
-    void cbPreStep()
-    {
-        static unsigned long c = 0;
-
-        if (c > 10)
-            return;
-
-        _sim->visWorld()->sceneRoot()->accept(*_inter_vis.get());
-
-        if (_inter->containsIntersections()){
-            DBG(DBGV(_inter->getFirstIntersection().getWorldIntersectPoint()));
-
-            {
-                sim::VisBody *b = new sim::VisBodyCube(0.01);
-                char a[100];
-                sprintf(a, "%ld", c);
-
-                b->setPos(_inter->getFirstIntersection().getWorldIntersectPoint());
-                b->setText(a, 0.1);
-                b->setColor(1., 0., 0., 1.);
-                _sim->visWorld()->addBody(b);
-            }
-            c++;
-        }
-    }
-};
 
 class S : public sim::Sim {
   public:
@@ -180,10 +118,16 @@ class S : public sim::Sim {
 
     void createIntersectors()
     {
-        Inter *inter;
+        sim::sensor::RangeFinder *rf;
 
-        inter = new Inter(Vec3(0., 0., 0.2), Vec3(5., 0., 0.2));
-        addComponent(inter);
+        //rf = new sim::sensor::RangeFinder(80., 181, M_PI);
+        rf = new sim::sensor::RangeFinder(80., 181, M_PI);
+        //rf->setPosRot(Vec3(0., 0., 0.2), Quat(Vec3(1., 0., 0.), M_PI / 4.));
+        rf->setPosRot(Vec3(0., 0., 0.2));
+        rf->setPosRot(Vec3(0., 0., 0.2), Quat(Vec3(0., 0., 1.), M_PI / 4.));
+        rf->setPosRot(Vec3(0., 0., 0.2), Quat(Vec3(0., 0., 1.), -M_PI / 4.));
+        rf->setPosRot(Vec3(0., 0., 0.2), Quat(Vec3(1., 0., 0.), M_PI / 4.));
+        addComponent(rf);
     }
 };
 

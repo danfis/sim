@@ -19,7 +19,7 @@ endif
 TARGETS = libsim.a
 OBJS = visbody.o visworld.o body.o joint.o sim.o component.o message.o \
        time.o visworldmanip.o
-OBJS += sensor/camera.o
+OBJS += sensor/camera.o sensor/rangefinder.o
 OBJS += comp/povray.o
 OBJS += robot/syrotek.o
 
