@@ -1,0 +1,7 @@
+how to prepare .3ds files for simulator
+1. load them to blender using 3d_importNoScale.py script.
+2. rotate/translate as you wish
+3. ctrl+a to ALL meshes
+4. export mesher to RAW if the bodies are ZERO positian an rotation
+5. save to a file their locations/rotations
+
