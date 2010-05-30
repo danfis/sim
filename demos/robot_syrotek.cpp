@@ -1,6 +1,7 @@
 #include "robot_syrotek.hpp"
 #include <sim/msg.hpp>
 #include <sim/sensor/camera.hpp>
+#include <sim/sensor/rangefinder.hpp>
 using sim::Vec3;
 using sim::Quat;
 using sim::Scalar;
@@ -34,6 +35,11 @@ void RobotSyrotekComp::init(sim::Sim *sim)
     cam->enableDump("cam-syrotek/");
     cam->enableView();
     sim->addComponent(cam);
+
+    sim::sensor::RangeFinder *range = new sim::sensor::RangeFinder(1., 181, M_PI / 2.);
+    range->attachToBody(_robot->chasis(), Vec3(0.13, 0., 0.05));
+    range->enableVis();
+    sim->addComponent(range);
 
     _robot->activate();
 
