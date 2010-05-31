@@ -14,6 +14,7 @@ LIBDEPS_ODE = ../src/libsim.a ../src/ode/libsim-ode.a
 OBJS_SYROTEK = demo_syrotek.cpp robot_syrotek.cpp
 OBJS_FOLLOW_COLOR = demo_follow_color.cpp robot_syrotek.cpp
 OBJS_INTERSECTION = demo_intersection.cpp
+OBJS_SSSA = demo_sssa.cpp robot_sssa.cpp
 
 TARGETS =
 
@@ -27,6 +28,7 @@ ifeq '$(WANT_ODE)' 'yes'
   TARGETS += demo_follow_color
   TARGETS += main
   TARGETS += demo_intersection
+  TARGETS += demo_sssa
 endif
 
 all: $(TARGETS)
@@ -50,6 +52,8 @@ demo_follow_color: $(OBJS_FOLLOW_COLOR) $(LIBDEPS_ODE)
 	$(CXX) $(CXXFLAGS_ODE) $(SDL_CXXFLAGS) -o $@ $(OBJS_FOLLOW_COLOR) $(LDFLAGS_ODE) $(SDL_LDFLAGS)
 demo_intersection: $(OBJS_INTERSECTION) $(LIBDEPS_ODE)
 	$(CXX) $(CXXFLAGS_ODE) -o $@ $(OBJS_INTERSECTION) $(LDFLAGS_ODE)
+demo_sssa: $(OBJS_SSSA) $(LIBDEPS_ODE)
+	$(CXX) $(CXXFLAGS_ODE) $(SDL_CXXFLAGS) -o $@ $(OBJS_SSSA) $(LDFLAGS_ODE) $(SDL_LDFLAGS)
 
 
 clean:
