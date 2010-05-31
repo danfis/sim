@@ -251,12 +251,16 @@ class Sim {
      * (see Component::cbPreStep()).
      */
     std::list<Component *> _cs_pre;
+    std::list<Component *> _cs_pre_to_unreg; //!< List of components meant to unregister
 
     /**
      * List of components registered for postStep callback
      * (see Component::cbPostStep()).
      */
     std::list<Component *> _cs_post;
+    std::list<Component *> _cs_post_to_unreg;
+
+    bool _in_cb; //!< True if in _cbPostStep()/_cbPreStep() methods
 
     SimComponentMessageRegistry _reg;
 
@@ -453,6 +457,8 @@ class Sim {
      * Deliver all messages to Components.
      */
     void _cbMessages();
+
+    void _unregPending();
 };
 
 }

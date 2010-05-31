@@ -157,6 +157,7 @@ void SimComponentMessageRegistry::deliverAssignedMessages(Component *c,
 
 Sim::Sim(World *world, VisWorld *visworld)
     : _world(world), _visworld(visworld),
+      _in_cb(false),
       _time_step(0, 20000000), _time_substeps(10),
       _vis_time_step(0, 50000000),
       _simulate(true), _simulate_real(true),
@@ -447,8 +448,10 @@ void Sim::regPreStep(Component *c)
 
 void Sim::unregPreStep(Component *c)
 {
-    if (_hasPreStep(c)){
+    if (!_in_cb && _hasPreStep(c)){
         _cs_pre.remove(c);
+    }else if (_in_cb){
+        _cs_pre_to_unreg.push_back(c);
     }
 }
 
@@ -461,8 +464,10 @@ void Sim::regPostStep(Component *c)
 
 void Sim::unregPostStep(Component *c)
 {
-    if (_hasPostStep(c)){
+    if (!_in_cb && _hasPostStep(c)){
         _cs_post.remove(c);
+    }else if (_in_cb){
+        _cs_post_to_unreg.push_back(c);
     }
 }
 
@@ -536,6 +541,7 @@ bool Sim::_isComponentInList(const Component *c,
 
 void Sim::_cbPreStep()
 {
+    _in_cb = true;
     for_each(cit_t, _cs_pre){
         (*it)->cbPreStep();
 
@@ -543,10 +549,14 @@ void Sim::_cbPreStep()
             _initComponents();
         }
     }
+    _in_cb = false;
+
+    _unregPending();
 }
 
 void Sim::_cbPostStep()
 {
+    _in_cb = true;
     for_each(cit_t, _cs_post){
         (*it)->cbPostStep();
 
@@ -554,6 +564,9 @@ void Sim::_cbPostStep()
             _initComponents();
         }
     }
+    _in_cb = false;
+
+    _unregPending();
 }
 
 void Sim::_cbMessages()
@@ -562,6 +575,21 @@ void Sim::_cbMessages()
 
     if (_cs_uninit.size() > 0){
         _initComponents();
+    }
+}
+
+void Sim::_unregPending()
+{
+    if (_cs_pre_to_unreg.size() > 0){
+        for_each(cit_t, _cs_pre_to_unreg){
+            unregPreStep(*it);
+        }
+    }
+
+    if (_cs_post_to_unreg.size() > 0){
+        for_each(cit_t, _cs_post_to_unreg){
+            unregPostStep(*it);
+        }
     }
 }
 
