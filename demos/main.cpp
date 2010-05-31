@@ -459,6 +459,7 @@ void DumpComp::init(sim::Sim *sim){
 }
 
 void DumpComp::cbPostStep() {
+    /*
     sim::Vec3 s(_robot->socketPosition(0));
     cerr << "Position socket1 = " << s[0] << "," << s[1] << "," << s[2] << "\n";
     s = (_robot->socketPosition(1));
@@ -467,6 +468,7 @@ void DumpComp::cbPostStep() {
     cerr << "Position socket3 = " << s[0] << "," << s[1] << "," << s[2] << "\n";
     s = (_robot->armPosition());
     cerr << "Arm position = " << s[0] << "," << s[1] << "," << s[2] << "\n";
+    */
 }
 
 
@@ -530,7 +532,7 @@ class SimTestFormace : public sim::Sim {
 		//createArdrone();
 	//	createJezek();
 	//	createPlane();
-		createPlane();
+	//	createPlane();
         createBoxPlane();
 //		createSurface();
 //		createRobotCarlike();
@@ -543,10 +545,10 @@ class SimTestFormace : public sim::Sim {
  //       createMaze();
 
 
-        createSSSARobotClass();
+  //      createSSSARobotClass();
 
-		sim::comp::Povray *pc = new sim::comp::Povray("povray/");
-		addComponent(pc);
+	//	sim::comp::Povray *pc = new sim::comp::Povray("povray/");
+	//	addComponent(pc);
 
 
 		//sim::comp::Snake *sc = new sim::comp::Snake(snakeJoints);
@@ -571,7 +573,7 @@ class SimTestFormace : public sim::Sim {
 
   protected:
 
-
+/*
     void createSSSARobotClass() {
 
         const double posz = 0.60;
@@ -593,7 +595,7 @@ class SimTestFormace : public sim::Sim {
 		addComponent(sc);
 		regMessage(sc,sim::MessageKeyPressed::Type);
     }
-
+*/
 
 
     /*

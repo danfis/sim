@@ -36,6 +36,7 @@ SSSA::SSSA(sim::World *w, const Vec3 &pos,
     _createWheels();
 }
 
+
 void SSSA::socketPosDir(size_t idx, Vec3 *pos, Vec3 *dir) const
 {
     if (idx >= 3)
@@ -99,6 +100,7 @@ int SSSA::canConnectTo(const sim::robot::SSSA &robot) const
         dist = (ball_pos - pos).length();
         if (dist > max_dist)
             continue;
+
 
         // compute rotational difference as rotation from ball's direction
         // vector to socket direction vector - this is reason why is
@@ -298,82 +300,7 @@ void SSSA::_createWheels()
         }
     } // if make wheel
 #endif
-
 }
-
-/** return true if two robots can be connected.
-  * they can be conected if:
-  *  - current robot is not connected to other robot (_linkJoint == NULL) AND
-  *  - other robot is proper oriented and close enough 
-  */
-bool SSSA::canConnect(sim::robot::SSSA *robot) const {
-
-    for(int i=0;i<3;i++) {
-        sim::Vec3 otherSocket = robot->socketPosition(0);
-    }
-    return false;
-}
-
-    /** connects two robots */
-int SSSA::connect(sim::robot::SSSA *robot) {
-    return 0;
-}
-
-sim::Vec3 SSSA::socketPosition(const int idx) {
-    sim::Vec3 result;
-    if (idx == 0) {
-        result = _chasis->rot()*_socket1;
-    } else if (idx == 1) {
-        result = _chasis->rot()*_socket2;
-    } else {
-        result = _chasis->rot()*_socket3;
-    }
-
-    result += _chasis->pos();
-    return result;
-}
-
-sim::Vec3 SSSA::armPosition() const {
-    sim::Vec3 result = _chasis->rot()*(_arm->rot()*_armEnd);
-    result += _chasis->pos();
-    return result;
-}
-
-
-
-bool SSSA::isConnectedTo(sim::robot::SSSA *robot) const {
-    if (robot && (_socket1_connection == robot || _socket2_connection == robot || _socket3_connection == robot)) {
-        return true;
-    }
-    return false;
-}
-
-bool SSSA::isConnected(const int idx) const {
-    if (idx == 0 && _socket1_connection) {
-        return true;
-    }
-    if (idx == 1 && _socket2_connection) {
-        return true;
-    }
-
-    if (idx == 2 && _socket3_connection) {
-        return true;
-    }
-    return false;
-}
-
-sim::robot::SSSA *SSSA::connectedRobot(const int idx) const {
-    if (idx == 0) {
-        return _socket1_connection;
-    } else if (idx == 1) {
-        return _socket2_connection;
-    } else if (idx == 2) {
-        return _socket3_connection;
-    }
-    return NULL;
-}
-
-
 
 
 }
