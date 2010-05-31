@@ -55,19 +55,19 @@ class S : public sim::Sim {
         sim::ode::World *w = (sim::ode::World *)world();
 
         c = (BodyCompound *)w->createBodyCompound();
-        id = c->addBox(Vec3(5., 5., 0.1));
+        id = c->addBox(Vec3(10., 10., 0.1));
         c->visBody(id)->setColor(color);
         c->visBody(id)->setTexture("wood.ppm");
-        id = c->addBox(Vec3(0.1, 5., 0.5), SIM_BODY_DEFAULT_VIS, Vec3(-2.5, 0., .25));
+        id = c->addBox(Vec3(0.1, 10., 0.5), SIM_BODY_DEFAULT_VIS, Vec3(-5, 0., .25));
         c->visBody(id)->setColor(color);
         c->visBody(id)->setTexture("wood.ppm");
-        id = c->addBox(Vec3(0.1, 5., 0.5), SIM_BODY_DEFAULT_VIS, Vec3(2.5, 0., .25));
+        id = c->addBox(Vec3(0.1, 10., 0.5), SIM_BODY_DEFAULT_VIS, Vec3(5, 0., .25));
         c->visBody(id)->setColor(color);
         c->visBody(id)->setTexture("wood.ppm");
-        id = c->addBox(Vec3(5., .1, 0.3), SIM_BODY_DEFAULT_VIS, Vec3(0., 2.5, .25));
+        id = c->addBox(Vec3(10., .1, 0.3), SIM_BODY_DEFAULT_VIS, Vec3(0., 5, .25));
         c->visBody(id)->setColor(color);
         c->visBody(id)->setTexture("wood.ppm");
-        id = c->addBox(Vec3(5., .1, 0.3), SIM_BODY_DEFAULT_VIS, Vec3(0., -2.5, .25));
+        id = c->addBox(Vec3(10., .1, 0.3), SIM_BODY_DEFAULT_VIS, Vec3(0., -5, .25));
         c->visBody(id)->setColor(color);
         c->visBody(id)->setTexture("wood.ppm");
 
@@ -75,28 +75,17 @@ class S : public sim::Sim {
         c->visBody(id)->setColor(0., .1, .8, 1.);
         c->visBody(id)->setTexture("wood.ppm");
         c->activate();
-
-        {
-            sim::Body *b;
-
-            b = w->createBodyCube(0.1, 0.1);
-            b->setPos(0., 0., 1.);
-            b->activate();
-
-            /*
-            b = w->createBodySphere(0.1, 0.1);
-            b->setPos(0.35, 0.4, .5);
-            b->activate();
-            */
-        }
     }
 
     void createRobot()
     {
         SSSAComp *comp;
+        comp = new SSSAComp(Vec3(0., 0, 1.5));
+        addComponent(comp);
 
-        comp = new SSSAComp();
-
+        comp = new SSSAComp(Vec3(1.2, 1.2, 1.5));
+        addComponent(comp);
+        comp = new SSSAComp(Vec3(1.2, 2.3, 1.5));
         addComponent(comp);
     }
 

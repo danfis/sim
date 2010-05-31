@@ -9,12 +9,14 @@ class SSSAComp : public sim::Component {
     sim::Sim *_sim;
 
     sim::robot::SSSA *_robot;
+    sim::Vec3 _pos;
 
   public:
-    SSSAComp();
+    SSSAComp(const sim::Vec3 &pos);
 
     void init(sim::Sim *sim);
     void finish();
+    void cbPostStep();
 };
 
 #endif
