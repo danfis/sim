@@ -2,10 +2,8 @@
 #include <sim/sim.hpp>
 #include <sim/ode/world.hpp>
 #include <sim/msg.hpp>
-#include <sim/sensor/camera.hpp>
 #include <sim/comp/povray.hpp>
-
-#include "robot_syrotek.hpp"
+#include <sim/comp/syrotek.hpp>
 
 using namespace sim::ode;
 using sim::Scalar;
@@ -14,51 +12,52 @@ using sim::Quat;
 using sim::Time;
 using namespace std;
 
-class FollowComp : public sim::Component {
-    sim::Sim *_sim;
-    sim::robot::Syrotek *_robot;
-    sim::sensor::Camera *_cam;
-    osg::Vec4 _ref_color;
+static bool dump = false;
 
+class Leader : public sim::comp::Syrotek {
   public:
-    FollowComp()
-        : sim::Component(),
-          _sim(0), _robot(0), _cam(0),
-          _ref_color(0.7, 0.1, 0., 0.6)
+    Leader(const sim::Vec3 &pos)
+        : sim::comp::Syrotek(pos)
     {
-    }
-
-    ~FollowComp()
-    {
-        if (_robot)
-            delete _robot;
     }
 
     void init(sim::Sim *sim)
     {
-        DBG("");
-        Vec3 pos(-0.2, 0., 0.08);
+        sim::comp::Syrotek::init(sim);
+        _useKeyboard();
+        _useJoystick();
+        _useCamera(200, 200);
+        cam()->enableView();
 
-        _sim = sim;
-        _robot = new sim::robot::Syrotek(_sim->world(), pos);
+        if (dump)
+            cam()->enableDump("cam-leader/");
+    }
+};
 
-        _cam = new sim::sensor::Camera;
-        //cam->attachToBody(_robot->chasis(), Vec3(0.13, 0., 0.18), Quat(Vec3(0., 0., 1.), M_PI / 2.));
-        _cam->attachToBody(_robot->chasis(), Vec3(0.13, 0., 0.15), Quat(Vec3(0., 1., 0.), M_PI / 4.));
-        _cam->visBodyEnable();
-        _cam->setWidthHeight(300, 300);
-        _cam->setBgColor(0., 0., 0., 1.);
-        _cam->enableDump("cam/");
-        _cam->enableView();
-        sim->addComponent(_cam);
+class Follower : public sim::comp::Syrotek {
+    osg::Vec4 _ref_color;
 
-        _robot->activate();
-
-        _sim->regPreStep(this);
+  public:
+    Follower(const Vec3 &pos, const sim::comp::Syrotek *leader)
+        : sim::comp::Syrotek(pos, osg::Vec4(0., 0.1, 0.7, 0.7)),
+          _ref_color(leader->color())
+    {
+        DBG(DBGV(_ref_color));
     }
 
-    void finish()
+    void init(sim::Sim *s)
     {
+        sim::comp::Syrotek::init(s);
+
+        _useCamera(300, 300);
+        cam()->enableView();
+        cam()->attachToBody(robot()->chasis(), Vec3(0.13, 0., 0.15),
+                            Quat(Vec3(0., 1., 0.), M_PI / 4.));
+
+        if (dump)
+            cam()->enableDump("cam-follower/");
+
+        sim()->regPreStep(this);
     }
 
     Scalar _evalPixel(const osg::Vec4 &color)
@@ -110,7 +109,7 @@ class FollowComp : public sim::Component {
 
     void cbPreStep()
     {
-        osg::Image *image = _cam->image();
+        osg::Image *image = cam()->image();
 
         if (!image->valid())
             return;
@@ -128,8 +127,8 @@ class FollowComp : public sim::Component {
         vright += (-mean.x() / 2.) * ko;
         //DBG("v: " << vleft << " " << vright);
 
-        _robot->setVelLeft(vleft);
-        _robot->setVelRight(vright);
+        robot()->setVelLeft(vleft);
+        robot()->setVelRight(vright);
     }
 };
 
@@ -155,11 +154,12 @@ class S : public sim::Sim {
         w->setContactBounce(0.1, 0.1);
 
         createArena();
-        createRobot();
-        createFollower();
+        createRobots();
 
-        sim::comp::Povray *pov = new sim::comp::Povray("povray/");
-        addComponent(pov);
+        if (dump){
+            sim::comp::Povray *pov = new sim::comp::Povray("povray/");
+            addComponent(pov);
+        }
     }
 
     void createArena()
@@ -239,24 +239,22 @@ class S : public sim::Sim {
         }
     }
 
-    void createRobot()
+    void createRobots()
     {
-        RobotSyrotekComp *comp;
-
-        comp = new RobotSyrotekComp();
-
-        addComponent(comp);
+        Leader *leader = new Leader(Vec3(0., 0., 0.08));
+        addComponent(leader);
+        Follower *fol = new Follower(Vec3(-0.2, 0., 0.08), leader);
+        addComponent(fol);
     }
-
-    void createFollower()
-    {
-        addComponent(new FollowComp());
-    }
-
 };
 
 int main(int argc, char *argv[])
 {
+    if (argc > 1){
+        if (strcmp(argv[1], "--dump") == 0)
+            dump = true;
+    }
+
     S s;
 
     s.run();

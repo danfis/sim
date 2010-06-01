@@ -2,15 +2,34 @@
 #include <sim/sim.hpp>
 #include <sim/ode/world.hpp>
 #include <sim/msg.hpp>
-#include <sim/sensor/camera.hpp>
-
+#include <sim/comp/syrotek.hpp>
 #include "sim/comp/povray.hpp"
-#include "robot_syrotek.hpp"
 
 using namespace sim::ode;
 using sim::Vec3;
 using sim::Time;
 using namespace std;
+
+static bool use_cam = false;
+
+class Syrotek : public sim::comp::Syrotek {
+  public:
+    Syrotek(const sim::Vec3 &pos)
+        : sim::comp::Syrotek(pos)
+    {
+    }
+
+    void init(sim::Sim *sim)
+    {
+        sim::comp::Syrotek::init(sim);
+        _useKeyboard();
+
+        if (use_cam){
+            _useCamera(100, 100);
+            cam()->enableView();
+        }
+    }
+};
 
 class S : public sim::Sim {
   public:
@@ -41,21 +60,6 @@ class S : public sim::Sim {
 		regPostStep(pc);
 
 
-    }
-
-    void init()
-    {
-        sim::Sim::init();
-        /*
-        for (size_t i = 0; i < 300; i++){
-            visWorld()->step();
-            std::cerr << i << "\r";
-            usleep(10000);
-        }
-        std::cerr << std::endl;
-
-        timeRealRestart();
-        */
     }
 
     void createArena()
@@ -102,10 +106,7 @@ class S : public sim::Sim {
 
     void createRobot()
     {
-        RobotSyrotekComp *comp;
-
-        comp = new RobotSyrotekComp();
-
+        Syrotek *comp = new Syrotek(Vec3(0., 0., 0.08));
         addComponent(comp);
     }
 
@@ -113,8 +114,13 @@ class S : public sim::Sim {
 
 int main(int argc, char *argv[])
 {
-    S s;
+    if (argc > 1){
+        if (strcmp(argv[1], "--cam") == 0){
+            use_cam = true;
+        }
+    }
 
+    S s;
     s.run();
 
     return 0;
