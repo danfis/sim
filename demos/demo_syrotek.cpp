@@ -11,6 +11,7 @@ using sim::Time;
 using namespace std;
 
 static bool use_cam = false;
+static bool use_rf = false;
 
 class Syrotek : public sim::comp::Syrotek {
   public:
@@ -23,10 +24,15 @@ class Syrotek : public sim::comp::Syrotek {
     {
         sim::comp::Syrotek::init(sim);
         _useKeyboard();
+        _useJoystick();
 
         if (use_cam){
             _useCamera(100, 100);
             cam()->enableView();
+        }
+
+        if (use_rf){
+            _useRangeFinder();
         }
     }
 };
@@ -114,9 +120,19 @@ class S : public sim::Sim {
 
 int main(int argc, char *argv[])
 {
-    if (argc > 1){
-        if (strcmp(argv[1], "--cam") == 0){
+    for (int i = 1; i < argc; i++){
+        if (strcmp(argv[i], "--cam") == 0){
             use_cam = true;
+        }else if (strcmp(argv[i], "--rf") == 0){
+            use_rf = true;
+        }else if (strcmp(argv[i], "--help") == 0){
+            printf("%s [OPTIONS]\n", argv[0]);
+            printf("  OPTIONS:\n");
+            printf("    --help  Print out this help\n");
+            printf("    --cam   Turn on camera sensor\n");
+            printf("    --rf    Turn on range finder sensor\n");
+            printf("\n");
+            return -1;
         }
     }
 

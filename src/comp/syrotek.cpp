@@ -99,8 +99,8 @@ void Syrotek::_useCamera(int width, int height)
 void Syrotek::_useRangeFinder()
 {
 
-    _range_finder = new sim::sensor::RangeFinder(1., 181, M_PI / 2.);
-    _range_finder->attachToBody(_robot->chasis(), Vec3(0.13, 0., 0.05));
+    _range_finder = new sim::sensor::RangeFinder(1., 181, M_PI);
+    _range_finder->attachToBody(_robot->chasis(), Vec3(0.12, 0., 0.05));
     _range_finder->enableVis();
     _sim->addComponent(_range_finder);
 }

@@ -142,6 +142,22 @@ void RangeFinder::_createVis()
 
         _vis->addChild(tr);
     }
+
+    box = new osg::Box(Vec3(0., 0., 0.), size);
+
+    draw = new osg::ShapeDrawable(box);
+    draw->setColor(osg::Vec4(0., 0., 0., 1.));
+
+    geode = new osg::Geode;
+    geode->addDrawable(draw);
+
+    tr = new osg::PositionAttitudeTransform;
+    tr->setAttitude(Quat(0., 0., 0, 1.));
+    tr->setPosition(Vec3(0., 0., 0.));
+
+    tr->addChild(geode);
+
+    _vis->addChild(tr);
 }
 
 
@@ -151,8 +167,8 @@ void RangeFinder::_updatePosition()
     Quat rot;
 
     if (_body){
-        pos = _offset_pos + _body->pos();
         rot = _offset_rot * _body->rot();
+        pos = (rot * _offset_pos) + _body->pos();
     }else{
         pos = _offset_pos;
         rot = _offset_rot;
@@ -173,7 +189,6 @@ void RangeFinder::_updatePosition()
         to = Quat(Vec3(0., 0., 1.), angle) * to_dir;
 
         from += pos;
-        from = rot * from;
         to += pos;
         to = rot * to;
 
@@ -200,6 +215,13 @@ void RangeFinder::_updateVis()
             draw->setColor(osg::Vec4(1., 0., 1., 1.));
         }
     }
+
+
+    osgUtil::LineSegmentIntersector *is;
+    osgUtil::IntersectorGroup::Intersectors &its = _intersectors->getIntersectors();
+    is = (osgUtil::LineSegmentIntersector *)its[0].get();
+    tr = (osg::PositionAttitudeTransform *)_vis->getChild(_num_beams);
+    tr->setPosition(is->getStart());
 }
 
 }
