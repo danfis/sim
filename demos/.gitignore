@@ -1,10 +1,4 @@
-demo
-demo[0-9]
-demo*_ode
-demo*_bt
-demo_syrotek
-demo_follow_color
+demo*
+!*.cpp
 main
-demo_intersection
-demo_sssa
 

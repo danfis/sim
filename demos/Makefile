@@ -26,8 +26,8 @@ ifeq '$(WANT_ODE)' 'yes'
 #  TARGETS += main
   TARGETS += demo_intersection
   TARGETS += demo_sssa
-#  TARGETS += demo_movement_tunning
-#  TARGETS += demo_pso
+  TARGETS += demo_movement_tunning
+  TARGETS += demo_pso
 endif
 
 all: $(TARGETS)

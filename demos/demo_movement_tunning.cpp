@@ -26,7 +26,6 @@ class SimMovementTunning : public sim::Sim {
         setTimeStep(sim::Time::fromMs(20));
         setTimeSubSteps(2);
         World *w = new World();
-        sim::Body *b;
         setWorld(w);
 //        w->setCFM(1e-3);
 //      w->setCFM(0.01);
