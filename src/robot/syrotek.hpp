@@ -27,6 +27,10 @@ class Syrotek {
     const sim::Body *chasis() const { return _chasis; }
     sim::Body *chasis() { return _chasis; }
 
+    void setColor(const osg::Vec4 &color);
+    void setColor(Scalar r, Scalar g, Scalar b, Scalar a = 1.)
+        { setColor(osg::Vec4(r, g, b, a)); }
+
     void activate();
 
     void setVelLeft(sim::Scalar vel);

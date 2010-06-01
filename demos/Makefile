@@ -25,6 +25,7 @@ ifeq '$(WANT_ODE)' 'yes'
   TARGETS += demo_follow_color
 #  TARGETS += main
   TARGETS += demo_intersection
+  TARGETS += demo_chameleon
   TARGETS += demo_sssa
   TARGETS += demo_movement_tunning
   TARGETS += demo_pso
@@ -53,6 +54,9 @@ demo_follow_color: demo_follow_color.cpp $(LIBDEPS_ODE)
 
 demo_intersection: demo_intersection.cpp $(LIBDEPS_ODE)
 	$(CXX) $(CXXFLAGS_ODE) -o $@ $< $(LDFLAGS_ODE)
+
+demo_chameleon: demo_chameleon.cpp $(LIBDEPS_ODE)
+	$(CXX) $(CXXFLAGS_ODE) $(SDL_CXXFLAGS) -o $@ $< $(LDFLAGS_ODE) $(SDL_LDFLAGS)
 
 demo_sssa: $(OBJS_SSSA) $(LIBDEPS_ODE)
 	$(CXX) $(CXXFLAGS_ODE) $(SDL_CXXFLAGS) -o $@ $(OBJS_SSSA) $(LDFLAGS_ODE) $(SDL_LDFLAGS)

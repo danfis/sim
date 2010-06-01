@@ -1,9 +1,10 @@
-#ifdef HAVE_SDL
-
 #ifndef _SIM_COMP_JOYSTICK_HPP_
 #define _SIM_COMP_JOYSTICK_HPP_
 
-#include <SDL/SDL.h>
+#ifdef HAVE_SDL
+# include <SDL/SDL.h>
+#endif /* HAVE_SDL */
+
 #include <sim/sim.hpp>
 #include <sim/component.hpp>
 #include <sim/message.hpp>
@@ -19,7 +20,11 @@ class Joystick : public sim::Component {
     int _num;
     sim::Time _delay;
     sim::Timer _timer;
+#ifdef HAVE_SDL
     SDL_Joystick *_joystick;
+#else /* HAVE_SDL */
+    void *_joystick;
+#endif /* HAVE_SDL */
 
     size_t _buttons;
 
@@ -58,5 +63,3 @@ class JoystickMessage : public sim::Message {
 } /* namespace sim */
 
 #endif /* _SIM_COMP_JOYSTICK_HPP_ */
-
-#endif /* HAVE_SDL */

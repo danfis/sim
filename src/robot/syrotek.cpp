@@ -175,6 +175,15 @@ void Syrotek::activate()
     _jwheel[1]->activate();
 }
 
+void Syrotek::setColor(const osg::Vec4 &color)
+{
+    std::list<VisBody *> list;
+    _chasis->visBodyAll(&list);
+    if (list.size() > 0)
+        list.front()->setColor(color);
+}
+
+
 void Syrotek::setVelLeft(Scalar v)
 {
     _vel[0] = v;
