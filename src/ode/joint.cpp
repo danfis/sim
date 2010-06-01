@@ -20,12 +20,17 @@ Joint::~Joint()
 
 void Joint::activate()
 {
-    Body *a, *b;
+    dBodyID a = 0, b = 0;
 
-    a = (Body *)objA();
-    b = (Body *)objB();
+    if (objA()){
+        a = ((Body *)objA())->body();
+    }
 
-    dJointAttach(_joint, a->body(), b->body());
+    if (objB()){
+        b = ((Body *)objB())->body();
+    }
+
+    dJointAttach(_joint, a, b);
 
     _enable();
 }

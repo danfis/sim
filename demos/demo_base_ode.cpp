@@ -142,7 +142,9 @@ class S : public sim::Sim {
         createHinge2();
         createHinge2Lim();
         createRobot();
-        createRobotMove();
+        createRobotMove(sim::Vec3(10., -10., -4.9));
+        createRobotMove(sim::Vec3(15., -15., -4.9));
+        createSeeSaw();
         createBunny();
 
         Vec3 verts[] = { Vec3(-10., 10., -0.5),
@@ -339,9 +341,8 @@ class S : public sim::Sim {
         chasis->visBody()->setText("Robot", 1., osg::Vec4(0.5, 0.6, 0.3, 1.));
     }
 
-    void createRobotMove()
+    void createRobotMove(const Vec3 &pos)
     {
-        sim::Vec3 pos(10., -10., -4.9);
         sim::Body *chasis;
         sim::Body *w[4];
         sim::Joint *jw[4];
@@ -385,6 +386,23 @@ class S : public sim::Sim {
         bunny->visBody()->setColor(0.4, 0.4, 0.4, 1.);
         bunny->setRot(sim::Quat(Vec3(1., 0., 0.), M_PI * 0.5));
         bunny->activate();
+    }
+
+    void createSeeSaw()
+    {
+        sim::Vec3 pos(15., -5., -5);
+        sim::Body *b;
+        sim::Joint *j;
+
+        b = world()->createBodyBox(Vec3(2., 5., 0.01), 1.);
+        b->visBody()->setColor(0.7, 0.5, 0.1, 1.);
+        b->visBody()->setTexture("wood.ppm");
+        b->setPos(pos);
+        b->setRot(Quat(Vec3(1., 0., 0.), M_PI / 50.));
+        b->activate();
+
+        j = world()->createJointHinge(b, 0, b->pos(), Vec3(1., 0., 0.));
+        j->activate();
     }
 };
 
