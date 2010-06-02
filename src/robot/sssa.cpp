@@ -17,7 +17,7 @@ namespace robot {
 
 SSSA::SSSA(sim::World *w, const Vec3 &pos,
                  const osg::Vec4 &color)
-    : _world(w), _pos(pos),
+    : _world(w), _pos(pos), _color(color), _arm_offset(0.),
       _chasis(0), _arm(0), _arm_joint(0),
       _ball_conn(0), _ball_joint(0),
       _vel_left(0.), _vel_right(0.), _vel_arm(0.),
@@ -31,10 +31,6 @@ SSSA::SSSA(sim::World *w, const Vec3 &pos,
         _wheel_left[i] = _wheel_right[i] = 0;
         _wheel_left_joint[i] = _wheel_right_joint[i] = 0;
     }
-
-    _createChasis(color);
-    _createArm(osg::Vec4(0.3, 0.2, 0.7, 1.));
-    _createWheels();
 }
 
 Scalar SSSA::armAngle() const
@@ -248,7 +244,9 @@ bool SSSA::isAnySocketConnectedTo(const sim::robot::SSSA *robot) const
 
 void SSSA::activate()
 {
-    _createArmJoint();
+    _createChasis(_color);
+    _createArm(osg::Vec4(0.3, 0.2, 0.7, 1.));
+    _createWheels();
 
     _chasis->activate();
     _arm->activate();
@@ -300,7 +298,8 @@ void SSSA::_createArm(const osg::Vec4 &color)
     // TODO: find out bounding box of end of arm
     b->setMassBox(Vec3(0.5, 0.5, 0.1), 1.);
 
-    b->setPos(_pos - offset);
+    b->setPos(_pos - (Quat(Vec3(0., 1., 0.), _arm_offset) * offset));
+    b->setRot(Quat(Vec3(0., 1., 0.), _arm_offset));
 
     b->collSetDontCollideId((unsigned long)this);
 
@@ -308,7 +307,8 @@ void SSSA::_createArm(const osg::Vec4 &color)
 
     _arm_joint = (sim::ode::JointHinge *)_world->createJointHinge(_chasis, _arm,
                                                                   _chasis->pos(),
-                                                                  Vec3(0., 1., 0.));
+                                                                  Vec3(0., 1., 0.),
+                                                                  -_arm_offset);
     _arm_joint->setParamBounce(0.01);
     _arm_joint->setParamLimitLoHi(-M_PI / 2., M_PI / 2.);
     _arm_joint->setParamFMax(100);

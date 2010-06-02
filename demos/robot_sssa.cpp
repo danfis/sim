@@ -14,6 +14,7 @@ void SSSAComp::init(sim::Sim *sim)
     _sim = sim;
 
     _robot = new sim::robot::SSSA(_sim->world(), _pos);
+    _robot->setArmOffset(M_PI / 2.);
     _robot->activate();
     DBG(this << " " << DBGV(_pos));
 

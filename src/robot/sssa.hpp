@@ -14,6 +14,8 @@ class SSSA {
   protected:
     sim::World *_world;
     sim::Vec3 _pos;
+    osg::Vec4 _color;
+    Scalar _arm_offset;
 
     sim::Body *_chasis;
     sim::Body *_arm;
@@ -34,7 +36,7 @@ class SSSA {
 
   public:
     SSSA(sim::World *w, const sim::Vec3 &pos = sim::Vec3(0., 0., 0.08),
-            const osg::Vec4 &chasis_color = osg::Vec4(0., 0.1, 0.7, 0.6));
+         const osg::Vec4 &chasis_color = osg::Vec4(0., 0.1, 0.7, 0.6));
 
     const sim::Body *chassis() const { return _chasis; }
     sim::Body *chassis() { return _chasis; }
@@ -44,6 +46,15 @@ class SSSA {
     sim::Joint *ballJoint() { return _ball_joint; }
 
     size_t numSockets() const { return 3; }
+
+    Scalar armOffset() const { return _arm_offset; }
+
+    /**
+     * Sets arm offset (in radians). This method has effect only before
+     * activation.
+     */
+    void setArmOffset(Scalar offset)
+        { _arm_offset = offset; }
 
     /**
      * Returns angle of arm is rotated about - range is -pi/2..pi/2.
