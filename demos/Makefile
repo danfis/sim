@@ -47,7 +47,7 @@ demo_base_ode: demo_base_ode.cpp $(LIBDEPS_ODE)
 	$(CXX) $(CXXFLAGS_ODE) -o $@ $< $(LDFLAGS_ODE)
 
 demo_syrotek: demo_syrotek.cpp $(LIBDEPS_ODE)
-	$(CXX) $(CXXFLAGS_ODE) $(SDL_CXXFLAGS) -o $@ $< $(LDFLAGS_ODE) $(SDL_LDFLAGS) -lSDL
+	$(CXX) $(CXXFLAGS_ODE) $(SDL_CXXFLAGS) -o $@ $< $(LDFLAGS_ODE) $(SDL_LDFLAGS)
 
 demo_follow_color: demo_follow_color.cpp $(LIBDEPS_ODE)
 	$(CXX) $(CXXFLAGS_ODE) $(SDL_CXXFLAGS) -o $@ $< $(LDFLAGS_ODE) $(SDL_LDFLAGS)
