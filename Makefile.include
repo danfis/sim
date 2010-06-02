@@ -64,10 +64,18 @@ WANT_SDL ?= yes
 # Try to find ODE
 ifeq '$(WANT_ODE)' 'yes'
   ifeq '$(HAVE_ODE)' 'no'
-    HAVE_ODE := $(shell if pkg-config ode --exists; then echo "yes"; else echo "no"; fi;)
+    HAVE_ODE := $(shell if ode-config --version >/dev/null 2>&1; then echo "yes"; else echo "no"; fi;)
+
     ifeq '$(HAVE_ODE)' 'yes'
-      ODE_CXXFLAGS = $(shell pkg-config ode --cflags)
-      ODE_LDFLAGS  = $(shell pkg-config ode --libs)
+        ODE_CXXFLAGS = $(shell ode-config --cflags)
+        ODE_LDFLAGS  = $(shell ode-config --libs)
+    else
+      HAVE_ODE := $(shell if pkg-config ode --exists; then echo "yes"; else echo "no"; fi;)
+
+      ifeq '$(HAVE_ODE)' 'yes'
+        ODE_CXXFLAGS = $(shell pkg-config ode --cflags)
+        ODE_LDFLAGS  = $(shell pkg-config ode --libs)
+      endif
     endif
   endif
 endif
