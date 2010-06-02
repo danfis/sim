@@ -19,22 +19,99 @@ SSSA::SSSA(sim::World *w, const Vec3 &pos,
                  const osg::Vec4 &color)
     : _world(w), _pos(pos),
       _chasis(0), _arm(0), _arm_joint(0),
-      _ball_conn(0), _ball_joint(0)
+      _ball_conn(0), _ball_joint(0),
+      _vel_left(0.), _vel_right(0.), _vel_arm(0.),
+      _arm_fixed(false)
 {
     for (size_t i = 0; i < 3; i++){
         _sock_conn[i] = 0;
     }
 
+    for (size_t i = 0; i < 6; i++){
+        _wheel_left[i] = _wheel_right[i] = 0;
+        _wheel_left_joint[i] = _wheel_right_joint[i] = 0;
+    }
+
     _createChasis(color);
     _createArm(osg::Vec4(0.3, 0.2, 0.7, 1.));
-    _createArmJoint();
     _createWheels();
 }
 
 Scalar SSSA::armAngle() const
 {
-    //TODO return dJointGetHingeAngle(_arm_joint->joint());
-    return 0.;
+    return _arm_joint->angle();
+}
+
+void SSSA::fixArm()
+{
+    Scalar angle = armAngle();
+
+    _arm_joint->setParamLimitLoHi(angle, angle);
+    _arm_fixed = true;
+
+    setVelArm(0.);
+}
+void SSSA::unfixArm()
+{
+    _arm_joint->setParamLimitLoHi(-M_PI / 2., M_PI / 2.);
+    _arm_fixed = false;
+}
+
+bool SSSA::reachArmAngle(Scalar angle)
+{
+    const Scalar eps = 0.01;
+    const Scalar gain = 0.5;
+    Scalar error;
+
+    if (fabs(armAngle() - angle) < eps){
+        fixArm();
+        return true;
+    }else{
+        error = armAngle() - angle;
+        setVelArm(-error * gain);
+        return false;
+    }
+}
+
+void SSSA::setVelArm(sim::Scalar vel)
+{
+    if (!_arm_fixed){
+        _vel_arm = vel;
+        _arm_joint->setParamVel(vel);
+    }
+}
+
+void SSSA::addVelArm(sim::Scalar d)
+{
+    if (!_arm_fixed){
+        setVelArm(_vel_arm + d);
+    }
+}
+
+void SSSA::setVelLeft(sim::Scalar vel)
+{
+    _vel_left = vel;
+    for (size_t i = 0; i < 6; i++){
+        _wheel_left_joint[i]->setParamVel(vel);
+    }
+}
+
+void SSSA::addVelLeft(sim::Scalar d)
+{
+    setVelLeft(_vel_left + d);
+}
+
+void SSSA::setVelRight(sim::Scalar vel)
+{
+    _vel_right = vel;
+    for (size_t i = 0; i < 6; i++){
+        _wheel_right_joint[i]->setParamVel(vel);
+    }
+}
+
+void SSSA::addVelRight(sim::Scalar d)
+{
+    setVelRight(_vel_right + d);
 }
 
 
@@ -171,6 +248,8 @@ bool SSSA::isAnySocketConnectedTo(const sim::robot::SSSA *robot) const
 
 void SSSA::activate()
 {
+    _createArmJoint();
+
     _chasis->activate();
     _arm->activate();
     _arm_joint->activate();
@@ -194,8 +273,9 @@ void SSSA::_createChasis(const osg::Vec4 &color)
                        sssa_body_ids, sssa_body_ids_len);
     b->visBody(id)->setColor(color);
 
-    // TODO: find out bounding box of trimesh
-    b->setMassBox(Vec3(1., 1., 1.), 1.);
+    const osg::BoundingSphere &bound = b->visBody(id)->node()->getBound();
+    // TODO: find mass of chasis
+    b->setMassCube(bound.radius() * 2., 1.);
 
     b->setPos(_pos);
     b->collSetDontCollideId((unsigned long)this);
@@ -225,20 +305,25 @@ void SSSA::_createArm(const osg::Vec4 &color)
     b->collSetDontCollideId((unsigned long)this);
 
     _arm = b;
+
+    _arm_joint = (sim::ode::JointHinge *)_world->createJointHinge(_chasis, _arm,
+                                                                  _chasis->pos(),
+                                                                  Vec3(0., 1., 0.));
+    _arm_joint->setParamBounce(0.01);
+    _arm_joint->setParamLimitLoHi(-M_PI / 2., M_PI / 2.);
+    _arm_joint->setParamFMax(100);
+    _arm_joint->setParamVel(_vel_arm);
 }
 
 void SSSA::_createArmJoint()
 {
-    _arm_joint = _world->createJointHinge(_chasis, _arm,
-                                          _chasis->pos(),
-                                          Vec3(0., 1., 0.));
-    _arm_joint->setParamBounce(0.01);
-    _arm_joint->setParamLimitLoHi(-M_PI / 2., M_PI / 2.);
 }
 
 
 void SSSA::_createWheels()
 {
+    sim::ode::JointHinge *j;
+
     const sim::Vec3 wheel_pos[] = {
         sim::Vec3( 0.395, -0.458,  0.24),
         sim::Vec3(-0.424, -0.458,  0.269),
@@ -265,16 +350,23 @@ void SSSA::_createWheels()
         _wheel_right[i]->setPos(_pos + wheel_pos[i + 6]);
 
         // create joints
-        _wheel_left_joint[i] = _world->createJointHinge(_chasis, _wheel_left[i],
-                                                        _wheel_left[i]->pos(),
-                                                        Vec3(0., 1., 0.));
-        _wheel_right_joint[i] = _world->createJointHinge(_chasis, _wheel_right[i],
-                                                         _wheel_right[i]->pos(),
-                                                         Vec3(0., 1., 0.));
+        j = (sim::ode::JointHinge *)_world->createJointHinge(_chasis, _wheel_left[i],
+                                                             _wheel_left[i]->pos(),
+                                                             Vec3(0., 1., 0.));
+        _wheel_left_joint[i] = j;
+        j = (sim::ode::JointHinge *)_world->createJointHinge(_chasis, _wheel_right[i],
+                                                             _wheel_right[i]->pos(),
+                                                             Vec3(0., 1., 0.));
+        _wheel_right_joint[i] = j;
 
 
         _wheel_left[i]->collSetDontCollideId((unsigned long)this);
         _wheel_right[i]->collSetDontCollideId((unsigned long)this);
+
+        _wheel_left_joint[i]->setParamFMax(100);
+        _wheel_left_joint[i]->setParamVel(0.);
+        _wheel_right_joint[i]->setParamFMax(100);
+        _wheel_right_joint[i]->setParamVel(0.);
     }
 }
 

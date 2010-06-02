@@ -4,6 +4,7 @@
 #include <sim/world.hpp>
 #include <sim/body.hpp>
 #include <sim/joint.hpp>
+#include <sim/ode/joint.hpp>
 
 namespace sim {
 
@@ -16,17 +17,20 @@ class SSSA {
 
     sim::Body *_chasis;
     sim::Body *_arm;
-    sim::Joint *_arm_joint; //!< joint between chasis and arm
+    sim::ode::JointHinge *_arm_joint; //!< joint between chasis and arm
 
     sim::Body *_wheel_left[6];
-    sim::Joint *_wheel_left_joint[6];
+    sim::ode::JointHinge *_wheel_left_joint[6];
     sim::Body *_wheel_right[6];
-    sim::Joint *_wheel_right_joint[6];
+    sim::ode::JointHinge *_wheel_right_joint[6];
 
     sim::robot::SSSA *_ball_conn; //!< Robot connected to arm's ball
-    sim::Joint *_ball_joint; //!< Joint used for connection via arm
+    sim::ode::JointHinge *_ball_joint; //!< Joint used for connection via arm
 
     sim::robot::SSSA *_sock_conn[3]; //!< Robots connected to sockets
+
+    Scalar _vel_left, _vel_right, _vel_arm;
+    bool _arm_fixed;
 
   public:
     SSSA(sim::World *w, const sim::Vec3 &pos = sim::Vec3(0., 0., 0.08),
@@ -46,6 +50,39 @@ class SSSA {
      */
     Scalar armAngle() const;
 
+    /**
+     * Returns true if arm is fixed in armAngle() position.
+     */
+    bool armFixed() const { return _arm_fixed; }
+
+    /**
+     * Fix arm in current position.
+     */
+    void fixArm();
+    void unfixArm();
+
+    /**
+     * Try to reach specified angle on arm.
+     * If arm is already in specified angle - arm is fixed.
+     * If not velocity is set to move arm properly.
+     * True is returned if arm was fixed, false otherwise.
+     */
+    bool reachArmAngle(Scalar angle);
+
+    /**
+     * Sets arm's velocity as desired value.
+     */
+    void setVelArm(sim::Scalar vel);
+    void addVelArm(sim::Scalar d);
+    sim::Scalar velArm() const { return _vel_arm; }
+
+    void setVelLeft(sim::Scalar vel);
+    void addVelLeft(sim::Scalar d);
+    sim::Scalar velLeft() const { return _vel_left; }
+
+    void setVelRight(sim::Scalar vel);
+    void addVelRight(sim::Scalar d);
+    sim::Scalar velRight() const { return _vel_right; }
 
     /**
      * Returns position, direction and up vector of specified socket.

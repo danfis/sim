@@ -17,6 +17,10 @@ class SSSAComp : public sim::Component {
     void init(sim::Sim *sim);
     void finish();
     void cbPostStep();
+    void processMessage(const sim::Message &msg);
+
+  protected:
+    void _keyPressedMsg(const sim::MessageKeyPressed &msg);
 };
 
 #endif

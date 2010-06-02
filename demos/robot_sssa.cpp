@@ -15,10 +15,11 @@ void SSSAComp::init(sim::Sim *sim)
 
     _robot = new sim::robot::SSSA(_sim->world(), _pos);
     _robot->activate();
+    DBG(this << " " << DBGV(_pos));
 
     _sim->regPostStep(this);
 
-    DBG(this << " " << DBGV(_pos));
+    _sim->regMessage(this, sim::MessageKeyPressed::Type);
 }
 
 void SSSAComp::finish()
@@ -33,8 +34,49 @@ void SSSAComp::cbPostStep()
 
     for (i = 0; i < 3; i++){
         _robot->socketSetup(i, &pos, &dir, &up);
-        DBG(this << " socket " << i << ": " << DBGV(pos) << " " << DBGV(dir));
+        DBG(this << " socket " << i << ": " << DBGV(pos) << " " <<
+                DBGV(dir) << " " << DBGV(up));
     }
     _robot->ballSetup(&pos, &dir, &up);
-    DBG(this << " ball: " << DBGV(pos) << " " << DBGV(dir));
+    DBG(this << " ball: " << DBGV(pos) << " " << DBGV(dir) << " " <<
+            DBGV(up));
+    DBG(this << " arm angle: " << _robot->armAngle());
+}
+
+void SSSAComp::processMessage(const sim::Message &msg)
+{
+    if (msg.type() == sim::MessageKeyPressed::Type){
+        _keyPressedMsg((const sim::MessageKeyPressed &)msg);
+    }
+}
+
+void SSSAComp::_keyPressedMsg(const sim::MessageKeyPressed &msg)
+{
+    int key = msg.key();
+
+    //DBG("Component: " << this << " - key pressed: " << msg.key());
+
+    if (key == 'h'){
+        _robot->addVelLeft(0.1);
+    }else if (key == 'j'){
+        _robot->addVelLeft(-0.1);
+    }else if (key == 'k'){
+        _robot->addVelRight(0.1);
+    }else if (key == 'l'){
+        _robot->addVelRight(-0.1);
+
+    }else if (key == 'n'){
+        _robot->addVelArm(0.1);
+    }else if (key == 'm'){
+        _robot->addVelArm(-0.1);
+    }else if (key == ','){
+        _robot->fixArm();
+    }else if (key == '.'){
+        _robot->unfixArm();
+    }else if (key == 'v'){
+        _robot->reachArmAngle(M_PI / 4.);
+    }else if (key == 'b'){
+        _robot->reachArmAngle(-M_PI / 4.);
+    }
+    DBG("Velocity: " << _robot->velLeft() << " " << _robot->velRight());
 }
