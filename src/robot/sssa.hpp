@@ -18,10 +18,10 @@ class SSSA {
     sim::Body *_arm;
     sim::Joint *_arm_joint; //!< joint between chasis and arm
 
-    sim::Body *_wheel_left[4];
-    sim::Joint *_wheel_left_joint[4];
-    sim::Body *_wheel_right[4];
-    sim::Joint *_wheel_right_joint[4];
+    sim::Body *_wheel_left[6];
+    sim::Joint *_wheel_left_joint[6];
+    sim::Body *_wheel_right[6];
+    sim::Joint *_wheel_right_joint[6];
 
     sim::robot::SSSA *_ball_conn; //!< Robot connected to arm's ball
     sim::Joint *_ball_joint; //!< Joint used for connection via arm
@@ -41,18 +41,23 @@ class SSSA {
 
     size_t numSockets() const { return 3; }
 
+    /**
+     * Returns angle of arm is rotated about - range is -pi/2..pi/2.
+     */
+    Scalar armAngle() const;
+
 
     /**
-     * Returns position and direction of specified socket via pos and dir
-     * arguments. Direction vector is always unit-length.
+     * Returns position, direction and up vector of specified socket.
+     * Direction and up vector is always unit-length.
      */
-    void socketPosDir(size_t idx, Vec3 *pos, Vec3 *dir) const;
+    void socketSetup(size_t idx, Vec3 *pos, Vec3 *dir, Vec3 *up) const;
 
     /**
      * Ball is socket on the end of arm.
      * This function does same thing as socketPosDir() but on arm's socket.
      */
-    void ballPosDir(Vec3 *pos, Vec3 *dir) const;
+    void ballSetup(Vec3 *pos, Vec3 *dir, Vec3 *up) const;
 
     /**
      * Returns number of socket of other robot this robot can connect to

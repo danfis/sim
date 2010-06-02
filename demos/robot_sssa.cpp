@@ -28,13 +28,13 @@ void SSSAComp::finish()
 
 void SSSAComp::cbPostStep()
 {
-    Vec3 pos, dir;
+    Vec3 pos, dir, up;
     size_t i;
 
     for (i = 0; i < 3; i++){
-        _robot->socketPosDir(i, &pos, &dir);
+        _robot->socketSetup(i, &pos, &dir, &up);
         DBG(this << " socket " << i << ": " << DBGV(pos) << " " << DBGV(dir));
     }
-    _robot->ballPosDir(&pos, &dir);
+    _robot->ballSetup(&pos, &dir, &up);
     DBG(this << " ball: " << DBGV(pos) << " " << DBGV(dir));
 }
