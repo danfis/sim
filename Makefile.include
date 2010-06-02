@@ -117,29 +117,25 @@ endif
 
 check-dep-osg:
 	@echo "Checking Openscenegraph..."
-	@if [ "$(HAVE_OSG)" != "yes" ]; then echo "Dependecy error: pkg-config can't find openscenegraph package"; exit 1; fi;
-	@echo "Openscenegraph found:"
+	@if [ "$(HAVE_OSG)" != "yes" ]; then echo "Dependecy error: pkg-config can't find openscenegraph package"; else echo "Openscenegraph found"; fi;
 	@echo "  OSG_CXXFLAGS = $(OSG_CXXFLAGS)"
 	@echo "  OSG_LDFLAGS  = $(OSG_LDFLAGS)"
 
 check-dep-bt:
 	@echo "Checking Bullet..."
-	@if [ "$(HAVE_BT)" != "yes" ]; then echo "Dependecy error: pkg-config can't find bullet package"; exit 1; fi;
-	@echo "Bullet found"
+	@if [ "$(HAVE_BT)" != "yes" ]; then echo "Dependecy error: pkg-config can't find bullet package"; else echo "Bullet found"; fi;
 	@echo "  BT_CXXFLAGS = $(BT_CXXFLAGS)"
 	@echo "  BT_LDFLAGS  = $(BT_LDFLAGS)"
 
 check-dep-ode:
 	@echo "Checking ODE..."
-	@if [ "$(HAVE_ODE)" != "yes" ]; then echo "Dependecy error: pkg-config can't find ode package"; exit 1; fi;
-	@echo "ODE found"
+	@if [ "$(HAVE_ODE)" != "yes" ]; then echo "Dependecy error: pkg-config can't find ode package"; else echo "ODE found"; fi;
 	@echo "  ODE_CXXFLAGS = $(ODE_CXXFLAGS)"
 	@echo "  ODE_LDFLAGS  = $(ODE_LDFLAGS)"
 
 check-dep-sdl:
 	@echo "Checking SDL..."
-	@if [ "$(HAVE_SDL)" != "yes" ]; then echo "Dependecy error: pkg-config can't find sdl package"; exit 1; fi;
-	@echo "SDL found"
+	@if [ "$(HAVE_SDL)" != "yes" ]; then echo "Dependecy error: pkg-config can't find sdl package"; else echo "SDL found"; fi;
 	@echo "  SDL_CXXFLAGS = $(SDL_CXXFLAGS)"
 	@echo "  SDL_LDFLAGS  = $(SDL_LDFLAGS)"
 	
@@ -185,15 +181,18 @@ showvars:
 	@echo "HAVE_ODE     = $(HAVE_ODE)"
 	@echo "ODE_CXXFLAGS = $(ODE_CXXFLAGS)"
 	@echo "ODE_LDFLAGS  = $(ODE_LDFLAGS)"
+	@echo ""
 	@echo "WANT_BT      = $(WANT_BT)"
 	@echo "HAVE_BT      = $(HAVE_BT)"
 	@echo "BT_CXXFLAGS  = $(BT_CXXFLAGS)"
 	@echo "BT_LDFLAGS   = $(BT_LDFLAGS)"
-	@echo "WANT_OSG     = $(WANT_ODE)"
+	@echo ""
+	@echo "WANT_OSG     = $(WANT_OSG)"
 	@echo "HAVE_OSG     = $(HAVE_OSG)"
 	@echo "OSG_CXXFLAGS = $(OSG_CXXFLAGS)"
 	@echo "OSG_LDFLAGS  = $(OSG_LDFLAGS)"
-	@echo "WANT_SDL     = $(WANT_ODE)"
+	@echo ""
+	@echo "WANT_SDL     = $(WANT_SDL)"
 	@echo "HAVE_SDL     = $(HAVE_SDL)"
 	@echo "SDL_CXXFLAGS = $(SDL_CXXFLAGS)"
 	@echo "SDL_LDFLAGS  = $(SDL_LDFLAGS)"
