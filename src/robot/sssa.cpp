@@ -311,7 +311,7 @@ void SSSA::_createArm(const osg::Vec4 &color)
                                                                   -_arm_offset);
     _arm_joint->setParamBounce(0.01);
     _arm_joint->setParamLimitLoHi(-M_PI / 2., M_PI / 2.);
-    _arm_joint->setParamFMax(100);
+    _arm_joint->setParamFMax(50);
     _arm_joint->setParamVel(_vel_arm);
 }
 
