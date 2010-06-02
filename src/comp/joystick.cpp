@@ -18,7 +18,7 @@ Joystick::~Joystick()
 
 void Joystick::init(sim::Sim *sim)
 {
-#ifndef HAVE_SDL
+#ifdef HAVE_SDL
     bool init = false;
 
     _sim = sim;
