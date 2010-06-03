@@ -3,6 +3,7 @@
 #include "robot_sssa.hpp"
 
 using sim::Vec3;
+using sim::Quat;
 
 SSSAComp::SSSAComp(const sim::Vec3 &pos)
     : _sim(0), _robot(0), _pos(pos)
@@ -13,9 +14,9 @@ void SSSAComp::init(sim::Sim *sim)
 {
     _sim = sim;
 
-    _robot = new sim::robot::SSSA(_sim->world(), _pos);
-    _robot->setArmOffset(M_PI / 2.);
+    _robot = new sim::robot::SSSA(_sim->world(), _pos);//, Quat(Vec3(0., 0., 1.), M_PI / 2.));
     _robot->activate();
+    //_robot->fixArm();
     DBG(this << " " << DBGV(_pos));
 
     _sim->regPostStep(this);
@@ -30,6 +31,7 @@ void SSSAComp::finish()
 
 void SSSAComp::cbPostStep()
 {
+    /*
     Vec3 pos, dir, up;
     size_t i;
 
@@ -42,6 +44,7 @@ void SSSAComp::cbPostStep()
     DBG(this << " ball: " << DBGV(pos) << " " << DBGV(dir) << " " <<
             DBGV(up));
     DBG(this << " arm angle: " << _robot->armAngle());
+    */
 }
 
 void SSSAComp::processMessage(const sim::Message &msg)

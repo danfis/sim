@@ -17,11 +17,10 @@ class SSSA {
         sim::ode::JointHinge *joint;
         Scalar vel;
         bool fixed;
-        Scalar init_offset;
         osg::Vec4 color;
 
         arm_t() : body(0), joint(0), vel(0.), fixed(false),
-                  init_offset(0.), color(0.3, 0.2, 0.7, 1.)
+                  color(0.3, 0.2, 0.7, 1.)
         {}
     };
 
@@ -42,6 +41,7 @@ class SSSA {
   protected:
     sim::World *_world;
     sim::Vec3 _pos;
+    sim::Quat _rot;
     osg::Vec4 _color;
 
     sim::Body *_chasis;
@@ -57,6 +57,7 @@ class SSSA {
 
   public:
     SSSA(sim::World *w, const sim::Vec3 &pos = sim::Vec3(0., 0., 0.08),
+         const sim::Quat &rot = sim::Quat(0., 0., 0., 1.),
          const osg::Vec4 &chasis_color = osg::Vec4(0., 0.1, 0.7, 0.6));
     ~SSSA();
 
@@ -71,15 +72,6 @@ class SSSA {
     const Quat &rot() const { return _chasis->rot(); }
 
     size_t numSockets() const { return 3; }
-
-    Scalar armOffset() const { return _arm.init_offset; }
-
-    /**
-     * Sets arm offset (in radians). This method has effect only before
-     * activation.
-     */
-    void setArmOffset(Scalar offset)
-        { _arm.init_offset = offset; }
 
     /**
      * Returns angle of arm is rotated about - range is -pi/2..pi/2.

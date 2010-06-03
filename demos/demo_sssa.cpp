@@ -8,6 +8,7 @@
 
 using namespace sim::ode;
 using sim::Vec3;
+using sim::Quat;
 using sim::Time;
 using namespace std;
 
@@ -18,7 +19,7 @@ class S : public sim::Sim {
     {
         World *w = new World();
 
-        setTimeStep(Time::fromMs(20));
+        setTimeStep(Time::fromMs(10));
         setTimeSubSteps(2);
 
         setWorld(w);
@@ -34,17 +35,13 @@ class S : public sim::Sim {
 
         createArena();
         createRobot();
-
-
-
     }
 
     void init()
     {
         sim::Sim::init();
 
-        visWorld()->step();
-        sleep(1);
+        pauseSimulation();
     }
 
     void createArena()
@@ -83,10 +80,25 @@ class S : public sim::Sim {
         comp = new SSSAComp(Vec3(0., 0, 1.5));
         addComponent(comp);
 
+        /*
         comp = new SSSAComp(Vec3(1.2, 1.2, 1.5));
         addComponent(comp);
         comp = new SSSAComp(Vec3(1.2, 2.3, 1.5));
         addComponent(comp);
+        */
+
+        /*
+        sim::robot::SSSA *r1, *r2;
+        r1 = new sim::robot::SSSA(world(), Vec3(2., 2., 1.));
+        r1->setArmOffset(M_PI / 2.);
+        r1->activate();
+
+        r2 = new sim::robot::SSSA(world(), Vec3(.72, 2., 1.),
+                                  Quat(Vec3(0., 0., 1.), M_PI / 2.));
+        r2->activate();
+
+        DBG("can connect: " << r1->canConnectTo(*r2));
+        */
     }
 
 };

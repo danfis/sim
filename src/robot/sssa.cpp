@@ -16,8 +16,8 @@ namespace sim {
 namespace robot {
 
 SSSA::SSSA(sim::World *w, const Vec3 &pos,
-                 const osg::Vec4 &color)
-    : _world(w), _pos(pos), _color(color),
+           const Quat &rot, const osg::Vec4 &color)
+    : _world(w), _pos(pos), _rot(rot), _color(color),
       _chasis(0),
       _ball_conn(0), _ball_joint(0)
 {
@@ -203,6 +203,7 @@ int SSSA::canConnectTo(const sim::robot::SSSA &robot) const
         // socket's dir reversed
         dir = -dir;
         rot_diff = (dir - ball_dir).length();
+        DBG("  " << i << " rot_diff: " << rot_diff);
         if (rot_diff > max_angle)
             continue;
         // the code above really isn't computation of angle but dir and
@@ -210,9 +211,10 @@ int SSSA::canConnectTo(const sim::robot::SSSA &robot) const
         // distance from one end to other end of vector
         // For me it looks sufficient solution.
 
-        rot_diff = (up - ball_up).length();
-        if (rot_diff > max_angle)
-            continue;
+        // TODO
+        //rot_diff = (up - ball_up).length();
+        //if (rot_diff > max_angle)
+        //    continue;
 
         // if code gets here ball can connect to currently tested socket
         return i;
@@ -224,12 +226,20 @@ int SSSA::canConnectTo(const sim::robot::SSSA &robot) const
 bool SSSA::connectTo(sim::robot::SSSA &robot)
 {
     int socket_num;
+    Vec3 pos, dir, up;
 
     socket_num = canConnectTo(robot);
     if (socket_num < 0)
         return false;
 
-    // TODO
+    ballSetup(&pos, &dir, &up);
+    _ball_conn = &robot;
+    _ball_joint = (sim::ode::JointHinge *)
+                    _world->createJointHinge(_chasis, robot.chasis(),
+                                             pos, dir);
+    robot._sock_conn[socket_num] = this;
+
+    _ball_joint->activate();
 
     return false;
 }
@@ -288,6 +298,7 @@ void SSSA::_createChasis(const osg::Vec4 &color)
     b->setMassCube(bound.radius() * 2., 1.);
 
     b->setPos(_pos);
+    b->setRot(_rot);
     b->collSetDontCollideId((unsigned long)this);
 
     _chasis = b;
@@ -296,9 +307,10 @@ void SSSA::_createChasis(const osg::Vec4 &color)
 void SSSA::_createArm(const osg::Vec4 &color)
 {
     sim::ode::BodyCompound *b;
+    Vec3 axis = _rot * Vec3(0., 1., 0.);
     int id;
     // TODO: find out correct offset
-    Vec3 offset(0., 0., 0.45);
+    Vec3 offset(0., 0., 0.65);
 
     b = (sim::ode::BodyCompound *)_world->createBodyCompound();
     id = b->addTriMesh(sssa_arm_verts, sssa_arm_verts_len,
@@ -310,17 +322,17 @@ void SSSA::_createArm(const osg::Vec4 &color)
     // TODO: find out bounding box of end of arm
     b->setMassBox(Vec3(0.5, 0.5, 0.1), 1.);
 
-    b->setPos(_pos - (Quat(Vec3(0., 1., 0.), _arm.init_offset) * offset));
-    b->setRot(Quat(Vec3(0., 1., 0.), _arm.init_offset));
+    b->setPos(_pos - (_rot * offset));
+    b->setRot(_rot );
 
     b->collSetDontCollideId((unsigned long)this);
 
     _arm.body = b;
 
-    _arm.joint = (sim::ode::JointHinge *)_world->createJointHinge(_chasis, _arm.body,
-                                                                  _chasis->pos(),
-                                                                  Vec3(0., 1., 0.),
-                                                                  -_arm.init_offset);
+    _arm.joint = (sim::ode::JointHinge *)
+                    _world->createJointHinge(_chasis, _arm.body,
+                                             _chasis->pos(), axis);
+
     _arm.joint->setParamBounce(0.01);
     _arm.joint->setParamLimitLoHi(-M_PI / 2., M_PI / 2.);
     _arm.joint->setParamFMax(50);
@@ -337,15 +349,15 @@ void SSSA::_createWheels()
     sim::ode::JointHinge *j;
 
     const sim::Vec3 wheel_pos[] = {
-        sim::Vec3( 0.395, -0.458,  0.24),
-        sim::Vec3(-0.424, -0.458,  0.269),
+        sim::Vec3( 0.419, -0.458,  0.25),
+        sim::Vec3(-0.424, -0.458,  0.25),
         sim::Vec3(-0.419, -0.458, -0.160),
         sim::Vec3(-0.159, -0.458, -0.425),
         sim::Vec3( 0.159, -0.458, -0.425),
         sim::Vec3( 0.419, -0.458, -0.160),
 
-        sim::Vec3( 0.395, 0.458,  0.24),
-        sim::Vec3(-0.424, 0.458,  0.269),
+        sim::Vec3( 0.419, 0.458,  0.25),
+        sim::Vec3(-0.424, 0.458,  0.25),
         sim::Vec3(-0.419, 0.458, -0.160),
         sim::Vec3(-0.159, 0.458, -0.425),
         sim::Vec3( 0.159, 0.458, -0.425),
@@ -354,21 +366,23 @@ void SSSA::_createWheels()
 
     for (size_t i = 0; i < 6; i++){
         // create wheels
-        _wleft.body[i] = _world->createBodyCylinderY(0.1, 0.08, 0.1);
-        _wright.body[i] = _world->createBodyCylinderY(0.1, 0.08, 0.1);
+        _wleft.body[i] = _world->createBodyCylinderY(0.11, 0.08, 0.1);
+        _wright.body[i] = _world->createBodyCylinderY(0.11, 0.08, 0.1);
 
         // set up position
-        _wleft.body[i]->setPos(_pos + wheel_pos[i]);
-        _wright.body[i]->setPos(_pos + wheel_pos[i + 6]);
+        _wleft.body[i]->setPos(_pos + (_rot * wheel_pos[i]));
+        _wleft.body[i]->setRot(_wleft.body[i]->rot() * _rot);
+        _wright.body[i]->setPos(_pos + (_rot * wheel_pos[6 + i]));
+        _wright.body[i]->setRot(_wright.body[i]->rot() * _rot);
 
         // create joints
         j = (sim::ode::JointHinge *)_world->createJointHinge(_chasis, _wleft.body[i],
                                                              _wleft.body[i]->pos(),
-                                                             Vec3(0., 1., 0.));
+                                                             _rot * Vec3(0., 1., 0.));
         _wleft.joint[i] = j;
         j = (sim::ode::JointHinge *)_world->createJointHinge(_chasis, _wright.body[i],
                                                              _wright.body[i]->pos(),
-                                                             Vec3(0., 1., 0.));
+                                                             _rot * Vec3(0., 1., 0.));
         _wright.joint[i] = j;
 
 

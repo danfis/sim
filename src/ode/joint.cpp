@@ -174,7 +174,7 @@ void JointHinge::activate()
     Joint::activate();
 
     dJointSetHingeAnchor(_joint, _anchor.x(), _anchor.y(), _anchor.z());
-    dJointSetHingeAxisOffset(_joint, _axis.x(), _axis.y(), _axis.z(), _axis_offset);
+    dJointSetHingeAxis(_joint, _axis.x(), _axis.y(), _axis.z());
 }
 
 Scalar JointHinge::angle() const
