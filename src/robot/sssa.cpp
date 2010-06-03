@@ -342,8 +342,8 @@ void SSSA::_createWheels()
 
     for (size_t i = 0; i < 6; i++){
         // create wheels
-        _wheel_left[i] = _world->createBodyCylinderY(0.15, 0.1, 0.1);
-        _wheel_right[i] = _world->createBodyCylinderY(0.15, 0.1, 0.1);
+        _wheel_left[i] = _world->createBodyCylinderY(0.1, 0.08, 0.1);
+        _wheel_right[i] = _world->createBodyCylinderY(0.1, 0.08, 0.1);
 
         // set up position
         _wheel_left[i]->setPos(_pos + wheel_pos[i]);
