@@ -60,8 +60,8 @@ class SSSA {
          const osg::Vec4 &chasis_color = osg::Vec4(0., 0.1, 0.7, 0.6));
     ~SSSA();
 
-    const sim::Body *chassis() const { return _chasis; }
-    sim::Body *chassis() { return _chasis; }
+    const sim::Body *chasis() const { return _chasis; }
+    sim::Body *chasis() { return _chasis; }
     const sim::Body *arm() const { return _arm.body; }
     sim::Body *arm() { return _arm.body; }
     const sim::Joint *ballJoint() const { return _ball_joint; }
