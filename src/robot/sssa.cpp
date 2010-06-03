@@ -17,11 +17,10 @@ namespace robot {
 
 SSSA::SSSA(sim::World *w, const Vec3 &pos,
                  const osg::Vec4 &color)
-    : _world(w), _pos(pos), _color(color), _arm_offset(0.),
-      _chasis(0), _arm(0), _arm_joint(0),
+    : _world(w), _pos(pos), _color(color),
+      _chasis(0),
       _ball_conn(0), _ball_joint(0),
-      _vel_left(0.), _vel_right(0.), _vel_arm(0.),
-      _arm_fixed(false)
+      _vel_left(0.), _vel_right(0.)
 {
     for (size_t i = 0; i < 3; i++){
         _sock_conn[i] = 0;
@@ -35,22 +34,22 @@ SSSA::SSSA(sim::World *w, const Vec3 &pos,
 
 Scalar SSSA::armAngle() const
 {
-    return _arm_joint->angle();
+    return _arm.joint->angle();
 }
 
 void SSSA::fixArm()
 {
     Scalar angle = armAngle();
 
-    _arm_joint->setParamLimitLoHi(angle, angle);
-    _arm_fixed = true;
-
     setVelArm(0.);
+
+    _arm.joint->setParamLimitLoHi(angle, angle);
+    _arm.fixed = true;
 }
 void SSSA::unfixArm()
 {
-    _arm_joint->setParamLimitLoHi(-M_PI / 2., M_PI / 2.);
-    _arm_fixed = false;
+    _arm.joint->setParamLimitLoHi(-M_PI / 2., M_PI / 2.);
+    _arm.fixed = false;
 }
 
 bool SSSA::reachArmAngle(Scalar angle)
@@ -71,16 +70,16 @@ bool SSSA::reachArmAngle(Scalar angle)
 
 void SSSA::setVelArm(sim::Scalar vel)
 {
-    if (!_arm_fixed){
-        _vel_arm = vel;
-        _arm_joint->setParamVel(vel);
+    if (!_arm.fixed){
+        _arm.vel = vel;
+        _arm.joint->setParamVel(vel);
     }
 }
 
 void SSSA::addVelArm(sim::Scalar d)
 {
-    if (!_arm_fixed){
-        setVelArm(_vel_arm + d);
+    if (!_arm.fixed){
+        setVelArm(_arm.vel + d);
     }
 }
 
@@ -151,9 +150,9 @@ void SSSA::ballSetup(Vec3 *pos, Vec3 *dir, Vec3 *up) const
     //const Scalar off = 0.720;
     const Vec3 offset(0., 0., -0.2); // offset from center of arm
 
-    *dir = _arm->rot() * offset;
-    *up = _arm->rot() * Vec3(-1., 0., 0.);
-    *pos = _arm->pos() + *dir;
+    *dir = _arm.body->rot() * offset;
+    *up = _arm.body->rot() * Vec3(-1., 0., 0.);
+    *pos = _arm.body->pos() + *dir;
     dir->normalize();
     up->normalize();
 }
@@ -249,8 +248,8 @@ void SSSA::activate()
     _createWheels();
 
     _chasis->activate();
-    _arm->activate();
-    _arm_joint->activate();
+    _arm.body->activate();
+    _arm.joint->activate();
 
     for (size_t i = 0; i < 6; i++){
         _wheel_left[i]->activate();
@@ -298,21 +297,21 @@ void SSSA::_createArm(const osg::Vec4 &color)
     // TODO: find out bounding box of end of arm
     b->setMassBox(Vec3(0.5, 0.5, 0.1), 1.);
 
-    b->setPos(_pos - (Quat(Vec3(0., 1., 0.), _arm_offset) * offset));
-    b->setRot(Quat(Vec3(0., 1., 0.), _arm_offset));
+    b->setPos(_pos - (Quat(Vec3(0., 1., 0.), _arm.init_offset) * offset));
+    b->setRot(Quat(Vec3(0., 1., 0.), _arm.init_offset));
 
     b->collSetDontCollideId((unsigned long)this);
 
-    _arm = b;
+    _arm.body = b;
 
-    _arm_joint = (sim::ode::JointHinge *)_world->createJointHinge(_chasis, _arm,
+    _arm.joint = (sim::ode::JointHinge *)_world->createJointHinge(_chasis, _arm.body,
                                                                   _chasis->pos(),
                                                                   Vec3(0., 1., 0.),
-                                                                  -_arm_offset);
-    _arm_joint->setParamBounce(0.01);
-    _arm_joint->setParamLimitLoHi(-M_PI / 2., M_PI / 2.);
-    _arm_joint->setParamFMax(50);
-    _arm_joint->setParamVel(_vel_arm);
+                                                                  -_arm.init_offset);
+    _arm.joint->setParamBounce(0.01);
+    _arm.joint->setParamLimitLoHi(-M_PI / 2., M_PI / 2.);
+    _arm.joint->setParamFMax(50);
+    _arm.joint->setParamVel(_arm.vel);
 }
 
 void SSSA::_createArmJoint()

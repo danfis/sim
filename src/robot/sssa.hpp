@@ -12,14 +12,27 @@ namespace robot {
 
 class SSSA {
   protected:
+    struct arm_t {
+        sim::Body *body;
+        sim::ode::JointHinge *joint;
+        Scalar vel;
+        bool fixed;
+        Scalar init_offset;
+        osg::Vec4 color;
+
+        arm_t() : body(0), joint(0), vel(0.), fixed(false),
+                  init_offset(0.), color(0.3, 0.2, 0.7, 1.)
+        {}
+    };
+
+  protected:
     sim::World *_world;
     sim::Vec3 _pos;
     osg::Vec4 _color;
-    Scalar _arm_offset;
+
+    arm_t _arm;
 
     sim::Body *_chasis;
-    sim::Body *_arm;
-    sim::ode::JointHinge *_arm_joint; //!< joint between chasis and arm
 
     sim::Body *_wheel_left[6];
     sim::ode::JointHinge *_wheel_left_joint[6];
@@ -31,8 +44,7 @@ class SSSA {
 
     sim::robot::SSSA *_sock_conn[3]; //!< Robots connected to sockets
 
-    Scalar _vel_left, _vel_right, _vel_arm;
-    bool _arm_fixed;
+    Scalar _vel_left, _vel_right;
 
   public:
     SSSA(sim::World *w, const sim::Vec3 &pos = sim::Vec3(0., 0., 0.08),
@@ -40,21 +52,21 @@ class SSSA {
 
     const sim::Body *chassis() const { return _chasis; }
     sim::Body *chassis() { return _chasis; }
-    const sim::Body *arm() const { return _arm; }
-    sim::Body *arm() { return _arm; }
+    const sim::Body *arm() const { return _arm.body; }
+    sim::Body *arm() { return _arm.body; }
     const sim::Joint *ballJoint() const { return _ball_joint; }
     sim::Joint *ballJoint() { return _ball_joint; }
 
     size_t numSockets() const { return 3; }
 
-    Scalar armOffset() const { return _arm_offset; }
+    Scalar armOffset() const { return _arm.init_offset; }
 
     /**
      * Sets arm offset (in radians). This method has effect only before
      * activation.
      */
     void setArmOffset(Scalar offset)
-        { _arm_offset = offset; }
+        { _arm.init_offset = offset; }
 
     /**
      * Returns angle of arm is rotated about - range is -pi/2..pi/2.
@@ -64,7 +76,7 @@ class SSSA {
     /**
      * Returns true if arm is fixed in armAngle() position.
      */
-    bool armFixed() const { return _arm_fixed; }
+    bool armFixed() const { return _arm.fixed; }
 
     /**
      * Fix arm in current position.
@@ -85,7 +97,7 @@ class SSSA {
      */
     void setVelArm(sim::Scalar vel);
     void addVelArm(sim::Scalar d);
-    sim::Scalar velArm() const { return _vel_arm; }
+    sim::Scalar velArm() const { return _arm.vel; }
 
     void setVelLeft(sim::Scalar vel);
     void addVelLeft(sim::Scalar d);
