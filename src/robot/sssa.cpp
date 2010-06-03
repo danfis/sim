@@ -19,16 +19,31 @@ SSSA::SSSA(sim::World *w, const Vec3 &pos,
                  const osg::Vec4 &color)
     : _world(w), _pos(pos), _color(color),
       _chasis(0),
-      _ball_conn(0), _ball_joint(0),
-      _vel_left(0.), _vel_right(0.)
+      _ball_conn(0), _ball_joint(0)
 {
     for (size_t i = 0; i < 3; i++){
         _sock_conn[i] = 0;
     }
+}
+
+SSSA::~SSSA()
+{
+    if (_chasis)
+        delete _chasis;
+    if (_arm.body)
+        delete _arm.body;
+    if (_arm.joint)
+        delete _arm.joint;
 
     for (size_t i = 0; i < 6; i++){
-        _wheel_left[i] = _wheel_right[i] = 0;
-        _wheel_left_joint[i] = _wheel_right_joint[i] = 0;
+        if (_wleft.body[i])
+            delete _wleft.body[i];
+        if (_wleft.joint[i])
+            delete _wleft.joint[i];
+        if (_wright.body[i])
+            delete _wright.body[i];
+        if (_wright.joint[i])
+            delete _wright.joint[i];
     }
 }
 
@@ -83,30 +98,28 @@ void SSSA::addVelArm(sim::Scalar d)
     }
 }
 
-void SSSA::setVelLeft(sim::Scalar vel)
+void SSSA::setVelLeft(sim::Scalar v)
 {
-    _vel_left = vel;
-    for (size_t i = 0; i < 6; i++){
-        _wheel_left_joint[i]->setParamVel(vel);
-    }
+    _wleft.vel = v;
+    for (size_t i = 0; i < 6; i++)
+        _wleft.joint[i]->setParamVel(_wleft.vel);
 }
 
 void SSSA::addVelLeft(sim::Scalar d)
 {
-    setVelLeft(_vel_left + d);
+    setVelLeft(_wleft.vel + d);
 }
 
-void SSSA::setVelRight(sim::Scalar vel)
+void SSSA::setVelRight(sim::Scalar v)
 {
-    _vel_right = vel;
-    for (size_t i = 0; i < 6; i++){
-        _wheel_right_joint[i]->setParamVel(vel);
-    }
+    _wright.vel = v;
+    for (size_t i = 0; i < 6; i++)
+        _wright.joint[i]->setParamVel(_wright.vel);
 }
 
 void SSSA::addVelRight(sim::Scalar d)
 {
-    setVelRight(_vel_right + d);
+    setVelRight(_wright.vel + d);
 }
 
 
@@ -252,10 +265,10 @@ void SSSA::activate()
     _arm.joint->activate();
 
     for (size_t i = 0; i < 6; i++){
-        _wheel_left[i]->activate();
-        _wheel_right[i]->activate();
-        _wheel_left_joint[i]->activate();
-        _wheel_right_joint[i]->activate();
+        _wleft.body[i]->activate();
+        _wleft.joint[i]->activate();
+        _wright.body[i]->activate();
+        _wright.joint[i]->activate();
     }
 }
 
@@ -341,31 +354,31 @@ void SSSA::_createWheels()
 
     for (size_t i = 0; i < 6; i++){
         // create wheels
-        _wheel_left[i] = _world->createBodyCylinderY(0.1, 0.08, 0.1);
-        _wheel_right[i] = _world->createBodyCylinderY(0.1, 0.08, 0.1);
+        _wleft.body[i] = _world->createBodyCylinderY(0.1, 0.08, 0.1);
+        _wright.body[i] = _world->createBodyCylinderY(0.1, 0.08, 0.1);
 
         // set up position
-        _wheel_left[i]->setPos(_pos + wheel_pos[i]);
-        _wheel_right[i]->setPos(_pos + wheel_pos[i + 6]);
+        _wleft.body[i]->setPos(_pos + wheel_pos[i]);
+        _wright.body[i]->setPos(_pos + wheel_pos[i + 6]);
 
         // create joints
-        j = (sim::ode::JointHinge *)_world->createJointHinge(_chasis, _wheel_left[i],
-                                                             _wheel_left[i]->pos(),
+        j = (sim::ode::JointHinge *)_world->createJointHinge(_chasis, _wleft.body[i],
+                                                             _wleft.body[i]->pos(),
                                                              Vec3(0., 1., 0.));
-        _wheel_left_joint[i] = j;
-        j = (sim::ode::JointHinge *)_world->createJointHinge(_chasis, _wheel_right[i],
-                                                             _wheel_right[i]->pos(),
+        _wleft.joint[i] = j;
+        j = (sim::ode::JointHinge *)_world->createJointHinge(_chasis, _wright.body[i],
+                                                             _wright.body[i]->pos(),
                                                              Vec3(0., 1., 0.));
-        _wheel_right_joint[i] = j;
+        _wright.joint[i] = j;
 
 
-        _wheel_left[i]->collSetDontCollideId((unsigned long)this);
-        _wheel_right[i]->collSetDontCollideId((unsigned long)this);
+        _wleft.body[i]->collSetDontCollideId((unsigned long)this);
+        _wright.body[i]->collSetDontCollideId((unsigned long)this);
 
-        _wheel_left_joint[i]->setParamFMax(100);
-        _wheel_left_joint[i]->setParamVel(0.);
-        _wheel_right_joint[i]->setParamFMax(100);
-        _wheel_right_joint[i]->setParamVel(0.);
+        _wleft.joint[i]->setParamFMax(100);
+        _wleft.joint[i]->setParamVel(0.);
+        _wright.joint[i]->setParamFMax(100);
+        _wright.joint[i]->setParamVel(0.);
     }
 }
 

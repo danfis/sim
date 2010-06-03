@@ -25,30 +25,40 @@ class SSSA {
         {}
     };
 
+    struct belt_t {
+        sim::Body *body[6];
+        sim::ode::JointHinge *joint[6];
+        Scalar vel;
+
+        belt_t() : vel(0.)
+        {
+            for (size_t i = 0; i < 6; i++){
+                body[i] = 0;
+                joint[i] = 0;
+            }
+        }
+    };
+
   protected:
     sim::World *_world;
     sim::Vec3 _pos;
     osg::Vec4 _color;
 
-    arm_t _arm;
-
     sim::Body *_chasis;
 
-    sim::Body *_wheel_left[6];
-    sim::ode::JointHinge *_wheel_left_joint[6];
-    sim::Body *_wheel_right[6];
-    sim::ode::JointHinge *_wheel_right_joint[6];
+    arm_t _arm;
+    belt_t _wleft;
+    belt_t _wright;
 
     sim::robot::SSSA *_ball_conn; //!< Robot connected to arm's ball
     sim::ode::JointHinge *_ball_joint; //!< Joint used for connection via arm
 
     sim::robot::SSSA *_sock_conn[3]; //!< Robots connected to sockets
 
-    Scalar _vel_left, _vel_right;
-
   public:
     SSSA(sim::World *w, const sim::Vec3 &pos = sim::Vec3(0., 0., 0.08),
          const osg::Vec4 &chasis_color = osg::Vec4(0., 0.1, 0.7, 0.6));
+    ~SSSA();
 
     const sim::Body *chassis() const { return _chasis; }
     sim::Body *chassis() { return _chasis; }
@@ -56,6 +66,9 @@ class SSSA {
     sim::Body *arm() { return _arm.body; }
     const sim::Joint *ballJoint() const { return _ball_joint; }
     sim::Joint *ballJoint() { return _ball_joint; }
+
+    const Vec3 &pos() const { return _chasis->pos(); }
+    const Quat &rot() const { return _chasis->rot(); }
 
     size_t numSockets() const { return 3; }
 
@@ -101,11 +114,11 @@ class SSSA {
 
     void setVelLeft(sim::Scalar vel);
     void addVelLeft(sim::Scalar d);
-    sim::Scalar velLeft() const { return _vel_left; }
+    sim::Scalar velLeft() const { return _wleft.vel; }
 
     void setVelRight(sim::Scalar vel);
     void addVelRight(sim::Scalar d);
-    sim::Scalar velRight() const { return _vel_right; }
+    sim::Scalar velRight() const { return _wright.vel; }
 
     /**
      * Returns position, direction and up vector of specified socket.
