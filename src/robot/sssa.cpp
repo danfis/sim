@@ -310,7 +310,7 @@ void SSSA::_createArm(const osg::Vec4 &color)
     Vec3 axis = _rot * Vec3(0., 1., 0.);
     int id;
     // TODO: find out correct offset
-    Vec3 offset(0., 0., 0.65);
+    Vec3 offset(-0.65, 0., 0.);
 
     b = (sim::ode::BodyCompound *)_world->createBodyCompound();
     id = b->addTriMesh(sssa_arm_verts, sssa_arm_verts_len,
@@ -349,19 +349,19 @@ void SSSA::_createWheels()
     sim::ode::JointHinge *j;
 
     const sim::Vec3 wheel_pos[] = {
-        sim::Vec3( 0.419, -0.458,  0.25),
-        sim::Vec3(-0.424, -0.458,  0.25),
-        sim::Vec3(-0.419, -0.458, -0.160),
-        sim::Vec3(-0.159, -0.458, -0.425),
-        sim::Vec3( 0.159, -0.458, -0.425),
-        sim::Vec3( 0.419, -0.458, -0.160),
+        sim::Vec3( 0.250, -0.458, -0.419),
+        sim::Vec3( 0.250, -0.458,  0.424),
+        sim::Vec3(-0.160, -0.458,  0.419),
+        sim::Vec3(-0.425, -0.458,  0.159),
+        sim::Vec3(-0.425, -0.458, -0.159),
+        sim::Vec3(-0.160, -0.458, -0.419),
 
-        sim::Vec3( 0.419, 0.458,  0.25),
-        sim::Vec3(-0.424, 0.458,  0.25),
-        sim::Vec3(-0.419, 0.458, -0.160),
-        sim::Vec3(-0.159, 0.458, -0.425),
-        sim::Vec3( 0.159, 0.458, -0.425),
-        sim::Vec3( 0.419, 0.458, -0.160)
+        sim::Vec3( 0.250, 0.458, -0.419),
+        sim::Vec3( 0.250, 0.458,  0.424),
+        sim::Vec3(-0.160, 0.458,  0.419),
+        sim::Vec3(-0.425, 0.458,  0.159),
+        sim::Vec3(-0.425, 0.458, -0.159),
+        sim::Vec3(-0.160, 0.458, -0.419)
     };
 
     for (size_t i = 0; i < 6; i++){
