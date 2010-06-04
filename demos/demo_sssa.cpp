@@ -26,7 +26,7 @@ class S : public sim::Sim {
 
         w->setCFM(0.0001);
         w->setERP(0.8);
-        //w->setStepType(World::STEP_TYPE_QUICK);
+        w->setStepType(World::STEP_TYPE_QUICK);
         w->setAutoDisable(0.01, 0.01, 5, 0.);
 
         w->setContactApprox1(true);
@@ -76,29 +76,33 @@ class S : public sim::Sim {
 
     void createRobot()
     {
-        SSSAComp *comp;
-        comp = new SSSAComp(Vec3(0., 0, 1.5));
-        addComponent(comp);
-
-        /*
-        comp = new SSSAComp(Vec3(1.2, 1.2, 1.5));
-        addComponent(comp);
-        comp = new SSSAComp(Vec3(1.2, 2.3, 1.5));
-        addComponent(comp);
-        */
-
-        /*
         sim::robot::SSSA *r1, *r2;
-        r1 = new sim::robot::SSSA(world(), Vec3(2., 2., 1.));
-        r1->setArmOffset(M_PI / 2.);
+        r1 = new sim::robot::SSSA(world(), Vec3(2., 2., .6));
         r1->activate();
 
-        r2 = new sim::robot::SSSA(world(), Vec3(.72, 2., 1.),
-                                  Quat(Vec3(0., 0., 1.), M_PI / 2.));
+        r2 = new sim::robot::SSSA(world(), Vec3(.746, 2., .6));
         r2->activate();
 
         DBG("can connect: " << r1->canConnectTo(*r2));
-        */
+        r1->connectTo(*r2);
+
+        SSSAComp *comp;
+        comp = new SSSAComp(r1);
+        addComponent(comp);
+
+        r2 = new sim::robot::SSSA(world(), Vec3(2., 3.254, .6),
+                                  Quat(Vec3(0., 0., 1.), M_PI / 2.));
+        r2->activate();
+        DBG("can connect: " << r2->canConnectTo(*r1));
+        r2->connectTo(*r1);
+
+
+        r2 = new sim::robot::SSSA(world(), Vec3(2., 0.746, .6),
+                                  Quat(Vec3(0., 0., 1.), -M_PI / 2.));
+        r2->activate();
+        DBG("can connect: " << r2->canConnectTo(*r1));
+        r2->connectTo(*r1);
+
     }
 
 };

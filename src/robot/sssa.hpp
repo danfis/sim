@@ -51,7 +51,7 @@ class SSSA {
     belt_t _wright;
 
     sim::robot::SSSA *_ball_conn; //!< Robot connected to arm's ball
-    sim::ode::JointHinge *_ball_joint; //!< Joint used for connection via arm
+    sim::Joint *_ball_joint; //!< Joint used for connection via arm
 
     sim::robot::SSSA *_sock_conn[3]; //!< Robots connected to sockets
 

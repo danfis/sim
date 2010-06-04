@@ -10,13 +10,20 @@ SSSAComp::SSSAComp(const sim::Vec3 &pos)
 {
 }
 
+SSSAComp::SSSAComp(sim::robot::SSSA *robot)
+    : _sim(0), _robot(robot), _pos(robot->pos())
+{
+}
+
 void SSSAComp::init(sim::Sim *sim)
 {
     _sim = sim;
 
-    _robot = new sim::robot::SSSA(_sim->world(), _pos);//, Quat(Vec3(0., 0., 1.), M_PI / 2.));
-    _robot->activate();
-    DBG(this << " " << DBGV(_pos));
+    if (!_robot){
+        _robot = new sim::robot::SSSA(_sim->world(), _pos);//, Quat(Vec3(0., 0., 1.), M_PI / 2.));
+        _robot->activate();
+        DBG(this << " " << DBGV(_pos));
+    }
 
     _sim->regPostStep(this);
 

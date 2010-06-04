@@ -13,6 +13,9 @@ class SSSAComp : public sim::Component {
 
   public:
     SSSAComp(const sim::Vec3 &pos);
+    SSSAComp(sim::robot::SSSA *robot);
+
+    sim::robot::SSSA *robot() { return _robot; }
 
     void init(sim::Sim *sim);
     void finish();

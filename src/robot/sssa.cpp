@@ -138,13 +138,13 @@ void SSSA::socketSetup(size_t idx, Vec3 *pos, Vec3 *dir, Vec3 *up) const
 
     if (idx == 0){
         offset = Vec3(0., off, 0.);
-        uporig = Vec3(0., 0., 1.);
+        uporig = Vec3(1., 0., 0.);
     }else if (idx == 1){
-        offset = Vec3(0., 0., off);
-        uporig = Vec3(-1., 0., 0.);
+        offset = Vec3(off, 0., 0.);
+        uporig = Vec3(0., 0., -1.);
     }else if (idx == 2){
         offset = Vec3(0., -off, 0.);
-        uporig = Vec3(0., 0., 1.);
+        uporig = Vec3(1., 0., 0.);
     }
 
     // get direction vector
@@ -164,10 +164,10 @@ void SSSA::socketSetup(size_t idx, Vec3 *pos, Vec3 *dir, Vec3 *up) const
 void SSSA::ballSetup(Vec3 *pos, Vec3 *dir, Vec3 *up) const
 {
     //const Scalar off = 0.720;
-    const Vec3 offset(0., 0., -0.2); // offset from center of arm
+    const Vec3 offset(-0.07, 0., 0.); // offset from center of arm
 
     *dir = _arm.body->rot() * offset;
-    *up = _arm.body->rot() * Vec3(-1., 0., 0.);
+    *up = _arm.body->rot() * Vec3(0., 0., 1.);
     *pos = _arm.body->pos() + *dir;
     dir->normalize();
     up->normalize();
@@ -176,7 +176,7 @@ void SSSA::ballSetup(Vec3 *pos, Vec3 *dir, Vec3 *up) const
 int SSSA::canConnectTo(const sim::robot::SSSA &robot) const
 {
     // maximal distance between ball and socket
-    const Scalar max_dist = 0.5;
+    const Scalar max_dist = 0.01;
     // maximal angle (about x, y and z axis) ball and socket can differ
     const Scalar max_angle = 0.1;
     Vec3 ball_pos, ball_dir, ball_up;
@@ -186,6 +186,7 @@ int SSSA::canConnectTo(const sim::robot::SSSA &robot) const
 
     // obtain position and direction of this robot's ball
     ballSetup(&ball_pos, &ball_dir, &ball_up);
+    DBG("ball setup: " << DBGV(ball_pos) << ", " << DBGV(ball_dir));
 
     for (size_t i = 0; i < 3; i++){
         // check if socket isn't already connected
@@ -194,9 +195,11 @@ int SSSA::canConnectTo(const sim::robot::SSSA &robot) const
 
         // obtain pos and dir of robot's socket
         robot.socketSetup(i, &pos, &dir, &up);
+        DBG("sock " << i << ": " << DBGV(pos) << ", " << DBGV(dir));
 
         // compute distance between ball and socket
         dist = (ball_pos - pos).length();
+        DBG("  dist: " << dist);
         if (dist > max_dist)
             continue;
 
@@ -206,7 +209,7 @@ int SSSA::canConnectTo(const sim::robot::SSSA &robot) const
         // socket's dir reversed
         dir = -dir;
         rot_diff = (dir - ball_dir).length();
-        DBG("  " << i << " rot_diff: " << rot_diff);
+        DBG("  rot_diff: " << rot_diff);
         if (rot_diff > max_angle)
             continue;
         // the code above really isn't computation of angle but dir and
@@ -237,9 +240,7 @@ bool SSSA::connectTo(sim::robot::SSSA &robot)
 
     ballSetup(&pos, &dir, &up);
     _ball_conn = &robot;
-    _ball_joint = (sim::ode::JointHinge *)
-                    _world->createJointHinge(_chasis, robot.chasis(),
-                                             pos, dir);
+    _ball_joint = _world->createJointFixed(_arm.body, robot.chasis());
     robot._sock_conn[socket_num] = this;
 
     _ball_joint->activate();
@@ -283,6 +284,8 @@ void SSSA::activate()
         _wright.body[i]->activate();
         _wright.joint[i]->activate();
     }
+
+    fixArm();
 }
 
 
@@ -313,7 +316,7 @@ void SSSA::_createArm(const osg::Vec4 &color)
     Vec3 axis = _rot * Vec3(0., 1., 0.);
     int id;
     // TODO: find out correct offset
-    Vec3 offset(-0.65, 0., 0.);
+    Vec3 offset(0.65, 0., 0.);
 
     b = (sim::ode::BodyCompound *)_world->createBodyCompound();
     id = b->addTriMesh(sssa_arm_verts, sssa_arm_verts_len,
@@ -323,7 +326,7 @@ void SSSA::_createArm(const osg::Vec4 &color)
     b->visBody(id)->setColor(color);
 
     // TODO: find out bounding box of end of arm
-    b->setMassBox(Vec3(0.5, 0.5, 0.1), 1.);
+    b->setMassBox(Vec3(0.14, 0.5, 0.5), 1.);
 
     b->setPos(_pos - (_rot * offset));
     b->setRot(_rot );
@@ -338,7 +341,8 @@ void SSSA::_createArm(const osg::Vec4 &color)
 
     _arm.joint->setParamBounce(0.01);
     _arm.joint->setParamLimitLoHi(-M_PI / 2., M_PI / 2.);
-    _arm.joint->setParamFMax(50);
+    //_arm.joint->setParamFMax(50);
+    _arm.joint->setParamFMax(200);
     _arm.joint->setParamVel(_arm.vel);
 }
 
