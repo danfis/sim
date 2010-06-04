@@ -441,9 +441,11 @@ sim::Joint *World::createJointFixed(sim::Body *oA, sim::Body *oB)
 }
 
 sim::Joint *World::createJointHinge(sim::Body *oA, sim::Body *oB,
-                                    const Vec3 &anchor, const Vec3 &axis)
+                                    const Vec3 &anchor, const Vec3 &axis,
+                                    Scalar axis_offset)
 {
-    sim::Joint *j = new JointHinge(this, (Body *)oA, (Body *)oB, anchor, axis);
+    sim::Joint *j = new JointHinge(this, (Body *)oA, (Body *)oB, anchor,
+                                   axis, axis_offset);
     _joints.push_back(j);
     return j;
 }

@@ -94,11 +94,18 @@ class JointHinge2 : public Joint {
 class JointHinge : public Joint {
     Vec3 _anchor;
     Vec3 _axis;
+    Scalar _axis_offset;
 
   public:
-    JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis);
+    JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor,
+               const Vec3 &axis, Scalar axis_offset = 0.);
 
     void activate();
+
+    /**
+     * Returns angle position of hinge (-pi..pi)
+     */
+    Scalar angle() const;
 
     virtual bool setParamLimitLoHi(double lo, double hi);
     virtual void paramLimitLoHi(double *lo, double *hi) const;

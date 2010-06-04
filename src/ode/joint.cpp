@@ -157,8 +157,10 @@ double JointHinge2::paramBounce() const
 
 
 
-JointHinge::JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis)
-    : Joint(w, oA, oB), _anchor(anchor), _axis(axis)
+JointHinge::JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor,
+                       const Vec3 &axis, Scalar axis_offset)
+    : Joint(w, oA, oB), _anchor(anchor),
+      _axis(axis), _axis_offset(axis_offset)
 {
     dJointID joint;
 
@@ -173,6 +175,11 @@ void JointHinge::activate()
 
     dJointSetHingeAnchor(_joint, _anchor.x(), _anchor.y(), _anchor.z());
     dJointSetHingeAxis(_joint, _axis.x(), _axis.y(), _axis.z());
+}
+
+Scalar JointHinge::angle() const
+{
+    return dJointGetHingeAngle(_joint);
 }
 
 bool JointHinge::setParamLimitLoHi(double lo, double hi)
