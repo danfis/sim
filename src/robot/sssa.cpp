@@ -56,10 +56,10 @@ void SSSA::fixArm()
 {
     Scalar angle = armAngle();
 
-    setVelArm(0.);
-
     _arm.joint->setParamLimitLoHi(angle, angle);
     _arm.fixed = true;
+
+    setVelArm(0.);
 }
 void SSSA::unfixArm()
 {
@@ -85,18 +85,21 @@ bool SSSA::reachArmAngle(Scalar angle)
 
 void SSSA::setVelArm(sim::Scalar vel)
 {
-    if (!_arm.fixed){
-        _arm.vel = vel;
-        _arm.joint->setParamVel(vel);
+    _arm.vel = vel;
+    _arm.joint->setParamVel(vel);
+
+    if (!isZero(vel)){
+        unfixArm();
+    }else if (!_arm.fixed){
+        fixArm();
     }
 }
 
 void SSSA::addVelArm(sim::Scalar d)
 {
-    if (!_arm.fixed){
-        setVelArm(_arm.vel + d);
-    }
+    setVelArm(_arm.vel + d);
 }
+
 
 void SSSA::setVelLeft(sim::Scalar v)
 {

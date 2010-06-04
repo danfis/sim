@@ -16,7 +16,6 @@ void SSSAComp::init(sim::Sim *sim)
 
     _robot = new sim::robot::SSSA(_sim->world(), _pos);//, Quat(Vec3(0., 0., 1.), M_PI / 2.));
     _robot->activate();
-    //_robot->fixArm();
     DBG(this << " " << DBGV(_pos));
 
     _sim->regPostStep(this);
@@ -82,5 +81,5 @@ void SSSAComp::_keyPressedMsg(const sim::MessageKeyPressed &msg)
     }else if (key == 'b'){
         _robot->reachArmAngle(-M_PI / 4.);
     }
-    DBG("Velocity: " << _robot->velLeft() << " " << _robot->velRight());
+    DBG("Velocity: " << _robot->velLeft() << " " << _robot->velRight() << " " << _robot->velArm());
 }
