@@ -336,6 +336,7 @@ class Sim {
     virtual void init();
     virtual void finish();
     virtual bool done();
+    virtual void step();
 
     /**
      * Run simulation.

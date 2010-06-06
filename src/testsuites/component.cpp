@@ -25,7 +25,8 @@ using std::endl;
 using std::cerr;
 
 #include "cu.h"
-#include "sim/sim.hpp"
+#include <sim/sim.hpp>
+#include <sim/ode/world.hpp>
 
 class Comp : public sim::Component {
   public:
@@ -61,6 +62,7 @@ TEST(compTearDown)
 TEST(compPrePostStep)
 {
     sim::Sim s;
+    s.setWorld(new sim::ode::World());
     s.visWorld()->setWindow(false);
 
     Comp *c = new Comp();
@@ -184,6 +186,7 @@ TEST(compMsg)
 
 
     sim::Sim s;
+    s.setWorld(new sim::ode::World());
     s.visWorld()->setWindow(false);
 
     C1 *c1 = new C1();

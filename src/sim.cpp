@@ -372,6 +372,12 @@ bool Sim::done()
     return done;
 }
 
+void Sim::step()
+{
+    _stepWorld();
+    _stepVisWorld();
+}
+
 void Sim::finish()
 {
     std::cerr << std::endl;

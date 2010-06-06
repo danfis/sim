@@ -1,0 +1,299 @@
+{
+   fglrx param
+   Memcheck:Param
+   ioctl(generic)
+   fun:ioctl
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx cond1
+   Memcheck:Cond
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx cond
+   Memcheck:Cond
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx addr4
+   Memcheck:Addr4
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx addr8
+   Memcheck:Addr8
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx addr8 2
+   Memcheck:Addr8
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+   obj:*
+}
+
+{
+   param
+   Memcheck:Param
+   ioctl(generic)
+   fun:ioctl
+   obj:*
+}
+{
+   fglrx malloc
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+
+{
+   fglrx leak 1
+   Memcheck:Leak
+   fun:malloc
+   fun:XInitExtension
+   fun:XkbUseExtension
+   fun:XOpenDisplay
+   fun:ADL_Main_Control_Initialize
+   fun:ADL_Main_Control_Create
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx leak 2
+   Memcheck:Leak
+   fun:malloc
+   fun:XInitExtension
+   fun:XextAddDisplay
+   fun:LnxXextGPUMapInfo
+   fun:ADL_Main_Control_Refresh
+   fun:ADL_Main_Control_Initialize
+   fun:ADL_Main_Control_Create
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx leak 3
+   Memcheck:Leak
+   fun:malloc
+   fun:_xcb_map_new
+   fun:_xcb_in_init
+   fun:xcb_connect_to_fd
+   fun:xcb_connect_to_display_with_auth_info
+   fun:xcb_connect
+   fun:_XConnectXCB
+   fun:XOpenDisplay
+   fun:ADL_Main_Control_Initialize
+   fun:ADL_Main_Control_Create
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx leak 4
+   Memcheck:Leak
+   fun:malloc
+   fun:AllocateContext
+   fun:OpenPCS
+   fun:amdPcsOpenX11
+   fun:ADL_Main_Control_Initialize
+   fun:ADL_Main_Control_Create
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx leak 5
+   Memcheck:Leak
+   fun:malloc
+   fun:_xgeCheckExtInit
+   fun:xgeExtRegister
+   fun:XextAddDisplay
+   fun:LnxXextGPUMapInfo
+   fun:ADL_Main_Control_Refresh
+   fun:ADL_Main_Control_Initialize
+   fun:ADL_Main_Control_Create
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx leak 6 
+   Memcheck:Leak
+   fun:malloc
+   fun:Priv_Main_Control_Refresh
+   fun:ADL_Main_Control_Refresh
+   fun:ADL_Main_Control_Initialize
+   fun:ADL_Main_Control_Create
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx leak 7
+   Memcheck:Leak
+   fun:malloc
+   fun:_XReply
+   fun:LnxXextEscape
+   fun:Send
+   fun:Pack_DI_AdapterCaps_Get
+   fun:ADL_Workstation_AdapterNumOfGLSyncConnectors_Get
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx leak 8
+   Memcheck:Leak
+   fun:malloc
+   fun:xgeExtRegister
+   fun:XextAddDisplay
+   fun:LnxXextGPUMapInfo
+   fun:ADL_Main_Control_Refresh
+   fun:ADL_Main_Control_Initialize
+   fun:ADL_Main_Control_Create
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx leak 9
+   Memcheck:Leak
+   fun:malloc
+   fun:realloc
+   fun:get_lazyreply
+   fun:xcb_get_extension_data
+   fun:xcb_prefetch_maximum_request_length
+   fun:xcb_get_maximum_request_length
+   fun:XOpenDisplay
+   fun:ADL_Main_Control_Initialize
+   fun:ADL_Main_Control_Create
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx leak 10
+   Memcheck:Leak
+   fun:malloc
+   fun:XextAddDisplay
+   fun:LnxXextGPUMapInfo
+   fun:ADL_Main_Control_Refresh
+   fun:ADL_Main_Control_Initialize
+   fun:ADL_Main_Control_Create
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx leak 11
+   Memcheck:Leak
+   fun:malloc
+   fun:XextAddDisplay
+   fun:_xgeFindDisplay
+   fun:xgeExtRegister
+   fun:XextAddDisplay
+   fun:LnxXextGPUMapInfo
+   fun:ADL_Main_Control_Refresh
+   fun:ADL_Main_Control_Initialize
+   fun:ADL_Main_Control_Create
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx leak 12
+   Memcheck:Leak
+   fun:malloc
+   fun:ADL_Main_Control_Initialize
+   fun:ADL_Main_Control_Create
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx leak 13
+   Memcheck:Leak
+   fun:malloc
+   fun:AllocateContext
+   fun:OpenPCS
+   fun:amdPcsOpenX11
+   fun:ADL_Main_Control_Initialize
+   fun:ADL_Main_Control_Create
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx leak 14
+   Memcheck:Leak
+   fun:malloc
+   fun:XOpenDisplay
+   fun:ADL_Main_Control_Initialize
+   fun:ADL_Main_Control_Create
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx leak 15
+   Memcheck:Leak
+   fun:malloc
+   fun:local_strdup
+   fun:_dl_map_object
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:_dl_open
+   fun:dlopen_doit
+   fun:_dl_catch_error
+   fun:_dlerror_run
+   fun:dlopen@@GLIBC_2.1
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx leak 16
+   Memcheck:Leak
+   fun:malloc
+   fun:_dl_new_object
+   fun:_dl_map_object_from_fd
+   fun:_dl_map_object
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:_dl_open
+   fun:dlopen_doit
+   fun:_dl_catch_error
+   fun:_dlerror_run
+   fun:dlopen@@GLIBC_2.1
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx leak 17
+   Memcheck:Leak
+   fun:malloc
+   fun:XInitExtension
+   fun:XextAddDisplay
+   fun:_xgeFindDisplay
+   fun:xgeExtRegister
+   fun:XextAddDisplay
+   fun:LnxXextGPUMapInfo
+   fun:ADL_Main_Control_Refresh
+   fun:ADL_Main_Control_Initialize
+   fun:ADL_Main_Control_Create
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+
+{
+   fglrx leak 18
+   Memcheck:Leak
+   fun:malloc
+   fun:_xcb_in_read
+   fun:_xcb_conn_wait
+   fun:xcb_wait_for_reply
+   fun:xcb_query_extension_reply
+   fun:xcb_get_extension_data
+   fun:xcb_prefetch_maximum_request_length
+   fun:xcb_get_maximum_request_length
+   fun:XOpenDisplay
+   fun:ADL_Main_Control_Initialize
+   fun:ADL_Main_Control_Create
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx leak 19
+   Memcheck:Leak
+   fun:malloc
+   fun:Priv_Main_Control_Refresh
+   fun:ADL_Main_Control_Refresh
+   fun:ADL_Main_Control_Initialize
+   fun:ADL_Main_Control_Create
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}
+{
+   fglrx leak 20
+   Memcheck:Leak
+   fun:malloc
+   fun:_dl_map_object_deps
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:_dl_open
+   fun:dlopen_doit
+   fun:_dl_catch_error
+   fun:_dlerror_run
+   fun:dlopen@@GLIBC_2.1
+   obj:/usr/lib/xorg/modules/dri/fglrx_dri.so
+}

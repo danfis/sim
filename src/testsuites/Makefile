@@ -3,7 +3,8 @@
 CXXFLAGS = -g -Wall -pedantic
 CXXFLAGS += -I./ -I../ -Icu/
 CXXFLAGS += $(OSG_CXXFLAGS) $(ODE_CXXFLAGS) $(BT_CXXFLAGS)
-LDFLAGS = -L./ -Lcu/ -lcu -lm -L../ -lsim
+LDFLAGS += -L../ode -lsim-ode
+LDFLAGS += -L./ -Lcu/ -lcu -lm -L../ -lsim
 LDFLAGS += $(OSG_LDFLAGS) $(ODE_LDFLAGS) $(BT_LDFLAGS)
 LDFLAGS += -lrt
 
@@ -30,8 +31,22 @@ check: all
 	@echo "Checking regressions:";
 	./$(CHECK_REG) regressions
 	@echo ""
+
 check-valgrind: all
-	valgrind -q --leak-check=full --show-reachable=yes --trace-children=yes ./test
+	valgrind -q --leak-check=full --show-reachable=yes --trace-children=yes \
+             --suppressions=opengl.supp \
+             --suppressions=fglrx.supp \
+             --suppressions=gen.supp \
+             --gen-suppressions=all --log-file=out --error-limit=no \
+             ./test
+
+check-valgrind-gen-suppressions: all
+	valgrind -q --leak-check=full --show-reachable=yes --trace-children=yes \
+             --suppressions=opengl.supp \
+             --suppressions=fglrx.supp \
+             --suppressions=gen.supp \
+             --gen-suppressions=all --log-file=out --error-limit=no \
+             ./test
 
 cu:
 	$(MAKE) -C cu/
