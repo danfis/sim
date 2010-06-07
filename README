@@ -1,0 +1,12 @@
+License
+--------
+sim is licensed available under LGPLv3 license. Text of license can be found
+at http://www.gnu.org/licenses/lgpl.html or in COPYING.LESSER file
+distributed along with sources.
+
+Documentation
+--------------
+Documentation is automaticaly generated from source code using Doxygen.
+You can generate documentation from doc/ directory:
+    $ make doc
+It will generate HTML documentation into doxy/html directory.
