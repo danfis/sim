@@ -1,0 +1,23 @@
+/*!
+\page man_build How to build sim library
+
+\section man_build_dep Dependencies
+First of all you should check you have installed all dependecies.
+
+Makefiles are written to try to find dependencies by itself. Try to
+run:
+\code $ make check-dep \endcode
+It prints out which libraries wasn't found and why. If you are sure you
+have installed libraries but Makefile didn't find it (it could happen if
+library is not installed in standart paht) you can create Makefile.local
+file where can be defined and modified any variables.
+
+You can also try to run:
+\code $ make showvars \endcode
+It prints all variables and again, if you are not satisfied with values
+assigned to variables you can override them by Makefile.local file.
+
+\section man_build_build Building
+If you have properly set dependecies library and attached demos can be
+build simply by command: \code $ make \endcode
+*/

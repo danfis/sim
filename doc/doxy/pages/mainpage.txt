@@ -2,6 +2,7 @@
 \mainpage
 
 \section man_section Manuals and Tutorials
+- \subpage man_build
 - \subpage man_message
 
 \section dev_section Internals Description.
