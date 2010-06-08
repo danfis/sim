@@ -180,6 +180,9 @@ TAB_SIZE               = 4
 # You can put \n's in the value part of an alias to insert newlines.
 
 ALIASES                =
+ALIASES += shell{2}="\htmlonly <pre class=\"fragment\">$ <b>\1</b> <i>\2</i></pre>\endhtmlonly"
+ALIASES += shellsudo{2}="\htmlonly <pre class=\"fragment\">$ sudo <b>\1</b> <i>\2</i></pre>\endhtmlonly"
+ALIASES += extlink{2}="\htmlonly <a href=\"http://\2\">\1</a> \endhtmlonly \latexonly \1 \endlatexonly"
 
 # Set the OPTIMIZE_OUTPUT_FOR_C tag to YES if your project consists of C
 # sources only. Doxygen will then generate output that is more tailored for C.

@@ -1,23 +1,95 @@
 /*!
 \page man_build How to build sim library
 
+Table of contents:
+- \ref man_build_dep
+    - \ref man_build_dep_ubuntu
+    - \ref man_build_dep_suse
+- \ref man_build_source
+- \ref man_build_build
+
 \section man_build_dep Dependencies
 First of all you should check you have installed all dependecies.
 
 Makefiles are written to try to find dependencies by itself. Try to
-run:
-\code $ make check-dep \endcode
+run: \shell{make,check-dep}
 It prints out which libraries wasn't found and why. If you are sure you
 have installed libraries but Makefile didn't find it (it could happen if
-library is not installed in standart paht) you can create Makefile.local
+library is not installed in standart path) you can create Makefile.local
 file where can be defined and modified any variables.
 
-You can also try to run:
-\code $ make showvars \endcode
+You can also try to run: \shell{make,showvars}
 It prints all variables and again, if you are not satisfied with values
-assigned to variables you can override them by Makefile.local file.
+assigned to variables you can override them using Makefile.local file.
 
-\section man_build_build Building
-If you have properly set dependecies library and attached demos can be
-build simply by command: \code $ make \endcode
+sim library currently depends on
+\extlink{OpenSceneGraph,www.openscenegraph.org} and \extlink{ODE,www.ode.org}.
+Optional dependency is \extlink{SDL,www.libsdl.org} (for joysticks).
+
+Furthemore, it's necessary to have installed either
+\extlink{Git,www.git-scm.org} - if you want to download sources from
+original git repository - or \extlink{Subversion,subversion.tigris.org} - if
+you want to download sources from svn mirror.
+
+
+
+\subsection man_build_dep_ubuntu Dependecies on Ubuntu
+If you are using \extlink{Ubuntu,www.ubuntu.com} and you don't know how to
+install dependecies, here is short guideline.
+
+\extlink{Ubuntu,www.ubuntu.com} has all dependecies in its default
+repository. So to install \extlink{OpenSceneGraph,www.openscenegraph.org}
+and \extlink{ODE,www.ode.org} simply type in
+terminal: \shellsudo{apt-get,install libopenscenegraph-dev libode-dev}
+
+If you want also \extlink{SDL, www.libsdl.org} library install also
+libsdl-dev package: \shellsudo{apt-get,install libsdl-dev}
+
+If you are planning to use git repository you will need git:
+\shellsudo{apt-get,install git-core}
+
+and if you want to use svn mirror instead you will need Subversion:
+\shellsudo{apt-get,install subversion}
+
+
+\subsection man_build_dep_suse Dependecies on OpenSUSE
+On \extlink{OpenSUSE,www.opensuse.org} isn't OpenSceneGraph included in
+standart repositories but \extlink{Packman,packman.links2linux.org}
+repository is great source of packages OpenSUSE doesn't support by default.
+How to add \extlink{Packman,packman.links2linux.org} to list of
+repositories see \extlink{wiki,http://wiki.links2linux.de/wiki/PackMan:FAQ_(en)#YaST}.
+
+If you have added \extlink{Packman,packman.links2linux.org} to
+repositories, libraries can be installed by single command:
+\shellsudo{zypper,install libOpenSceneGraph-devel libode-devel libSDL-devel}
+
+If you will use git repository you need git:
+\shellsudo{zypper,install git}
+or Subversion if you will use svn mirror:
+\shellsudo{zypper,install subversion}
+
+
+
+\section man_build_source Source Code
+Original source code is versioned in Git repository currently located at
+http://git.danfis.cz/sim.git. So you can clone repository by:
+\shell{git,clone http://git.danfis.cz/sim.git}
+
+Git repository is also every midnight mirrored to svn repository which you
+can checkout by:
+\shell{svn,co https://ipvs.informatik.uni-stuttgart.de/software/repos/software/Simulation/symbricator-simulation/branches/ctu/sim}
+
+If you want to download a tarball with sources or only check history of
+repository you can do that using \extlink{pitweb,pitweb.danfis.cz} web
+interface \extlink{here,gitview.danfis.cz/sim}.
+
+
+
+\section man_build_build Build
+If you have installed all dependecies and downloaded source codes you can
+build the library using single command:
+\shell{make, }
+
+This will build all static libraries and demos (located in demos/ directory).
+
 */
