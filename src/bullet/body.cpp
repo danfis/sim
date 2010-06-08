@@ -23,13 +23,14 @@
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
 #include <BulletCollision/CollisionShapes/btCylinderShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
-#include <BulletCollision/CollisionShapes/btConvexHullShape.h>
+#include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <osg/ShapeDrawable>
 
 #include "sim/bullet/body.hpp"
 #include "sim/bullet/world.hpp"
 #include "sim/bullet/math.hpp"
 #include "sim/msg.hpp"
+#include "sim/common.hpp"
 
 namespace sim {
 
@@ -49,12 +50,34 @@ void BodyMotionState::setWorldTransform(const btTransform &world)
 
     pos = _world.getOrigin();
     rot = _world.getRotation();
-    DBG("pos: " << DBGV(vFromBt(pos)));
-    _vis->setPosRot(vFromBt(pos), qFromBt(rot));
+    //DBG("pos: " << DBGV(vFromBt(pos)));
+    _body->setPosRot(vFromBt(pos), qFromBt(rot));
+    if (_body->visBody())
+        _body->visBody()->setPosRot(vFromBt(pos), qFromBt(rot));
+}
+
+void BodyMotionStateCompound::getWorldTransform(btTransform &world) const
+{
+    world = _world;
+}
+
+void BodyMotionStateCompound::setWorldTransform(const btTransform &world)
+{
+    btVector3 pos;
+    btQuaternion rot;
+
+    _world = world;
+
+    pos = _world.getOrigin();
+    rot = _world.getRotation();
+    //DBG("pos: " << DBGV(vFromBt(pos)));
+    _body->setPosRot(vFromBt(pos), qFromBt(rot));
+
+    _body->_applyShapesToVis();
 }
 
 Body::Body(World *w)
-    : _world(w), _body(0), _shape(0), _motion_state(0), _vis(0),
+    : _world(w), _body(0), _shape(0), _motion_state(0),
       _damping_lin(0.2), _damping_ang(0.2)
 {
 }
@@ -71,72 +94,18 @@ Body::~Body()
         delete _vis;
 }
 
-void Body::setPos(const Vec3 &v)
-{
-    btTransform trans;
-    Vec3 pos = v;
-
-    _motion_state->getWorldTransform(trans);
-
-    trans.setOrigin(vToBt(pos));
-    _motion_state->setWorldTransform(trans);
-    _body->setWorldTransform(trans);
-}
-
-void Body::setRot(const Quat &q)
-{
-    btTransform trans;
-    _motion_state->getWorldTransform(trans);
-
-    trans.setRotation(qToBt(q));
-    _motion_state->setWorldTransform(trans);
-    _body->setWorldTransform(trans);
-}
-
-void Body::pos(Scalar *x, Scalar *y, Scalar *z) const
-{
-    Vec3 v = pos();
-    *x = v.x();
-    *y = v.y();
-    *z = v.z();
-}
-Vec3 Body::pos() const
-{
-    btTransform trans;
-    _motion_state->getWorldTransform(trans);
-    return vFromBt(trans.getOrigin());
-}
-
-void Body::rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const
-{
-    Quat q = rot();
-    *x = q.x();
-    *y = q.y();
-    *z = q.z();
-    *w = q.w();
-}
-
-Quat Body::rot() const
-{
-    btTransform trans;
-    _motion_state->getWorldTransform(trans);
-    return qFromBt(trans.getRotation());
-}
-
-void Body::setPosRot(const Vec3 &v, const Quat &q)
-{
-    btTransform trans;
-    _motion_state->getWorldTransform(trans);
-    trans.setOrigin(vToBt(v));
-    trans.setRotation(qToBt(q));
-    _motion_state->setWorldTransform(trans);
-    _body->setWorldTransform(trans);
-}
 
 void Body::activate()
 {
     _body->setDamping(_damping_lin, _damping_ang);
-    _world->addBody(this);
+
+    _applyPosRotToBt();
+
+    _world->world()->addRigidBody(_body);
+
+    if (_world->visWorld() && _vis){
+        _world->visWorld()->addBody(_vis);
+    }
 }
 
 void Body::deactivate()
@@ -153,7 +122,7 @@ void Body::_set(VisBody *o, btCollisionShape *shape, Scalar mass)
         setVisBody(o);
 
     _shape = shape;
-    _motion_state = new BodyMotionState(o);
+    _motion_state = new BodyMotionState(this);
 
     if (!btFuzzyZero(mass))
         _shape->calculateLocalInertia(mass, local_inertia);
@@ -161,6 +130,16 @@ void Body::_set(VisBody *o, btCollisionShape *shape, Scalar mass)
     _body = new btRigidBody(mass, _motion_state, _shape, local_inertia);
 
     _body->setUserPointer(this);
+}
+
+void Body::_applyPosRotToBt()
+{
+    btTransform world;
+    world.setIdentity();
+    world.setOrigin(vToBt(pos()));
+    world.setRotation(qToBt(rot()));
+    _motion_state->setWorldTransform(world);
+    _body->setWorldTransform(world);
 }
 
 
@@ -251,18 +230,285 @@ BodyTriMesh::BodyTriMesh(World *w, const sim::Vec3 *coords, size_t coords_len,
     _set(vis, shape, 0.);
 }
 
-BodyConvexHull::BodyConvexHull(World *w, const sim::Vec3 *points, size_t points_len,
-                               Scalar mass, VisBody *vis)
-    : Body(w)
+BodyCompound::BodyCompound(World *w)
+    : Body(w),
+      _next_id(1), _mass(0), _local_inertia(0., 0., 0.)
 {
-    btConvexHullShape *shape;
+    _shape = new btCompoundShape;
+    _motion_state = new BodyMotionStateCompound(this);
+}
 
-    shape = new btConvexHullShape();
-    for (size_t i = 0; i < points_len; i++){
-        shape->addPoint(vToBt(points[i]));
+BodyCompound::~BodyCompound()
+{
+    for_each(_shapes_it_t, _shapes){
+        if (it->second->vis)
+            delete it->second->vis;
+
+        ((btCompoundShape *)_shape)->removeChildShape(it->second->shape);
+        delete it->second->shape;
+
+        delete it->second;
+    }
+    _shapes.clear();
+}
+
+int BodyCompound::addCube(Scalar w, VisBody *vis,
+                          const Vec3 &pos, const Quat &rot)
+{
+    return addBox(Vec3(w, w, w), vis, pos, rot);
+}
+
+int BodyCompound::addBox(const Vec3 &dim, VisBody *vis,
+                         const Vec3 &pos, const Quat &rot)
+{
+    btCollisionShape *shape = new btBoxShape(vToBt(dim / 2));
+
+    if (vis == SIM_BODY_DEFAULT_VIS)
+        vis = new VisBodyBox(dim);
+
+    return _addShape(shape, vis, pos, rot);
+}
+
+int BodyCompound::addSphere(Scalar radius, VisBody *vis,
+                            const Vec3 &pos, const Quat &rot)
+{
+    btCollisionShape *shape = new btSphereShape(radius);
+
+    if (vis == SIM_BODY_DEFAULT_VIS)
+        vis = new VisBodySphere(radius);
+
+    return _addShape(shape, vis, pos, rot);
+}
+
+int BodyCompound::addCylinderZ(Scalar radius, Scalar height, VisBody *vis,
+                            const Vec3 &pos, const Quat &rot)
+{
+    Vec3 v(radius, radius, height / 2.);
+    btCollisionShape *shape = new btCylinderShape(vToBt(v));
+
+    if (vis == SIM_BODY_DEFAULT_VIS)
+        vis = new VisBodyCylinder(radius, height);
+
+    return _addShape(shape, vis, pos, rot);
+}
+
+int BodyCompound::addCylinderY(Scalar radius, Scalar height, VisBody *vis,
+                               const Vec3 &pos, const Quat &rot)
+{
+    Quat r = rot * Quat(Vec3(1., 0., 0.), M_PI * .5);
+    return addCylinderZ(radius, height, vis, pos, r);
+}
+
+int BodyCompound::addCylinderX(Scalar radius, Scalar height, VisBody *vis,
+                               const Vec3 &pos, const Quat &rot)
+{
+    Quat r = rot * Quat(Vec3(0., 1., 0.), M_PI * .5);
+    return addCylinderZ(radius, height, vis, pos, r);
+}
+
+int BodyCompound::addTriMesh(const sim::Vec3 *coords, size_t coords_len,
+                             const unsigned int *ids, size_t ids_len,
+                             VisBody *vis, const Vec3 &pos, const Quat &rot)
+{
+    btTriangleMesh *tris = new btTriangleMesh();
+
+    for (size_t i = 0; i < ids_len; i += 3){
+        tris->addTriangle(vToBt(coords[ids[i]]),
+                          vToBt(coords[ids[i + 1]]),
+                          vToBt(coords[ids[i + 2]]));
     }
 
-    _set(vis, shape, mass);
+    if (vis == SIM_BODY_DEFAULT_VIS)
+        vis = new sim::VisBodyTriMesh(coords, coords_len, ids, ids_len);
+
+    btBvhTriangleMeshShape *shape = new btBvhTriangleMeshShape(tris, true);
+
+    return _addShape(shape, vis, pos, rot);
+}
+
+
+void BodyCompound::setMassCube(Scalar w, Scalar mass)
+{
+    setMassBox(Vec3(w, w, w), mass);
+}
+
+void BodyCompound::setMassBox(const Vec3 &dim, Scalar mass)
+{
+    _mass = mass;
+
+    if (!isZero(_mass)){
+        btVector3 local_inertia(0,0,0);
+
+        btCollisionShape *shape = new btBoxShape(vToBt(dim / 2.));
+        shape->calculateLocalInertia(_mass, local_inertia);
+        delete shape;
+
+        _local_inertia = vFromBt(local_inertia);
+    }else{
+        _local_inertia.set(0., 0., 0.);
+    }
+}
+
+void BodyCompound::setMassSphere(Scalar radius, Scalar mass)
+{
+    _mass = mass;
+
+    if (!isZero(_mass)){
+        btVector3 local_inertia(0,0,0);
+
+        btCollisionShape *shape = new btSphereShape(radius);
+        shape->calculateLocalInertia(_mass, local_inertia);
+        delete shape;
+
+        _local_inertia = vFromBt(local_inertia);
+    }else{
+        _local_inertia.set(0., 0., 0.);
+    }
+}
+
+void BodyCompound::setMassCylinder(Scalar radius, Scalar height, Scalar mass)
+{
+    _mass = mass;
+
+    if (!isZero(_mass)){
+        btVector3 local_inertia(0,0,0);
+
+        Vec3 v(radius, radius, height / 2.);
+        btCollisionShape *shape = new btCylinderShape(vToBt(v));
+        shape->calculateLocalInertia(_mass, local_inertia);
+        delete shape;
+
+        _local_inertia = vFromBt(local_inertia);
+    }else{
+        _local_inertia.set(0., 0., 0.);
+    }
+}
+
+void BodyCompound::rmShape(int id)
+{
+    shape_t *s;
+
+    s = shape(id);
+    if (!s)
+        return;
+
+    if (s->vis)
+        delete s->vis;
+
+    ((btCompoundShape *)_shape)->removeChildShapeByIndex(s->idx);
+    delete s->shape;
+
+    delete s;
+
+    _shapes.erase(id);
+}
+
+void BodyCompound::activate()
+{
+    _body = new btRigidBody(_mass, _motion_state, _shape, vToBt(_local_inertia));
+    _body->setUserPointer(this);
+
+    _body->setDamping(_damping_lin, _damping_ang);
+
+    _applyPosRotToBt();
+    _applyShapesToVis();
+
+    _world->world()->addRigidBody(_body);
+
+    if (_world->visWorld()){
+        for_each(_shapes_it_t, _shapes){
+            _world->visWorld()->addBody(it->second->vis);
+        }
+    }
+}
+
+
+
+VisBody *BodyCompound::visBody(int id)
+{
+    shape_t *s = shape(id);
+    if (!s)
+        return 0;
+    return s->vis;
+}
+
+const VisBody *BodyCompound::visBody(int id) const
+{
+    const shape_t *s = shape(id);
+    if (!s)
+        return 0;
+    return s->vis;
+}
+
+void BodyCompound::visBodyAll(std::list<const VisBody *> *list) const
+{
+    for_each(_shapes_cit_t, _shapes){
+        list->push_back(it->second->vis);
+    }
+}
+
+void BodyCompound::visBodyAll(std::list<VisBody *> *list)
+{
+    for_each(_shapes_cit_t, _shapes){
+        list->push_back(it->second->vis);
+    }
+}
+
+
+
+int BodyCompound::_addShape(btCollisionShape *shape, VisBody *vis,
+                            const Vec3 &pos, const Quat &rot)
+{
+    shape_t *s;
+    int idx = ((btCompoundShape *)_shape)->getNumChildShapes();
+   
+    s = new shape_t(shape, vis, pos, rot, idx);
+
+    _shapes.insert(_shapes_t::value_type(_next_id, s));
+
+    btTransform tr;
+    tr.setIdentity();
+    tr.setOrigin(vToBt(pos));
+    tr.setRotation(qToBt(rot));
+
+    ((btCompoundShape *)_shape)->addChildShape(tr, shape);
+
+    return _next_id++;
+}
+
+BodyCompound::shape_t *BodyCompound::shape(int ID)
+{
+    _shapes_it_t it = _shapes.find(ID);
+
+    if (it != _shapes.end())
+        return it->second;
+    return 0;
+}
+
+const BodyCompound::shape_t *BodyCompound::shape(int ID) const
+{
+    _shapes_cit_t it = _shapes.find(ID);
+
+    if (it != _shapes.end())
+        return it->second;
+    return 0;
+}
+
+void BodyCompound::_applyShapesToVis()
+{
+    VisBody *vis;
+    int idx;
+    btTransform world(qToBt(rot()), vToBt(pos()));
+    btTransform tr;
+
+    for_each(_shapes_it_t, _shapes){
+        vis = it->second->vis;
+        idx = it->second->idx;
+
+        tr = world * ((btCompoundShape *)_shape)->getChildTransform(idx);
+        vis->setPos(vFromBt(tr.getOrigin()));
+        vis->setRot(qFromBt(tr.getRotation()));
+    }
 }
 
 } /* namespace bullet */

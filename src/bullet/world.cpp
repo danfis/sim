@@ -141,12 +141,20 @@ sim::Body *World::createBodyCylinderZ(Scalar radius, Scalar height, Scalar mass,
 {
     return new BodyCylinder(this, radius, height, mass, vis);
 }
+
 sim::Body *World::createBodyTriMesh(const Vec3 *coords, size_t coords_len,
                                     const unsigned int *indices, size_t indices_len,
-                                    VisBody *vis)
+                                    Scalar mass, VisBody *vis)
 {
     return new BodyTriMesh(this, coords, coords_len, indices, indices_len, vis);
 }
+
+sim::Body *World::createBodyCompound()
+{
+    return 0;
+}
+
+
 
 sim::Joint *World::createJointFixed(sim::Body *oA, sim::Body *oB)
 {
@@ -165,12 +173,6 @@ sim::Joint *World::createJointHinge2(sim::Body *oA, sim::Body *oB, const Vec3 &a
     return new JointHinge2(this, (Body *)oA, (Body *)oB, anchor, axis1, axis2);
 }
 
-
-sim::ActuatorWheelCylinderX *World::createActuatorWheelCylinderX
-                                (Scalar radius, Scalar height, Scalar mass)
-{
-    return new ActuatorWheelCylinderX(this, radius, height, mass);
-}
 
 
 } /* namespace bullet */

@@ -32,7 +32,6 @@
 #include "sim/world.hpp"
 #include "sim/bullet/body.hpp"
 #include "sim/bullet/joint.hpp"
-#include "sim/bullet/actuator.hpp"
 #include "sim/bullet/collision_detection.hpp"
 
 namespace sim {
@@ -54,6 +53,9 @@ class World : public sim::World {
   public:
     World();
     virtual ~World();
+
+    btDynamicsWorld *world() { return _world; }
+    const btDynamicsWorld *world() const { return _world; }
 
     /**
      * Initializes world.
@@ -83,16 +85,14 @@ class World : public sim::World {
                                    VisBody *vis = SIM_BODY_DEFAULT_VIS);
     sim::Body *createBodyTriMesh(const Vec3 *coords, size_t coords_len,
                                  const unsigned int *indices, size_t indices_len,
-                                 VisBody *vis = SIM_BODY_DEFAULT_VIS);
+                                 Scalar mass = 0., VisBody *vis = SIM_BODY_DEFAULT_VIS);
+    sim::Body *createBodyCompound();
 
     sim::Joint *createJointFixed(sim::Body *oA, sim::Body *oB);
     sim::Joint *createJointHinge(sim::Body *A, sim::Body *oB,
                                  const Vec3 &anchor, const Vec3 &axis);
     sim::Joint *createJointHinge2(sim::Body *A, sim::Body *oB, const Vec3 &anchor,
                                   const Vec3 &axis1, const Vec3 &axis2);
-
-    sim::ActuatorWheelCylinderX *createActuatorWheelCylinderX
-                                    (Scalar radius, Scalar height, Scalar mass);
 
 
     /**

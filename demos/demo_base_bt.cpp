@@ -26,20 +26,38 @@
 #include "sim/sim.hpp"
 #include "msg.hpp"
 
+#include "bunny.hpp"
+
 using namespace sim::bullet;
 using sim::Vec3;
-
+using sim::Quat;
+using namespace std;
 
 
 class S : public sim::Sim {
   public:
     S()
-        : Sim()
+        : sim::Sim()
     {
+        setTimeStep(sim::Time::fromMs(20));
+        setTimeSubSteps(2);
+
+        setTimeLimit(sim::Time::fromMs(100000));
+        pauseSimulation();
+
         World *w = new World();
         sim::Body *b;
 
         setWorld(w);
+        //w->setCFM(1e-10);
+        //w->setCFM(0.01);
+        //w->setERP(0.5);
+        //w->setStepType(World::STEP_TYPE_QUICK);
+        //w->setAutoDisable(0.01, 0.01, 5, 0.);
+        //w->setContactSoftCFM(0.0000001);
+        //w->setContactApprox1(false);
+        //w->setContactApprox2(false);
+        //w->setContactBounce(0.1, 0.1);
     
         /*
         b = w->createBodyBox(sim::Vec3(20., 20., 1.), 0.);
@@ -47,15 +65,11 @@ class S : public sim::Sim {
         b->activate();
         */
 
-        b = w->createBodyCube(1., 1.);
-        b->visBody()->setColor(osg::Vec4(0.5, 0.5, 0.5, 0.5));
-        b->setPos(-6.5, 6.5, -5.);
-        b->activate();
-
         b = w->createBodySphere(1.3, 2.);
         b->visBody()->setColor(osg::Vec4(0.5, 0.1, 0.8, 0.3));
-        b->setPos(-3., 0., 0.);
+        b->setPos(-3., 0., -3.);
         b->activate();
+
 
         b = w->createBodyCube(1., 1.);
         b->visBody()->setColor(osg::Vec4(0., 0., 0., 1.));
@@ -63,63 +77,131 @@ class S : public sim::Sim {
         b->activate();
 
         b = w->createBodyCylinderZ(.5, 1., 3.);
+        b->visBody()->setTexture("wood.ppm");
+        b->visBody()->setColor(1., 0., 0., 1.);
+        b->visBody()->setText("CylZ", 1., osg::Vec4(0., 0., 0., 1.));
         b->setPos(3., 0., 0.);
         b->activate();
 
         b = w->createBodyCylinderX(.5, 1., 3.);
+        b->visBody()->setText("CylX", 1., osg::Vec4(0., 0., 0., 1.));
         b->setPos(0., 3., 0.);
         b->activate();
 
         b = w->createBodyCylinderY(.5, 1., 3.);
+        b->visBody()->setText("CylY", 1., osg::Vec4(0., 0., 0., 1.));
         b->setPos(0., -3., 0.);
         b->activate();
 
+        {
+            int id;
+
+            BodyCompound *c = new BodyCompound(w);
+            c->addCube(1.);
+            c->addBox(Vec3(0.5, 0.1, 0.3), SIM_BODY_DEFAULT_VIS, Vec3(0.7, 0.7, 0.7));
+            c->addSphere(0.7, SIM_BODY_DEFAULT_VIS, Vec3(-0.7, 0.7, 0.7));
+            c->addCylinderZ(0.4, 1., SIM_BODY_DEFAULT_VIS, Vec3(1., 0., 0.));
+            c->addCylinderY(0.4, 1., SIM_BODY_DEFAULT_VIS, Vec3(2., 0., 0.));
+            c->addCylinderX(0.4, 1., SIM_BODY_DEFAULT_VIS, Vec3(3., 0., 0.));
+            c->addTriMesh(bunny_coords, bunny_coords_len,
+                          bunny_ids, bunny_ids_len,
+                          SIM_BODY_DEFAULT_VIS,
+                          Vec3(5., 3., 0.),
+                          Quat(Vec3(1., 0., 0.), M_PI * .5));
+            c->setPos(Vec3(15., 0., 13.));
+            c->activate();
+
+            b = w->createBodyCube(0.5, 1.);
+            b->setPos(15., 0., 15.);
+            b->activate();
+
+            c = new BodyCompound(w);
+            c->addCube(1.);
+            c->addBox(Vec3(0.5, 0.1, 0.3), SIM_BODY_DEFAULT_VIS, Vec3(0.7, 0.7, 0.7));
+            c->addSphere(0.7, SIM_BODY_DEFAULT_VIS, Vec3(-0.7, 0.7, 0.7));
+            c->addCylinderZ(0.4, 1., SIM_BODY_DEFAULT_VIS, Vec3(1., 0., 0.));
+            c->addCylinderY(0.4, 1., SIM_BODY_DEFAULT_VIS, Vec3(2., 0., 0.));
+            c->addCylinderX(0.4, 1., SIM_BODY_DEFAULT_VIS, Vec3(3., 0., 0.));
+            c->addTriMesh(bunny_coords, bunny_coords_len,
+                          bunny_ids, bunny_ids_len,
+                          SIM_BODY_DEFAULT_VIS,
+                          Vec3(5., 3., 0.),
+                          Quat(Vec3(1., 0., 0.), M_PI * .5));
+            c->setPos(Vec3(15., -5., 13.));
+            c->setMassCube(3., 3.);
+            c->activate();
+
+            c = new BodyCompound(w);
+            id = c->addBox(Vec3(15., 15., 0.5));
+            c->visBody(id)->setColor(0.6, 0., 0.6, 0.1);
+            id = c->addBox(Vec3(5., 15., 0.5), SIM_BODY_DEFAULT_VIS,
+                           Vec3(9., 0., 2.),
+                           Quat(Vec3(0., 1., 0.), -M_PI / 4.));
+            c->visBody(id)->setColor(0.6, 0., 0.6, 0.1);
+            id = c->addBox(Vec3(5., 15., 0.5), SIM_BODY_DEFAULT_VIS,
+                           Vec3(-9., 0., 2.),
+                           Quat(Vec3(0., 1., 0.), M_PI / 4.));
+            c->visBody(id)->setColor(0.6, 0., 0.6, 0.1);
+            id = c->addBox(Vec3(19., .5, 5.), SIM_BODY_DEFAULT_VIS,
+                           Vec3(0., 7.5, 2.5));
+            c->visBody(id)->setColor(0.6, 0., 0.6, 0.1);
+            id = c->addBox(Vec3(19., .5, 5.), SIM_BODY_DEFAULT_VIS,
+                           Vec3(0., -7.5, 2.5));
+            c->visBody(id)->setColor(0.6, 0., 0.6, 0.1);
+
+            c->setPos(Vec3(15., 0., 10.));
+            c->activate();
+
+            Vec3 start(13., -2., 20.);
+            for (size_t i = 0; i < 15; i++){
+                for (size_t j = 0; j < 15; j++){
+                    b = w->createBodyCube(0.5, 1.);
+                    b->visBody()->setColor(0., 0.6, 0.6, 0.3);
+                    b->setPos(start + Vec3(0.55 * i, 0.55 * j, 0.));
+                    b->activate();
+                }
+            }
+        }
+
+        /*
         createFixed();
         createHinge();
+        createHingeLim();
+        createHinge2();
+        createHinge2Lim();
         createRobot();
+        createRobotMove(sim::Vec3(10., -10., -4.9));
+        createRobotMove(sim::Vec3(15., -15., -4.9));
+        createSeeSaw();
+        createBunny();
+        */
 
-		int *indices = NULL;
-		Vec3 *vertices = NULL;
-		int indicesSize = 0;
-		int verticesSize = 0;
-		vector<SPoint> points(loadTriangles(rawFile,&indices, &vertices, indicesSize, verticesSize));
-	
-/*
         Vec3 verts[] = { Vec3(-10., 10., -0.5),
                          Vec3(0., 10., -0.8),
-                         Vec3(10., 10., -0.5),
+                         Vec3(10., 10., -0.9),
                          Vec3(-10., 0., 0.5),
                          Vec3(0., 0., 0.),
-                         Vec3(10., 0., 0.7),
+                         Vec3(20., 0., 0.),
                          Vec3(-10., -10., 0.4),
-                         Vec3(0., -10., 1.),
-                         Vec3(10., -10., 0.8) };
-        unsigned int ind[] = { 0, 1, 4,
-                               1, 2, 5,
-                               0, 4, 3,
-                               1, 5, 4,
-                               3, 4, 7,
-                               4, 5, 8,
-                               3, 7, 6,
-                               4, 8, 7 };
-        b = w->createBodyTriMesh(verts, 9, ind, 24);
-*/
-        b = w->createBodyTriMesh(vertices,verticesSize,indices,indicesSize);
-        b->setPos(0., 0., -10.3);
+                         Vec3(0., -20., 0.),
+                         Vec3(20., -20., 0.) };
+        unsigned int ind[] = { 0, 3, 1,
+                               3, 4, 1,
+                               1, 4, 2,
+                               4, 5, 2,
+                               3, 6, 4,
+                               6, 7, 4,
+                               4, 7, 5,
+                               7, 8, 5 };
+        b = w->createBodyTriMesh(verts, 9, ind, 24, 0.);
+        b->visBody()->setColor(0.9, 0.6, 0.3, 1.);
+        b->setPos(0., 0., -5.3);
         b->activate();
-    }
-
-    void init()
-    {
-        sim::Sim::init();
-        for (size_t i = 0; i < 300; i++){
-            visWorld()->step();
-            std::cerr << i << "\r";
-            usleep(10000);
-        }
-        std::cerr << std::endl;
-
-        timeRealRestart();
+        /*
+        b = w->createBodyBox(Vec3(20, 20, 2), 0.);
+        b->setPos(0., 0., -10);
+        b->activate();
+        */
     }
 
   protected:
@@ -152,6 +234,7 @@ class S : public sim::Sim {
         cy->setPos(pos + sim::Vec3(0., 0., 2.));
 
         j = world()->createJointHinge(cu, cy, pos + sim::Vec3(0., 0., 1.), sim::Vec3(0., 1., 0.));
+        DBG(j);
 
         cu->activate();
         cy->activate();
@@ -162,6 +245,7 @@ class S : public sim::Sim {
 
     void createRobot()
     {
+        /*
         sim::Vec3 pos(3., 3., -6.);
         sim::Body *chasis;
         sim::ActuatorWheelCylinderX *w[4];
@@ -188,6 +272,7 @@ class S : public sim::Sim {
         }
 
         chasis->visBody()->setText("Robot", 1., osg::Vec4(0.5, 0.6, 0.3, 1.));
+        */
     }
 };
 

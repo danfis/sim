@@ -36,6 +36,8 @@ namespace bullet {
 
 // Forward declaration
 class World;
+class Body;
+class BodyCompound;
 
 /**
  * Class using which is possible to change VisBody's position according to
@@ -43,14 +45,27 @@ class World;
  * for more info.
  */
 class BodyMotionState : public btMotionState {
-    VisBody *_vis;
+    Body *_body;
     btTransform _world, _offset;
 
   public:
-    BodyMotionState(VisBody *vis,
-                   const btTransform &start = btTransform::getIdentity(),
-                   const btTransform &offset = btTransform::getIdentity())
-        : _vis(vis), _world(start), _offset(offset) {}
+    BodyMotionState(Body *body,
+                    const btTransform &start = btTransform::getIdentity(),
+                    const btTransform &offset = btTransform::getIdentity())
+        : _body(body), _world(start), _offset(offset) {}
+
+    void getWorldTransform(btTransform &worldTrans) const;
+    void setWorldTransform(const btTransform &worldTrans);
+};
+
+class BodyMotionStateCompound : public btMotionState {
+    BodyCompound *_body;
+    btTransform _world;
+
+  public:
+    BodyMotionStateCompound(BodyCompound *body,
+                            const btTransform &start = btTransform::getIdentity())
+        : _body(body), _world(start) {}
 
     void getWorldTransform(btTransform &worldTrans) const;
     void setWorldTransform(const btTransform &worldTrans);
@@ -65,8 +80,7 @@ class Body : public sim::Body {
 
     btRigidBody *_body;
     btCollisionShape *_shape;
-    BodyMotionState *_motion_state;
-    VisBody *_vis;
+    btMotionState *_motion_state;
 
     Scalar _damping_lin, _damping_ang;
 
@@ -89,42 +103,6 @@ class Body : public sim::Body {
     const Scalar &dampingAng() const { return _damping_ang; }
     void setDampingLin(Scalar v) { _damping_lin = v; }
     void setDampingAng(Scalar v) { _damping_ang = v; }
-
-    /* \{ */
-    /**
-     * Set position of body in 3D space.
-     */
-    virtual void setPos(const Vec3 &v);
-    virtual void setPos(const Vec3 *v) { setPos(*v); }
-    virtual void setPos(const Scalar x, const Scalar y, const Scalar z)
-        { setPos(Vec3(x, y, z)); }
-
-    /**
-     * Set rotation of body in 3D space.
-     */
-    virtual void setRot(const Quat &q);
-    virtual void setRot(const Quat *q) { setRot(*q); }
-    virtual void setRot(const Scalar x, const Scalar y, const Scalar z, const Scalar w)
-        { setRot(Quat(x, y, z, w)); }
-
-    /**
-     * Set position and rotation of body at once.
-     */
-    virtual void setPosRot(const Vec3 &v, const Quat &q);
-    virtual void setPosRot(const Vec3 *v, const Quat *q) { setPosRot(*v, *q); }
-
-    /**
-     * Returns position of body.
-     */
-    virtual Vec3 pos() const;
-    virtual void pos(Scalar *x, Scalar *y, Scalar *z) const;
-
-    /**
-     * Returns rotation of body.
-     */
-    virtual Quat rot() const;
-    virtual void rot(Scalar *x, Scalar *y, Scalar *z, Scalar *w) const;
-    /* \} */
 
     /* \{ */
     /**
@@ -151,6 +129,8 @@ class Body : public sim::Body {
      * with BodyMotionState to update its position when needed.
      */
     virtual void _set(VisBody *o, btCollisionShape *shape, Scalar mass);
+
+    virtual void _applyPosRotToBt();
 };
 
 
@@ -222,10 +202,104 @@ class BodyTriMesh : public Body {
 };
 
 
-class BodyConvexHull : public Body {
+
+class BodyCompound : public Body {
+  protected:
+    struct shape_t {
+        btCollisionShape *shape;
+        VisBody *vis;
+        Vec3 pos;
+        Quat rot;
+        int idx;
+        shape_t(btCollisionShape *s, VisBody *v,
+                const Vec3 &pos, const Quat &rot, int idx)
+            : shape(s), vis(v), pos(pos), rot(rot), idx(idx) {}
+    };
+    typedef std::map<int, shape_t *> _shapes_t;
+    typedef _shapes_t::iterator _shapes_it_t;
+    typedef _shapes_t::const_iterator _shapes_cit_t;
+
+    _shapes_t _shapes;
+    int _next_id;
+
+    Scalar _mass;
+    Vec3 _local_inertia;
+
+    friend class BodyMotionStateCompound;
+
   public:
-    BodyConvexHull(World *w, const sim::Vec3 *points, size_t points_len,
-                   Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS);
+    BodyCompound(World *w);
+    virtual ~BodyCompound();
+
+    /* \{ */
+    /**
+     * Adds cube to compound shape.
+     * Visual representation can be provided.
+     * Parameters pos_offset and rot_offset define relative offset of shape
+     * from origin (0., 0., 0.).
+     * Returns ID of shape that can be used lately for modifications.
+     */
+    int addCube(Scalar width,
+                VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                const Quat &rot_offset = Quat(0., 0., 0., 1.));
+    int addBox(const Vec3 &dim,
+               VisBody *vis = SIM_BODY_DEFAULT_VIS,
+               const Vec3 &pos_offset = Vec3(0., 0., 0.),
+               const Quat &rot_offset = Quat(0., 0., 0., 1.));
+    int addSphere(Scalar radius,
+                  VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                  const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                  const Quat &rot_offset = Quat(0., 0., 0., 1.));
+    int addCylinderZ(Scalar radius, Scalar height,
+                     VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                     const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                     const Quat &rot_offset = Quat(0., 0., 0., 1.));
+    int addCylinderY(Scalar radius, Scalar height,
+                     VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                     const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                     const Quat &rot_offset = Quat(0., 0., 0., 1.));
+    int addCylinderX(Scalar radius, Scalar height,
+                     VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                     const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                     const Quat &rot_offset = Quat(0., 0., 0., 1.));
+    int addTriMesh(const sim::Vec3 *coords, size_t coords_len,
+                   const unsigned int *indices, size_t indices_len,
+                   VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                   const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                   const Quat &rot_offset = Quat(0., 0., 0., 1.));
+    /* \} */
+
+    /* \{ */
+    void setMassCube(Scalar width, Scalar mass);
+    void setMassBox(const Vec3 &dim, Scalar mass);
+    void setMassSphere(Scalar radius, Scalar mass);
+    void setMassCylinder(Scalar radius, Scalar height, Scalar mass);
+    /* \} */
+
+    /**
+     * Removes shape with ID that was returned by add.. method.
+     */
+    void rmShape(int ID);
+
+    /**
+     * Returns pointer to VisBody of shape with specified ID.
+     */
+    VisBody *visBody(int ID);
+    const VisBody *visBody(int ID) const;
+    void visBodyAll(std::list<const VisBody *> *list) const;
+    void visBodyAll(std::list<VisBody *> *list);
+
+    void activate();
+
+  protected:
+    int _addShape(btCollisionShape *shape, VisBody *vis,
+                  const Vec3 &pos, const Quat &rot);
+
+    shape_t *shape(int ID);
+    const shape_t *shape(int ID) const;
+
+    void _applyShapesToVis();
 };
 } /* namespace bullet */
 

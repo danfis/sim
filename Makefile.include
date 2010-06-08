@@ -78,8 +78,7 @@ HAVE_OSG ?= no
 HAVE_SDL ?= no
 WANT_ODE ?= yes
 WANT_OSG ?= yes
-# Disable Bullet for now
-WANT_BT  ?= no
+WANT_BT  ?= yes
 WANT_SDL ?= yes
 
 # Try to find ODE

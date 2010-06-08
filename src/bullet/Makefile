@@ -25,7 +25,7 @@ CXXFLAGS += -I../ $(OSG_CXXFLAGS) $(BT_CXXFLAGS)
 
 
 TARGETS = libsim-bullet.a
-OBJS = body.o joint.o actuator.o world.o collision_detection.o sim.o
+OBJS = body.o joint.o world.o collision_detection.o sim.o
 
 all: $(TARGETS)
 
