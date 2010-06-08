@@ -133,6 +133,8 @@ JointHinge::JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const V
     : Joint(w, oA, oB),
       _anchor(anchor), _axis(axis)
 {
+    _lim[0] = -10000;
+    _lim[1] = 10000;
 }
 
 void JointHinge::activate()
@@ -141,7 +143,7 @@ void JointHinge::activate()
     btTransform frameInA, frameInB;
     btRigidBody *bA, *bB;
     btVector3 anch = vToBt(_anchor);
-    btVector3 ax = vToBt(_axis);
+    btVector3 ax = vToBt(-_axis);
 
     bA = ((Body *)objA())->body();
     bB = ((Body *)objB())->body();
@@ -164,7 +166,28 @@ void JointHinge::activate()
     _setJoint(c);
 
     Joint::activate();
+
+    setParamLimitLoHi(_lim[0], _lim[1]);
 }
+
+bool JointHinge::setParamLimitLoHi(double lo, double hi)
+{
+    _lim[0] = lo;
+    _lim[1] = hi;
+
+    if (_joint){
+        ((btHingeConstraint *)_joint)->setLimit(_lim[0], _lim[1]);
+    }
+
+    return true;
+}
+
+void JointHinge::paramLimitLoHi(double *lo, double *hi) const
+{
+    *lo = _lim[0];
+    *hi = _lim[1];
+}
+
 
 } /* namespace bullet */
 

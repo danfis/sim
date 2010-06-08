@@ -93,10 +93,14 @@ class JointHinge2 : public Joint {
  */
 class JointHinge : public Joint {
     Vec3 _anchor, _axis;
+    Scalar _lim[2]; //!< Limit lo, hi
 
   public:
     JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis);
     void activate();
+
+    bool setParamLimitLoHi(double lo, double hi);
+    void paramLimitLoHi(double *lo, double *hi) const;
 };
 
 } /* namespace bullet */

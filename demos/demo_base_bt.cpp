@@ -161,8 +161,8 @@ class S : public sim::Sim {
 
         createFixed();
         createHinge();
-        /*
         createHingeLim();
+        /*
         createHinge2();
         createHinge2Lim();
         createRobot();
@@ -243,6 +243,26 @@ class S : public sim::Sim {
         b2->visBody()->setColor(osg::Vec4(0.5, 0.5, 0.5, 0.5));
         b2->setPos(pos + Vec3(-0.5, -1.0, 2.7));
         b2->activate();
+    }
+
+    void createHingeLim()
+    {
+        sim::Vec3 pos(10., -4., -4.6);
+        sim::Body *cy = world()->createBodyCylinderZ(0.5, 0.5, .2);
+        sim::Body *cu = world()->createBodyCube(1., 1.);
+        sim::Joint *j;
+
+        cu->setPos(pos);
+        cy->setPos(pos + sim::Vec3(0., 0., 2.));
+
+        j = world()->createJointHinge(cu, cy, pos + sim::Vec3(0., 0., 1.), sim::Vec3(0., 1., 0.));
+        j->setParamLimitLoHi(-M_PI / 2., 0.);
+
+        cu->activate();
+        cy->activate();
+        j->activate();
+
+        cu->visBody()->setText("Hinge lim.", 1., osg::Vec4(0.7, 0.6, 0.3, 1.));
     }
 
     void createRobot()
