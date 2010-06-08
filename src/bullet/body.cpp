@@ -395,7 +395,7 @@ void BodyCompound::rmShape(int id)
     if (s->vis)
         delete s->vis;
 
-    ((btCompoundShape *)_shape)->removeChildShapeByIndex(s->idx);
+    ((btCompoundShape *)_shape)->removeChildShape(s->shape);
     delete s->shape;
 
     delete s;
@@ -460,18 +460,16 @@ int BodyCompound::_addShape(btCollisionShape *shape, VisBody *vis,
                             const Vec3 &pos, const Quat &rot)
 {
     shape_t *s;
-    int idx = ((btCompoundShape *)_shape)->getNumChildShapes();
    
-    s = new shape_t(shape, vis, pos, rot, idx);
+    s = new shape_t(shape, vis);
 
     _shapes.insert(_shapes_t::value_type(_next_id, s));
 
-    btTransform tr;
-    tr.setIdentity();
-    tr.setOrigin(vToBt(pos));
-    tr.setRotation(qToBt(rot));
+    s->tr.setIdentity();
+    s->tr.setOrigin(vToBt(pos));
+    s->tr.setRotation(qToBt(rot));
 
-    ((btCompoundShape *)_shape)->addChildShape(tr, shape);
+    ((btCompoundShape *)_shape)->addChildShape(s->tr, shape);
 
     return _next_id++;
 }
@@ -497,15 +495,13 @@ const BodyCompound::shape_t *BodyCompound::shape(int ID) const
 void BodyCompound::_applyShapesToVis()
 {
     VisBody *vis;
-    int idx;
     btTransform world(qToBt(rot()), vToBt(pos()));
     btTransform tr;
 
     for_each(_shapes_it_t, _shapes){
         vis = it->second->vis;
-        idx = it->second->idx;
 
-        tr = world * ((btCompoundShape *)_shape)->getChildTransform(idx);
+        tr = world * it->second->tr;
         vis->setPos(vFromBt(tr.getOrigin()));
         vis->setRot(qFromBt(tr.getRotation()));
     }

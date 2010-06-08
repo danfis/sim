@@ -111,10 +111,6 @@ class S : public sim::Sim {
             c->setPos(Vec3(15., 0., 13.));
             c->activate();
 
-            b = w->createBodyCube(0.5, 1.);
-            b->setPos(15., 0., 15.);
-            b->activate();
-
             c = new BodyCompound(w);
             c->addCube(1.);
             c->addBox(Vec3(0.5, 0.1, 0.3), SIM_BODY_DEFAULT_VIS, Vec3(0.7, 0.7, 0.7));

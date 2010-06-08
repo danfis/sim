@@ -207,13 +207,10 @@ class BodyCompound : public Body {
   protected:
     struct shape_t {
         btCollisionShape *shape;
+        btTransform tr;
         VisBody *vis;
-        Vec3 pos;
-        Quat rot;
-        int idx;
-        shape_t(btCollisionShape *s, VisBody *v,
-                const Vec3 &pos, const Quat &rot, int idx)
-            : shape(s), vis(v), pos(pos), rot(rot), idx(idx) {}
+        shape_t(btCollisionShape *s, VisBody *v)
+            : shape(s), vis(v) {}
     };
     typedef std::map<int, shape_t *> _shapes_t;
     typedef _shapes_t::iterator _shapes_it_t;
