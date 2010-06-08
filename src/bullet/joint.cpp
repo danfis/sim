@@ -46,31 +46,38 @@ Joint::~Joint()
 
 void Joint::activate()
 {
-    _world->addJoint(this);
+    _world->world()->addConstraint(_joint);
 }
 
 void Joint::deactivate()
 {
-    /*TODO: _world->rmJoint(this); */
+    _world->world()->removeConstraint(_joint);
 }
 
 JointFixed::JointFixed(World *w, Body *oA, Body *oB)
     : Joint(w, oA, oB)
 {
+}
+
+void JointFixed::activate()
+{
    btGeneric6DofConstraint * joint6DOF;
    btTransform localA, localB;
-   btRigidBody *bA = oA->body();
-   btRigidBody *bB = oB->body();
+   btRigidBody *bA = ((Body *)objA())->body();
+   btRigidBody *bB = ((Body *)objB())->body();
 
    localA.setIdentity();
    localB = bB->getCenterOfMassTransform().inverse() * bA->getCenterOfMassTransform();
 
+   // TODO: what if objB is NULL?!
    joint6DOF = new btGeneric6DofConstraint(*bA, *bB, localA, localB, true);
 
    joint6DOF->setAngularLowerLimit(btVector3(-SIMD_EPSILON,-SIMD_EPSILON,-SIMD_EPSILON));
    joint6DOF->setAngularUpperLimit(btVector3(SIMD_EPSILON,SIMD_EPSILON,SIMD_EPSILON));
 
    _setJoint(joint6DOF);
+
+   Joint::activate();
 }
 
 JointHinge2::JointHinge2(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis1, const Vec3 &axis2)
@@ -123,16 +130,21 @@ void JointHinge2::setLimitAngAxis2(Scalar from, Scalar to)
 
 
 JointHinge::JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis)
-    : Joint(w, oA, oB)
+    : Joint(w, oA, oB),
+      _anchor(anchor), _axis(axis)
+{
+}
+
+void JointHinge::activate()
 {
     btHingeConstraint *c;
     btTransform frameInA, frameInB;
     btRigidBody *bA, *bB;
-    btVector3 anch = vToBt(anchor);
-    btVector3 ax = vToBt(axis);
+    btVector3 anch = vToBt(_anchor);
+    btVector3 ax = vToBt(_axis);
 
-    bA = oA->body();
-    bB = oB->body();
+    bA = ((Body *)objA())->body();
+    bB = ((Body *)objB())->body();
 
     frameInA.setIdentity();
     frameInB.setIdentity();
@@ -150,6 +162,8 @@ JointHinge::JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const V
    
     c = new btHingeConstraint (*bA, *bB, frameInA, frameInB);
     _setJoint(c);
+
+    Joint::activate();
 }
 
 } /* namespace bullet */

@@ -159,9 +159,9 @@ class S : public sim::Sim {
             }
         }
 
-        /*
         createFixed();
         createHinge();
+        /*
         createHingeLim();
         createHinge2();
         createHinge2Lim();
@@ -203,11 +203,13 @@ class S : public sim::Sim {
   protected:
     void createFixed()
     {
-        sim::Vec3 pos(-6., -6., -9.);
+        sim::Vec3 pos(-6., -6., -3.);
         sim::Body *cu = world()->createBodyCube(1., 1.);
         sim::Body *s = world()->createBodySphere(0.5, 3.);
         sim::Joint *j;
 
+        DBG(cu);
+        DBG(cu->visBody());
         cu->setPos(pos);
         s->setPos(pos + sim::Vec3(0.9, 0., 1.0));
         j = world()->createJointFixed(cu, s);
@@ -221,8 +223,8 @@ class S : public sim::Sim {
 
     void createHinge()
     {
-        sim::Vec3 pos(-6., 6., -9.);
-        sim::Body *cy = world()->createBodyCylinderZ(0.5, 0.5, 1.);
+        sim::Vec3 pos(10., -2., -4.6);
+        sim::Body *cy = world()->createBodyCylinderZ(0.5, 0.5, .2);
         sim::Body *cu = world()->createBodyCube(1., 1.);
         sim::Joint *j;
 
@@ -230,13 +232,17 @@ class S : public sim::Sim {
         cy->setPos(pos + sim::Vec3(0., 0., 2.));
 
         j = world()->createJointHinge(cu, cy, pos + sim::Vec3(0., 0., 1.), sim::Vec3(0., 1., 0.));
-        DBG(j);
 
         cu->activate();
         cy->activate();
         j->activate();
 
         cu->visBody()->setText("Hinge", 1., osg::Vec4(0.7, 0.6, 0.3, 1.));
+
+        sim::Body *b2 = world()->createBodyBox(Vec3(.5, 2.0, 0.5), 2.);
+        b2->visBody()->setColor(osg::Vec4(0.5, 0.5, 0.5, 0.5));
+        b2->setPos(pos + Vec3(-0.5, -1.0, 2.7));
+        b2->activate();
     }
 
     void createRobot()

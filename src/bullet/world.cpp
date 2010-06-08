@@ -164,6 +164,7 @@ sim::Joint *World::createJointFixed(sim::Body *oA, sim::Body *oB)
 sim::Joint *World::createJointHinge(sim::Body *oA, sim::Body *oB,
                                     const Vec3 &anchor, const Vec3 &axis)
 {
+    DBG("");
     return new JointHinge(this, (Body *)oA, (Body *)oB, anchor, axis);
 }
 

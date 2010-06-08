@@ -95,8 +95,7 @@ class World {
 
     virtual Joint *createJointFixed(Body *oA, Body *oB) { return 0; }
     virtual Joint *createJointHinge(Body *A, Body *oB,
-                                    const Vec3 &anchor, const Vec3 &axis,
-                                    Scalar axis_offset = 0.)
+                                    const Vec3 &anchor, const Vec3 &axis)
         { return 0; }
     virtual Joint *createJointHinge2(Body *A, Body *oB, const Vec3 &anchor,
                                      const Vec3 &axis1, const Vec3 &axis2)

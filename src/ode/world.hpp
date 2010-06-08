@@ -250,8 +250,7 @@ class World : public sim::World {
 
     sim::Joint *createJointFixed(sim::Body *oA, sim::Body *oB);
     sim::Joint *createJointHinge(sim::Body *A, sim::Body *oB,
-                                 const Vec3 &anchor, const Vec3 &axis,
-                                 Scalar axis_offset = 0.);
+                                 const Vec3 &anchor, const Vec3 &axis);
     sim::Joint *createJointHinge2(sim::Body *A, sim::Body *oB, const Vec3 &anchor,
                                   const Vec3 &axis1, const Vec3 &axis2);
 
