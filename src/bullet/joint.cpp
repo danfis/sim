@@ -214,7 +214,7 @@ bool JointHinge::setParamFMax(double fmax)
 
 void JointHinge::_applyVelFMax(const sim::Time &time)
 {
-    Scalar imp; // TODO: impulse = force * step
+    Scalar imp;
 
     imp = _fmax * time.inSF();
 
