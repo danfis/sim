@@ -44,11 +44,19 @@ namespace bullet {
  */
 class World : public sim::World {
   protected:
+    typedef std::list<sim::Body *> _bodies_t;
+    typedef _bodies_t::iterator _bodies_it_t;
+    typedef std::list<sim::Joint *> _joints_t;
+    typedef _joints_t::iterator _joints_it_t;
+
     btCollisionConfiguration *_coll_conf;
     CollisionDispatcher *_dispatch;
     btBroadphaseInterface *_broadphase;
     btConstraintSolver *_solver;
     btDynamicsWorld *_world;
+
+    _bodies_t _bodies;
+    _joints_t _joints;
 
   public:
     World();
@@ -106,6 +114,15 @@ class World : public sim::World {
      * Body and should NOT be used directly.
      */
     void addBody(Body *obj);
+
+  protected:
+    sim::Body *_createBody(sim::Body *);
+    sim::Joint *_createJoint(sim::Joint *);
+
+    /**
+     * Iterates over all joints and converts all forces to impulses.
+     */
+    void _setJointsForceToImpulse(const sim::Time &time);
 };
 
 } /* namespace bullet */

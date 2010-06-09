@@ -24,6 +24,7 @@
 
 #include <BulletDynamics/ConstraintSolver/btTypedConstraint.h>
 
+#include <sim/time.hpp>
 #include "sim/joint.hpp"
 #include "sim/bullet/body.hpp"
 
@@ -59,6 +60,10 @@ class Joint : public sim::Joint {
      */
     void deactivate();
 
+    virtual bool isFixed() const { return false; }
+    virtual bool isHinge() const { return false; }
+    virtual bool isHinge2() const { return false; }
+
   protected:
     void _setJoint(btTypedConstraint *c) { _joint = c; }
 };
@@ -72,6 +77,8 @@ class JointFixed : public Joint {
   public:
     JointFixed(World *w, Body *oA, Body *oB);
     void activate();
+
+    bool isFixed() const { return true; }
 };
 
 /**
@@ -87,6 +94,8 @@ class JointHinge2 : public Joint {
     JointHinge2(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis1, const Vec3 &axis2);
     void activate();
 
+    bool isHinge2() const { return true; }
+
     virtual bool setParamLimitLoHi(double lo, double hi);
     void paramLimitLoHi(double *lo, double *hi) const;
 };
@@ -101,10 +110,17 @@ class JointHinge : public Joint {
     Scalar _lim[2]; //!< Limit lo, hi
     Scalar _vel; //!< Target velocity of angular motor
     Scalar _fmax; //!< Max force on angular motor
+    Scalar _impulse_max;
+
+    friend class World;
 
   public:
     JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis);
     void activate();
+
+    bool isHinge() const { return true; }
+
+    Scalar angle() const;
 
     bool setParamLimitLoHi(double lo, double hi);
     void paramLimitLoHi(double *lo, double *hi) const;
@@ -116,7 +132,7 @@ class JointHinge : public Joint {
     double paramFMax() const { return _fmax; }
 
   protected:
-    void _applyVelFMax();
+    void _applyVelFMax(const sim::Time &time);
 };
 
 } /* namespace bullet */

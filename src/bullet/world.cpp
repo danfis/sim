@@ -29,6 +29,7 @@
 #include "sim/bullet/world.hpp"
 #include "sim/bullet/math.hpp"
 #include "sim/msg.hpp"
+#include "sim/common.hpp"
 
 namespace sim {
 
@@ -51,6 +52,18 @@ World::World()
 
 World::~World()
 {
+    // delete all bodies
+    for_each(_bodies_it_t, _bodies){
+        delete *it;
+    }
+    _bodies.clear();
+
+    // delete all joints
+    for_each(_joints_it_t, _joints){
+        delete *it;
+    }
+    _joints.clear();
+
     delete _world;
     delete _solver;
     delete _broadphase;
@@ -98,6 +111,8 @@ void World::finish()
 
 void World::step(const sim::Time &time, unsigned int substeps)
 {
+    _setJointsForceToImpulse(time);
+
     btScalar fixed = time.inSF() / (double)substeps;
     _world->stepSimulation(time.inSF(), substeps, fixed);
 }
@@ -111,70 +126,92 @@ bool World::done()
 
 sim::Body *World::createBodyCube(Scalar width, Scalar mass, VisBody *vis)
 {
-    return new BodyCube(this, width, mass, vis);
+    return _createBody(new BodyCube(this, width, mass, vis));
 }
 
 sim::Body *World::createBodyBox(Vec3 dim, Scalar mass, VisBody *vis)
 {
-    return new BodyBox(this, dim, mass, vis);
+    return _createBody(new BodyBox(this, dim, mass, vis));
 }
 
 sim::Body *World::createBodySphere(Scalar radius, Scalar mass, VisBody *vis)
 {
-    return new BodySphere(this, radius, mass, vis);
+    return _createBody(new BodySphere(this, radius, mass, vis));
 }
 
 sim::Body *World::createBodyCylinderX(Scalar radius, Scalar height, Scalar mass,
                                       VisBody *vis)
 {
-    return new BodyCylinderX(this, radius, height, mass, vis);
+    return _createBody(new BodyCylinderX(this, radius, height, mass, vis));
 }
 
 sim::Body *World::createBodyCylinderY(Scalar radius, Scalar height, Scalar mass,
                                       VisBody *vis)
 {
-    return new BodyCylinderY(this, radius, height, mass, vis);
+    return _createBody(new BodyCylinderY(this, radius, height, mass, vis));
 }
 
 sim::Body *World::createBodyCylinderZ(Scalar radius, Scalar height, Scalar mass,
                                       VisBody *vis)
 {
-    return new BodyCylinder(this, radius, height, mass, vis);
+    return _createBody(new BodyCylinder(this, radius, height, mass, vis));
 }
 
 sim::Body *World::createBodyTriMesh(const Vec3 *coords, size_t coords_len,
                                     const unsigned int *indices, size_t indices_len,
                                     Scalar mass, VisBody *vis)
 {
-    return new BodyTriMesh(this, coords, coords_len, indices, indices_len, vis);
+    return _createBody(new BodyTriMesh(this, coords, coords_len, indices, indices_len, vis));
 }
 
 sim::Body *World::createBodyCompound()
 {
-    return 0;
+    return _createBody(new BodyCompound(this));
 }
 
 
 
 sim::Joint *World::createJointFixed(sim::Body *oA, sim::Body *oB)
 {
-    return new JointFixed(this, (Body *)oA, (Body *)oB);
+    return _createJoint(new JointFixed(this, (Body *)oA, (Body *)oB));
 }
 
 sim::Joint *World::createJointHinge(sim::Body *oA, sim::Body *oB,
                                     const Vec3 &anchor, const Vec3 &axis)
 {
-    DBG("");
-    return new JointHinge(this, (Body *)oA, (Body *)oB, anchor, axis);
+    return _createJoint(new JointHinge(this, (Body *)oA, (Body *)oB, anchor, axis));
 }
 
 sim::Joint *World::createJointHinge2(sim::Body *oA, sim::Body *oB, const Vec3 &anchor,
                                      const Vec3 &axis1, const Vec3 &axis2)
 {
-    return new JointHinge2(this, (Body *)oA, (Body *)oB, anchor, axis1, axis2);
+    return _createJoint(new JointHinge2(this, (Body *)oA, (Body *)oB, anchor, axis1, axis2));
 }
 
+sim::Body *World::_createBody(sim::Body *b)
+{
+    _bodies.push_back(b);
+    return b;
+}
 
+sim::Joint *World::_createJoint(sim::Joint *j)
+{
+    _joints.push_back(j);
+    return j;
+}
+
+void World::_setJointsForceToImpulse(const sim::Time &time)
+{
+    Joint *j;
+
+    for_each(_joints_it_t, _joints){
+        j = (Joint *)*it;
+
+        if (j->isHinge()){
+            ((JointHinge *)j)->_applyVelFMax(time);
+        }
+    }
+}
 
 } /* namespace bullet */
 

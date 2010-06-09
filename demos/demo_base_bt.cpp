@@ -96,11 +96,6 @@ class S : public sim::Sim {
         b->visBody()->setColor(0.9, 0.6, 0.3, 1.);
         b->setPos(0., 0., -5.3);
         b->activate();
-        /*
-        b = w->createBodyBox(Vec3(20, 20, 2), 0.);
-        b->setPos(0., 0., -10);
-        b->activate();
-        */
     }
 
   protected:
@@ -119,12 +114,6 @@ class S : public sim::Sim {
         b->visBody()->setColor(osg::Vec4(0., 0., 0., 1.));
         b->setPos(-3., 0.2, 3.);
         b->activate();
-
-        /*
-        b = w->createBodyBox(sim::Vec3(20., 20., 1.), 0.);
-        b->setPos(0., 0., -10.);
-        b->activate();
-        */
 
         b = w->createBodyCylinderZ(.5, 1., 3.);
         b->visBody()->setTexture("wood.ppm");

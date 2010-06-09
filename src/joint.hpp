@@ -59,7 +59,7 @@ class Joint {
     /* \{ */
     /**
      * Low and high stop angle or position.
-     * Default values are -dInfinity, dInfinity
+     * Default values are -infinity, infinity
      */
     virtual bool setParamLimitLoHi(double lo, double hi) { return false; }
     virtual bool setParamLimitLoHi2(double lo, double hi) { return false; }
@@ -94,19 +94,6 @@ class Joint {
     virtual bool setParamBounce(double restitution) { return false; }
     virtual double paramBounce() const { return -1.; }
     /* \} */
-};
-
-/**
- * ODE's hinge2 joint interface.
- * For more info see:
- *  http://opende.sourceforge.net/wiki/index.php/Manual_(All)#Hinge-2
- */
-class JointHinge2 {
-  public:
-    virtual void setLimitLinAxis1(Scalar from, Scalar to) = 0;
-    virtual void setLimitLinAxis2(Scalar from, Scalar to) = 0;
-    virtual void setLimitAngAxis1(Scalar from, Scalar to) = 0;
-    virtual void setLimitAngAxis2(Scalar from, Scalar to) = 0;
 };
 
 } /* namespace sim */

@@ -107,6 +107,13 @@ void JointHinge2::activate()
     setParamLimitLoHi(_lim[0], _lim[1]);
 }
 
+Scalar JointHinge::angle() const
+{
+    if (_joint)
+        return ((btHingeConstraint *)_joint)->getHingeAngle();
+    return 0.;
+}
+
 bool JointHinge2::setParamLimitLoHi(double lo, double hi)
 {
     _lim[0] = lo;
@@ -173,7 +180,6 @@ void JointHinge::activate()
     Joint::activate();
 
     setParamLimitLoHi(_lim[0], _lim[1]);
-    _applyVelFMax();
 }
 
 bool JointHinge::setParamLimitLoHi(double lo, double hi)
@@ -197,25 +203,24 @@ void JointHinge::paramLimitLoHi(double *lo, double *hi) const
 bool JointHinge::setParamVel(double vel)
 {
     _vel = vel;
-    _applyVelFMax();
     return true;
 }
 
 bool JointHinge::setParamFMax(double fmax)
 {
     _fmax = fmax;
-    _applyVelFMax();
     return true;
 }
 
-void JointHinge::_applyVelFMax()
+void JointHinge::_applyVelFMax(const sim::Time &time)
 {
     Scalar imp; // TODO: impulse = force * step
 
+    imp = _fmax * time.inSF();
+
     if (_joint){
         if (!isZero(_fmax) && !isZero(_vel)){
-            DBG("");
-            ((btHingeConstraint *)_joint)->enableAngularMotor(true, -_vel, _fmax);
+            ((btHingeConstraint *)_joint)->enableAngularMotor(true, -_vel, imp);
         }else{
             ((btHingeConstraint *)_joint)->enableAngularMotor(false, 0., 0.);
         }
