@@ -164,9 +164,9 @@ class S : public sim::Sim {
         createFixed();
         createHinge();
         createHingeLim();
-        /*
         createHinge2();
         createHinge2Lim();
+        /*
         createRobot();
         createRobotMove(sim::Vec3(10., -10., -4.9));
         createRobotMove(sim::Vec3(15., -15., -4.9));

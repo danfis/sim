@@ -80,10 +80,15 @@ class JointFixed : public Joint {
  *  http://opende.sourceforge.net/wiki/index.php/Manual_(All)#Hinge-2
  */
 class JointHinge2 : public Joint {
+    Vec3 _anchor, _axis1, _axis2;
+    Scalar _lim[2]; //!< Limit lo, hi
+
   public:
     JointHinge2(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis1, const Vec3 &axis2);
+    void activate();
 
     virtual bool setParamLimitLoHi(double lo, double hi);
+    void paramLimitLoHi(double *lo, double *hi) const;
 };
 
 /**
