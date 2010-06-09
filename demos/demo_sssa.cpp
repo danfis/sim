@@ -68,11 +68,11 @@ class S : public sim::Sim {
     void createArena()
     {
         osg::Vec4 color(0., 0.7, 0.1, 1.);
-        BodyCompound *c;
+        sim::Body *c;
         int id;
         sim::ode::World *w = (sim::ode::World *)world();
 
-        c = (BodyCompound *)w->createBodyCompound();
+        c = w->createBodyCompound();
         id = c->addBox(Vec3(10., 10., 0.1));
         c->visBody(id)->setColor(color);
         c->visBody(id)->setTexture("wood.ppm");

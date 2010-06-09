@@ -313,10 +313,10 @@ void SSSA::activate()
 
 void SSSA::_createChasis(const osg::Vec4 &color)
 {
-    sim::ode::BodyCompound *b;
+    sim::Body *b;
     int id;
 
-    b = (sim::ode::BodyCompound *)_world->createBodyCompound();
+    b = _world->createBodyCompound();
     id = b->addTriMesh(sssa_body_verts, sssa_body_verts_len,
                        sssa_body_ids, sssa_body_ids_len);
     b->visBody(id)->setColor(color);
@@ -334,13 +334,13 @@ void SSSA::_createChasis(const osg::Vec4 &color)
 
 void SSSA::_createArm(const osg::Vec4 &color)
 {
-    sim::ode::BodyCompound *b;
+    sim::Body *b;
     Vec3 axis = _rot * Vec3(0., 1., 0.);
     int id;
     // TODO: find out correct offset
     Vec3 offset(0.65, 0., 0.);
 
-    b = (sim::ode::BodyCompound *)_world->createBodyCompound();
+    b = _world->createBodyCompound();
     id = b->addTriMesh(sssa_arm_verts, sssa_arm_verts_len,
                        sssa_arm_ids, sssa_arm_ids_len,
                        SIM_BODY_DEFAULT_VIS,

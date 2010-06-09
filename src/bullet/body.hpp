@@ -23,7 +23,7 @@
 #define _SIM_BULLET_OBJ_HPP_
 
 #include <BulletDynamics/Dynamics/btRigidBody.h>
-#include <BulletCollision/CollisionShapes/btCollisionShape.h>
+#include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <LinearMath/btMotionState.h>
 
@@ -37,173 +37,27 @@ namespace bullet {
 // Forward declaration
 class World;
 class Body;
-class BodyCompound;
 
 /**
  * Class using which is possible to change VisBody's position according to
  * Body's position effectively. See Bullet's btMotionState documentation
  * for more info.
  */
+
 class BodyMotionState : public btMotionState {
     Body *_body;
-    btTransform _world, _offset;
-
-  public:
-    BodyMotionState(Body *body,
-                    const btTransform &start = btTransform::getIdentity(),
-                    const btTransform &offset = btTransform::getIdentity())
-        : _body(body), _world(start), _offset(offset) {}
-
-    void getWorldTransform(btTransform &worldTrans) const;
-    void setWorldTransform(const btTransform &worldTrans);
-};
-
-class BodyMotionStateCompound : public btMotionState {
-    BodyCompound *_body;
     btTransform _world;
 
   public:
-    BodyMotionStateCompound(BodyCompound *body,
-                            const btTransform &start = btTransform::getIdentity())
+    BodyMotionState(Body *body,
+                    const btTransform &start = btTransform::getIdentity())
         : _body(body), _world(start) {}
 
     void getWorldTransform(btTransform &worldTrans) const;
     void setWorldTransform(const btTransform &worldTrans);
 };
 
-/**
- * Class representing physical body.
- */
 class Body : public sim::Body {
-  protected:
-    World *_world;
-
-    btRigidBody *_body;
-    btCollisionShape *_shape;
-    btMotionState *_motion_state;
-
-    Scalar _damping_lin, _damping_ang;
-
-  public:
-    Body(World *w);
-    virtual ~Body();
-
-    /* \{ */
-    btRigidBody *body() { return _body; }
-    const btRigidBody *body() const { return _body; }
-    btCollisionShape *shape() { return _shape; }
-    const btCollisionShape *shape() const { return _shape; }
-    btMotionState *motionState() { return _motion_state; }
-    const btMotionState *motionState() const { return _motion_state; }
-    World *world() { return _world; }
-    const World *world() const { return _world; }
-    /* \} */
-
-    const Scalar &dampingLin() const { return _damping_lin; }
-    const Scalar &dampingAng() const { return _damping_ang; }
-    void setDampingLin(Scalar v) { _damping_lin = v; }
-    void setDampingAng(Scalar v) { _damping_ang = v; }
-
-    /* \{ */
-    /**
-     * Activates body in world - world will realize this body.
-     */
-    virtual void activate();
-
-    /**
-     * Deactives body - body will be removed from a world.
-     */
-    virtual void deactivate();
-
-
-    const BodyCollisionInfo &collInfo() { return _collision_info; }
-    void collSetDontCollideId(unsigned long id)
-        { _collision_info.dont_collide_id = id; }
-    /* \} */
-
-  protected:
-    /**
-     * Sets internals of Body.
-     *
-     * btRigidBody is created according to shape and VisBody is connected
-     * with BodyMotionState to update its position when needed.
-     */
-    virtual void _set(VisBody *o, btCollisionShape *shape, Scalar mass);
-
-    virtual void _applyPosRotToBt();
-};
-
-
-/**
- * Body with shape of cube.
- * Constructor takes width of edge and amount of mass.
- */
-class BodyCube : public Body {
-  public:
-    BodyCube(World *w, Scalar width, Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS);
-};
-
-/**
- * Body with general box shape.
- * Constructot takes vector with lengths of three box's edges and amount of
- * mass.
- */
-class BodyBox : public Body {
-  public:
-    BodyBox(World *w, Vec3 dim, Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS);
-};
-
-/**
- * Body with sphere shape.
- * Contructor takes radius of sphere and mass.
- */
-class BodySphere : public Body {
-  public:
-    BodySphere(World *w, Scalar radius, Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS);
-};
-
-/**
- * Body with cylinder shape placed along Z axis.
- * Constructor takes radius and height of cylinder.
- */
-class BodyCylinder : public Body {
-  public:
-    BodyCylinder(World *w, Scalar radius, Scalar height, Scalar mass,
-                 VisBody *vis = SIM_BODY_DEFAULT_VIS);
-};
-
-/**
- * Body with shape of cylinder placed along X axis.
- */
-class BodyCylinderX : public BodyCylinder {
-  public:
-    BodyCylinderX(World *w, Scalar radius, Scalar height, Scalar mass,
-                 VisBody *vis = SIM_BODY_DEFAULT_VIS);
-};
-
-/**
- * Body with shape of cylinder placed along Y axis.
- */
-class BodyCylinderY : public BodyCylinder {
-  public:
-    BodyCylinderY(World *w, Scalar radius, Scalar height, Scalar mass,
-                 VisBody *vis = SIM_BODY_DEFAULT_VIS);
-};
-
-/**
- * Body represented by triangular mesh. This Body is static and thus can't
- * have any mass.
- */
-class BodyTriMesh : public Body {
-  public:
-    BodyTriMesh(World *w, const sim::Vec3 *coords, size_t coords_len,
-                const unsigned int *indices, size_t indices_len,
-                VisBody *vis = SIM_BODY_DEFAULT_VIS);
-};
-
-
-
-class BodyCompound : public Body {
   protected:
     struct shape_t {
         btCollisionShape *shape;
@@ -216,17 +70,40 @@ class BodyCompound : public Body {
     typedef _shapes_t::iterator _shapes_it_t;
     typedef _shapes_t::const_iterator _shapes_cit_t;
 
+    World *_world;
+
+    btRigidBody *_body;
+    btCompoundShape *_shape;
+    btMotionState *_motion_state;
+
     _shapes_t _shapes;
     int _next_id;
 
     Scalar _mass;
     Vec3 _local_inertia;
 
-    friend class BodyMotionStateCompound;
+    Scalar _damping_lin, _damping_ang;
+
+    friend class BodyMotionState;
 
   public:
-    BodyCompound(World *w);
-    virtual ~BodyCompound();
+    Body(World *w);
+    virtual ~Body();
+
+    /* \{ */
+    btRigidBody *body() { return _body; }
+    const btRigidBody *body() const { return _body; }
+    btMotionState *motionState() { return _motion_state; }
+    const btMotionState *motionState() const { return _motion_state; }
+    World *world() { return _world; }
+    const World *world() const { return _world; }
+    /* \} */
+
+    const Scalar &dampingLin() const { return _damping_lin; }
+    const Scalar &dampingAng() const { return _damping_ang; }
+    void setDampingLin(Scalar v) { _damping_lin = v; }
+    void setDampingAng(Scalar v) { _damping_ang = v; }
+
 
     /* \{ */
     /**
@@ -265,6 +142,11 @@ class BodyCompound : public Body {
                    VisBody *vis = SIM_BODY_DEFAULT_VIS,
                    const Vec3 &pos_offset = Vec3(0., 0., 0.),
                    const Quat &rot_offset = Quat(0., 0., 0., 1.));
+
+    /**
+     * Removes shape with ID that was returned by add.. method.
+     */
+    void rmShape(int ID);
     /* \} */
 
     /* \{ */
@@ -275,11 +157,6 @@ class BodyCompound : public Body {
     /* \} */
 
     /**
-     * Removes shape with ID that was returned by add.. method.
-     */
-    void rmShape(int ID);
-
-    /**
      * Returns pointer to VisBody of shape with specified ID.
      */
     VisBody *visBody(int ID);
@@ -288,6 +165,7 @@ class BodyCompound : public Body {
     void visBodyAll(std::list<VisBody *> *list);
 
     void activate();
+    void deactivate();
 
   protected:
     int _addShape(btCollisionShape *shape, VisBody *vis,
@@ -297,7 +175,88 @@ class BodyCompound : public Body {
     const shape_t *shape(int ID) const;
 
     void _applyShapesToVis();
+    void _applyPosRotToBt();
 };
+
+class BodySimple : public Body {
+  public:
+    BodySimple(World *w) : Body(w) {}
+    virtual ~BodySimple() {}
+
+    VisBody *visBody() { return shape(1)->vis; }
+    const VisBody *visBody() const { return shape(1)->vis; }
+    void setVisBody(VisBody *vis) { shape(1)->vis = vis; }
+};
+
+
+/**
+ * Body with general box shape.
+ * Constructot takes vector with lengths of three box's edges and amount of
+ * mass.
+ */
+class BodyBox : public BodySimple {
+  public:
+    BodyBox(World *w, Vec3 dim, Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS);
+};
+
+/**
+ * Body with shape of cube.
+ * Constructor takes width of edge and amount of mass.
+ */
+class BodyCube : public BodyBox {
+  public:
+    BodyCube(World *w, Scalar width, Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS);
+};
+
+
+/**
+ * Body with sphere shape.
+ * Contructor takes radius of sphere and mass.
+ */
+class BodySphere : public BodySimple {
+  public:
+    BodySphere(World *w, Scalar radius, Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS);
+};
+
+/**
+ * Body with cylinder shape placed along Z axis.
+ * Constructor takes radius and height of cylinder.
+ */
+class BodyCylinder : public BodySimple {
+  public:
+    BodyCylinder(World *w, Scalar radius, Scalar height, Scalar mass,
+                 VisBody *vis = SIM_BODY_DEFAULT_VIS);
+};
+
+/**
+ * Body with shape of cylinder placed along X axis.
+ */
+class BodyCylinderX : public BodyCylinder {
+  public:
+    BodyCylinderX(World *w, Scalar radius, Scalar height, Scalar mass,
+                 VisBody *vis = SIM_BODY_DEFAULT_VIS);
+};
+
+/**
+ * Body with shape of cylinder placed along Y axis.
+ */
+class BodyCylinderY : public BodyCylinder {
+  public:
+    BodyCylinderY(World *w, Scalar radius, Scalar height, Scalar mass,
+                 VisBody *vis = SIM_BODY_DEFAULT_VIS);
+};
+
+/**
+ * Body represented by triangular mesh. This Body is static and thus can't
+ * have any mass.
+ */
+class BodyTriMesh : public BodySimple {
+  public:
+    BodyTriMesh(World *w, const sim::Vec3 *coords, size_t coords_len,
+                const unsigned int *indices, size_t indices_len,
+                VisBody *vis = SIM_BODY_DEFAULT_VIS);
+};
+
 } /* namespace bullet */
 
 } /* namespace sim */

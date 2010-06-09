@@ -28,7 +28,6 @@
 
 #include "bunny.hpp"
 
-using namespace sim::bullet;
 using sim::Vec3;
 using sim::Quat;
 using namespace std;
@@ -45,7 +44,7 @@ class S : public sim::Sim {
 
         pauseSimulation();
 
-        World *w = new World();
+        sim::bullet::World *w = new sim::bullet::World();
         sim::Body *b;
 
         setWorld(w);
@@ -101,7 +100,7 @@ class S : public sim::Sim {
   protected:
     void createShapes()
     {
-        World *w = (World *)world();
+        sim::World *w = world();
         sim::Body *b;
 
         b = w->createBodySphere(1.3, 2.);
@@ -135,11 +134,11 @@ class S : public sim::Sim {
 
     void createCompound()
     {
-        World *w = (World *)world();
+        sim::World *w = world();
         sim::Body *b;
         int id;
 
-        BodyCompound *c = new BodyCompound(w);
+        sim::Body *c = w->createBodyCompound();
         c->addCube(1.);
         c->addBox(Vec3(0.5, 0.1, 0.3), SIM_BODY_DEFAULT_VIS, Vec3(0.7, 0.7, 0.7));
         c->addSphere(0.7, SIM_BODY_DEFAULT_VIS, Vec3(-0.7, 0.7, 0.7));
@@ -154,7 +153,7 @@ class S : public sim::Sim {
         c->setPos(Vec3(15., 0., 13.));
         c->activate();
 
-        c = new BodyCompound(w);
+        c = w->createBodyCompound();
         c->addCube(1.);
         c->addBox(Vec3(0.5, 0.1, 0.3), SIM_BODY_DEFAULT_VIS, Vec3(0.7, 0.7, 0.7));
         c->addSphere(0.7, SIM_BODY_DEFAULT_VIS, Vec3(-0.7, 0.7, 0.7));
@@ -170,7 +169,7 @@ class S : public sim::Sim {
         c->setMassCube(3., 3.);
         c->activate();
 
-        c = new BodyCompound(w);
+        c = w->createBodyCompound();
         id = c->addBox(Vec3(15., 15., 0.5));
         c->visBody(id)->setColor(0.6, 0., 0.6, 0.1);
         id = c->addBox(Vec3(5., 15., 0.5), SIM_BODY_DEFAULT_VIS,
@@ -255,7 +254,7 @@ class S : public sim::Sim {
         cy->setPos(pos + sim::Vec3(0., 0., 2.));
 
         j = world()->createJointHinge(cu, cy, pos + sim::Vec3(0., 0., 1.), sim::Vec3(0., 1., 0.));
-        ((JointHinge *)j)->setParamLimitLoHi(-M_PI / 2., 0.);
+        ((sim::bullet::JointHinge *)j)->setParamLimitLoHi(-M_PI / 2., 0.);
 
         cu->activate();
         cy->activate();
@@ -304,7 +303,7 @@ class S : public sim::Sim {
         j = world()->createJointHinge2(b, s, pos + Vec3(0., 0., 1.),
                                        Vec3(0., 0., 1.), Vec3(1., 0., 0.));
 
-        ((JointHinge2 *)j)->setParamLimitLoHi(-M_PI / 4., M_PI / 4.);
+        ((sim::bullet::JointHinge2 *)j)->setParamLimitLoHi(-M_PI / 4., M_PI / 4.);
 
         b->activate();
         s->activate();
@@ -374,10 +373,10 @@ class S : public sim::Sim {
             jw[i] = world()->createJointHinge(chasis, w[i], w[i]->pos(), Vec3(1., 0., 0.));
         }
 
-        ((JointHinge *)jw[0])->setParamVel(5.);
-        ((JointHinge *)jw[0])->setParamFMax(10.);
-        ((JointHinge *)jw[1])->setParamVel(5.);
-        ((JointHinge *)jw[1])->setParamFMax(10.);
+        ((sim::bullet::JointHinge *)jw[0])->setParamVel(5.);
+        ((sim::bullet::JointHinge *)jw[0])->setParamFMax(10.);
+        ((sim::bullet::JointHinge *)jw[1])->setParamVel(5.);
+        ((sim::bullet::JointHinge *)jw[1])->setParamFMax(10.);
 
         chasis->activate();
         for (i = 0; i < 4; i++){

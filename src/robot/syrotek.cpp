@@ -23,7 +23,6 @@
 #include <sim/msg.hpp>
 
 using sim::Vec3;
-using sim::ode::BodyCompound;
 
 #define SIZE(a) (sizeof(a) / sizeof(*a))
 
@@ -135,7 +134,7 @@ Syrotek::Syrotek(sim::World *w, const Vec3 &pos,
         unsigned long robot_coll_id = (unsigned long)this;
 
         // create chasis
-        _chasis = (BodyCompound *)_world->createBodyCompound();
+        _chasis = _world->createBodyCompound();
         id = _chasis->addTriMesh(verts, SIZE(verts), ids, SIZE(ids));
         _chasis->visBody(id)->setColor(chasis_color);
         _chasis->setPos(_pos);

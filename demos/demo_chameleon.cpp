@@ -124,12 +124,12 @@ class S : public sim::Sim {
         size_t width = 10, height = 10;
         Vec3 pos;
         osg::Vec4 color(0., 0.7, 0.1, 1.);
-        BodyCompound *c;
+        sim::Body *c;
         int id;
         sim::ode::World *w = (sim::ode::World *)world();
 
         srand(3456789);
-        c = (BodyCompound *)w->createBodyCompound();
+        c = w->createBodyCompound();
         for (size_t w = 0; w < width; w++){
             for (size_t h = 0; h < height; h++){
                 randColor(&color);

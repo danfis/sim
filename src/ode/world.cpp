@@ -449,7 +449,7 @@ sim::Body *World::createBodyTriMesh(const Vec3 *coords, size_t coords_len,
 
 sim::Body *World::createBodyCompound()
 {
-    sim::Body *b = new BodyCompound(this);
+    sim::Body *b = new Body(this);
     _bodies.push_back(b);
     return b;
 }

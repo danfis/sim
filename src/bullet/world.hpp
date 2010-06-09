@@ -103,18 +103,6 @@ class World : public sim::World {
                                   const Vec3 &axis1, const Vec3 &axis2);
 
 
-    /**
-     * Adds joint to world. This function is used by .activate() method of
-     * Joint and should NOT be used directly.
-     */
-    void addJoint(Joint *j);
-
-    /**
-     * Adds body to world. This function is used by .activate() method of
-     * Body and should NOT be used directly.
-     */
-    void addBody(Body *obj);
-
   protected:
     sim::Body *_createBody(sim::Body *);
     sim::Joint *_createJoint(sim::Joint *);

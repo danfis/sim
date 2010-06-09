@@ -63,11 +63,11 @@ class S : public sim::Sim {
     void createArena()
     {
         osg::Vec4 color(0., 0.7, 0.1, 1.);
-        BodyCompound *c;
+        sim::Body *c;
         int id;
         sim::ode::World *w = (sim::ode::World *)world();
 
-        c = (BodyCompound *)w->createBodyCompound();
+        c = w->createBodyCompound();
         id = c->addBox(Vec3(2., 2., 0.1));
         id = c->addBox(Vec3(0.1, 2., 0.5), SIM_BODY_DEFAULT_VIS, Vec3(-1., 0., .25));
         id = c->addBox(Vec3(2., .1, 0.3), SIM_BODY_DEFAULT_VIS, Vec3(0., 1., .25));

@@ -19,8 +19,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _SIM_OBJ_HPP_
-#define _SIM_OBJ_HPP_
+#ifndef _SIM_BODY_HPP_
+#define _SIM_BODY_HPP_
 
 #include "visbody.hpp"
 
@@ -53,8 +53,6 @@ struct BodyCollisionInfo {
 class Body {
   protected:
     BodyCollisionInfo _collision_info;
-
-    VisBody *_vis;
 
     Vec3 _pos;
     Quat _rot;
@@ -102,12 +100,6 @@ class Body {
     /* \} */
 
     /* \{ */
-    virtual VisBody *visBody() { return _vis; }
-    virtual const VisBody *visBody() const { return _vis; }
-    virtual void setVisBody(VisBody *vis) { _vis = vis; }
-    /* \} */
-
-    /* \{ */
     /**
      * Activates body in world - world will realize this body.
      */
@@ -123,8 +115,82 @@ class Body {
     void collSetDontCollideId(unsigned long id)
         { _collision_info.dont_collide_id = id; }
     /* \} */
+
+
+    /* \{ */
+    /**
+     * Adds cube to compound shape.
+     * Visual representation can be provided.
+     * Parameters pos_offset and rot_offset define relative offset of shape
+     * from origin (0., 0., 0.).
+     * Returns ID of shape that can be used lately for modifications.
+     */
+    virtual int addCube(Scalar width,
+                        VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                        const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                        const Quat &rot_offset = Quat(0., 0., 0., 1.))
+        { return -1; }
+    virtual int addBox(const Vec3 &dim,
+                       VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                       const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                       const Quat &rot_offset = Quat(0., 0., 0., 1.))
+        { return -1; }
+    virtual int addSphere(Scalar radius,
+                          VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                          const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                          const Quat &rot_offset = Quat(0., 0., 0., 1.))
+        { return -1; }
+    virtual int addCylinderZ(Scalar radius, Scalar height,
+                             VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                             const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                             const Quat &rot_offset = Quat(0., 0., 0., 1.))
+        { return -1; }
+    virtual int addCylinderY(Scalar radius, Scalar height,
+                             VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                             const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                             const Quat &rot_offset = Quat(0., 0., 0., 1.))
+        { return -1; }
+    virtual int addCylinderX(Scalar radius, Scalar height,
+                             VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                             const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                             const Quat &rot_offset = Quat(0., 0., 0., 1.))
+        { return -1; }
+    virtual int addTriMesh(const sim::Vec3 *coords, size_t coords_len,
+                           const unsigned int *indices, size_t indices_len,
+                           VisBody *vis = SIM_BODY_DEFAULT_VIS,
+                           const Vec3 &pos_offset = Vec3(0., 0., 0.),
+                           const Quat &rot_offset = Quat(0., 0., 0., 1.))
+        { return -1; }
+
+    /**
+     * Removes shape with ID that was returned by add.. method.
+     */
+    virtual void rmShape(int ID) {}
+    /* \} */
+
+    /* \{ */
+    virtual void setMassCube(Scalar width, Scalar mass) {}
+    virtual void setMassBox(const Vec3 &dim, Scalar mass) {}
+    virtual void setMassSphere(Scalar radius, Scalar mass) {}
+    virtual void setMassCylinder(Scalar radius, Scalar height, Scalar mass) {}
+    /* \} */
+
+    /* \{ */
+    virtual VisBody *visBody() { return 0; }
+    virtual const VisBody *visBody() const { return 0; }
+    virtual void setVisBody(VisBody *vis) { }
+
+    /**
+     * Returns pointer to VisBody of shape with specified ID.
+     */
+    virtual VisBody *visBody(int ID) { return 0; }
+    virtual const VisBody *visBody(int ID) const { return 0; }
+    virtual void visBodyAll(std::list<const VisBody *> *list) const {}
+    virtual void visBodyAll(std::list<VisBody *> *list) {}
+
+    /* \} */
 };
 
-}
+} /* namespace sim */
 
-#endif /* _SIM_OBJ_HPP_ */
+#endif /* _SIM_BODY_HPP_ */

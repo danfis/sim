@@ -75,30 +75,6 @@ World::~World()
 }
 
 
-void World::addBody(Body *obj)
-{
-    btRigidBody *body;
-    VisBody *vobj;
-
-    body = obj->body();
-    if (body)
-        _world->addRigidBody(body);
-
-    vobj = obj->visBody();
-    if (vobj && visWorld())
-        visWorld()->addBody(vobj);
-}
-
-void World::addJoint(Joint *j)
-{
-    btTypedConstraint *c = j->joint();
-
-    DBG(c);
-    if (c)
-        _world->addConstraint(c);
-}
-
-
 
 void World::init()
 {
@@ -166,7 +142,7 @@ sim::Body *World::createBodyTriMesh(const Vec3 *coords, size_t coords_len,
 
 sim::Body *World::createBodyCompound()
 {
-    return _createBody(new BodyCompound(this));
+    return _createBody(new Body(this));
 }
 
 

@@ -34,7 +34,7 @@ class Syrotek {
     sim::World *_world;
     sim::Vec3 _pos;
 
-    sim::ode::BodyCompound *_chasis;
+    sim::Body *_chasis;
     sim::Body *_wheel[2], *_ball[2];
     sim::ode::JointFixed *_jball[2];
     sim::ode::JointHinge *_jwheel[2];
