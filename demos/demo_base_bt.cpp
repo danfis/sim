@@ -72,10 +72,8 @@ class S : public sim::Sim {
         createRobot();
         createRobotMove(sim::Vec3(10., -10., -4.9));
         createRobotMove(sim::Vec3(15., -15., -4.9));
-        /*
         createSeeSaw();
         createBunny();
-        */
 
         Vec3 verts[] = { Vec3(-10., 10., -0.5),
                          Vec3(0., 10., -0.8),

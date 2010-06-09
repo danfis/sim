@@ -145,24 +145,29 @@ void JointHinge::activate()
     btVector3 anch = vToBt(_anchor);
     btVector3 ax = vToBt(_axis);
 
-    bA = ((Body *)objA())->body();
-    bB = ((Body *)objB())->body();
-
-    frameInA.setIdentity();
-    frameInB.setIdentity();
-
-    frameInA.setOrigin(bA->getCenterOfMassTransform().inverse() * anch);
-    frameInB.setOrigin(bB->getCenterOfMassTransform().inverse() * anch);
 
     btVector3 zAxis = ax;
     btVector3 xAxis = btVector3(0,1,0).cross(zAxis);
     assert (xAxis.normalized());
     btVector3 yAxis = zAxis.cross(xAxis);
     btMatrix3x3 basis(xAxis.x(), xAxis.y(), xAxis.z(), yAxis.x(), yAxis.y(), yAxis.z(), zAxis.x(), zAxis.y(), zAxis.z());
+
+    bA = ((Body *)objA())->body();
+    frameInA.setIdentity();
+    frameInA.setOrigin(bA->getCenterOfMassTransform().inverse() * anch);
     frameInA.setBasis(bA->getCenterOfMassTransform().getBasis().inverse() * basis);
-    frameInB.setBasis(bB->getCenterOfMassTransform().getBasis().inverse() * basis);
-   
-    c = new btHingeConstraint (*bA, *bB, frameInA, frameInB);
+
+    if (objB()){
+        bB = ((Body *)objB())->body();
+        frameInB.setIdentity();
+        frameInB.setOrigin(bB->getCenterOfMassTransform().inverse() * anch);
+        frameInB.setBasis(bB->getCenterOfMassTransform().getBasis().inverse() * basis);
+
+        c = new btHingeConstraint (*bA, *bB, frameInA, frameInB);
+    }else{
+        c = new btHingeConstraint (*bA, frameInA);
+    }
+
     _setJoint(c);
 
     Joint::activate();
