@@ -99,6 +99,8 @@ class JointHinge2 : public Joint {
 class JointHinge : public Joint {
     Vec3 _anchor, _axis;
     Scalar _lim[2]; //!< Limit lo, hi
+    Scalar _vel; //!< Target velocity of angular motor
+    Scalar _fmax; //!< Max force on angular motor
 
   public:
     JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis);
@@ -106,6 +108,15 @@ class JointHinge : public Joint {
 
     bool setParamLimitLoHi(double lo, double hi);
     void paramLimitLoHi(double *lo, double *hi) const;
+
+    bool setParamVel(double vel);
+    double paramVel() const { return _vel; }
+
+    bool setParamFMax(double fmax);
+    double paramFMax() const { return _fmax; }
+
+  protected:
+    void _applyVelFMax();
 };
 
 } /* namespace bullet */

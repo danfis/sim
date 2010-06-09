@@ -130,7 +130,8 @@ void JointHinge2::paramLimitLoHi(double *lo, double *hi) const
 
 JointHinge::JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis)
     : Joint(w, oA, oB),
-      _anchor(anchor), _axis(axis)
+      _anchor(anchor), _axis(-axis),
+      _vel(0.), _fmax(0.)
 {
     _lim[0] = -10000;
     _lim[1] = 10000;
@@ -142,7 +143,7 @@ void JointHinge::activate()
     btTransform frameInA, frameInB;
     btRigidBody *bA, *bB;
     btVector3 anch = vToBt(_anchor);
-    btVector3 ax = vToBt(-_axis);
+    btVector3 ax = vToBt(_axis);
 
     bA = ((Body *)objA())->body();
     bB = ((Body *)objB())->body();
@@ -167,6 +168,7 @@ void JointHinge::activate()
     Joint::activate();
 
     setParamLimitLoHi(_lim[0], _lim[1]);
+    _applyVelFMax();
 }
 
 bool JointHinge::setParamLimitLoHi(double lo, double hi)
@@ -187,6 +189,33 @@ void JointHinge::paramLimitLoHi(double *lo, double *hi) const
     *hi = _lim[1];
 }
 
+bool JointHinge::setParamVel(double vel)
+{
+    _vel = vel;
+    _applyVelFMax();
+    return true;
+}
+
+bool JointHinge::setParamFMax(double fmax)
+{
+    _fmax = fmax;
+    _applyVelFMax();
+    return true;
+}
+
+void JointHinge::_applyVelFMax()
+{
+    Scalar imp; // TODO: impulse = force * step
+
+    if (_joint){
+        if (!isZero(_fmax) && !isZero(_vel)){
+            DBG("");
+            ((btHingeConstraint *)_joint)->enableAngularMotor(true, -_vel, _fmax);
+        }else{
+            ((btHingeConstraint *)_joint)->enableAngularMotor(false, 0., 0.);
+        }
+    }
+}
 
 } /* namespace bullet */
 

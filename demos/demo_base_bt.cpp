@@ -61,115 +61,18 @@ class S : public sim::Sim {
         //w->setContactApprox2(false);
         //w->setContactBounce(0.1, 0.1);
     
-        /*
-        b = w->createBodyBox(sim::Vec3(20., 20., 1.), 0.);
-        b->setPos(0., 0., -10.);
-        b->activate();
-        */
 
-        b = w->createBodySphere(1.3, 2.);
-        b->visBody()->setColor(osg::Vec4(0.5, 0.1, 0.8, 0.3));
-        b->setPos(-3., 0., -3.);
-        b->activate();
-
-
-        b = w->createBodyCube(1., 1.);
-        b->visBody()->setColor(osg::Vec4(0., 0., 0., 1.));
-        b->setPos(-3., 0.2, 3.);
-        b->activate();
-
-        b = w->createBodyCylinderZ(.5, 1., 3.);
-        b->visBody()->setTexture("wood.ppm");
-        b->visBody()->setColor(1., 0., 0., 1.);
-        b->visBody()->setText("CylZ", 1., osg::Vec4(0., 0., 0., 1.));
-        b->setPos(3., 0., 0.);
-        b->activate();
-
-        b = w->createBodyCylinderX(.5, 1., 3.);
-        b->visBody()->setText("CylX", 1., osg::Vec4(0., 0., 0., 1.));
-        b->setPos(0., 3., 0.);
-        b->activate();
-
-        b = w->createBodyCylinderY(.5, 1., 3.);
-        b->visBody()->setText("CylY", 1., osg::Vec4(0., 0., 0., 1.));
-        b->setPos(0., -3., 0.);
-        b->activate();
-
-        {
-            int id;
-
-            BodyCompound *c = new BodyCompound(w);
-            c->addCube(1.);
-            c->addBox(Vec3(0.5, 0.1, 0.3), SIM_BODY_DEFAULT_VIS, Vec3(0.7, 0.7, 0.7));
-            c->addSphere(0.7, SIM_BODY_DEFAULT_VIS, Vec3(-0.7, 0.7, 0.7));
-            c->addCylinderZ(0.4, 1., SIM_BODY_DEFAULT_VIS, Vec3(1., 0., 0.));
-            c->addCylinderY(0.4, 1., SIM_BODY_DEFAULT_VIS, Vec3(2., 0., 0.));
-            c->addCylinderX(0.4, 1., SIM_BODY_DEFAULT_VIS, Vec3(3., 0., 0.));
-            c->addTriMesh(bunny_coords, bunny_coords_len,
-                          bunny_ids, bunny_ids_len,
-                          SIM_BODY_DEFAULT_VIS,
-                          Vec3(5., 3., 0.),
-                          Quat(Vec3(1., 0., 0.), M_PI * .5));
-            c->setPos(Vec3(15., 0., 13.));
-            c->activate();
-
-            c = new BodyCompound(w);
-            c->addCube(1.);
-            c->addBox(Vec3(0.5, 0.1, 0.3), SIM_BODY_DEFAULT_VIS, Vec3(0.7, 0.7, 0.7));
-            c->addSphere(0.7, SIM_BODY_DEFAULT_VIS, Vec3(-0.7, 0.7, 0.7));
-            c->addCylinderZ(0.4, 1., SIM_BODY_DEFAULT_VIS, Vec3(1., 0., 0.));
-            c->addCylinderY(0.4, 1., SIM_BODY_DEFAULT_VIS, Vec3(2., 0., 0.));
-            c->addCylinderX(0.4, 1., SIM_BODY_DEFAULT_VIS, Vec3(3., 0., 0.));
-            c->addTriMesh(bunny_coords, bunny_coords_len,
-                          bunny_ids, bunny_ids_len,
-                          SIM_BODY_DEFAULT_VIS,
-                          Vec3(5., 3., 0.),
-                          Quat(Vec3(1., 0., 0.), M_PI * .5));
-            c->setPos(Vec3(15., -5., 13.));
-            c->setMassCube(3., 3.);
-            c->activate();
-
-            c = new BodyCompound(w);
-            id = c->addBox(Vec3(15., 15., 0.5));
-            c->visBody(id)->setColor(0.6, 0., 0.6, 0.1);
-            id = c->addBox(Vec3(5., 15., 0.5), SIM_BODY_DEFAULT_VIS,
-                           Vec3(9., 0., 2.),
-                           Quat(Vec3(0., 1., 0.), -M_PI / 4.));
-            c->visBody(id)->setColor(0.6, 0., 0.6, 0.1);
-            id = c->addBox(Vec3(5., 15., 0.5), SIM_BODY_DEFAULT_VIS,
-                           Vec3(-9., 0., 2.),
-                           Quat(Vec3(0., 1., 0.), M_PI / 4.));
-            c->visBody(id)->setColor(0.6, 0., 0.6, 0.1);
-            id = c->addBox(Vec3(19., .5, 5.), SIM_BODY_DEFAULT_VIS,
-                           Vec3(0., 7.5, 2.5));
-            c->visBody(id)->setColor(0.6, 0., 0.6, 0.1);
-            id = c->addBox(Vec3(19., .5, 5.), SIM_BODY_DEFAULT_VIS,
-                           Vec3(0., -7.5, 2.5));
-            c->visBody(id)->setColor(0.6, 0., 0.6, 0.1);
-
-            c->setPos(Vec3(15., 0., 10.));
-            c->activate();
-
-            Vec3 start(13., -2., 20.);
-            for (size_t i = 0; i < 15; i++){
-                for (size_t j = 0; j < 15; j++){
-                    b = w->createBodyCube(0.5, 1.);
-                    b->visBody()->setColor(0., 0.6, 0.6, 0.3);
-                    b->setPos(start + Vec3(0.55 * i, 0.55 * j, 0.));
-                    b->activate();
-                }
-            }
-        }
-
+        createShapes();
+        createCompound();
         createFixed();
         createHinge();
         createHingeLim();
         createHinge2();
         createHinge2Lim();
-        /*
         createRobot();
         createRobotMove(sim::Vec3(10., -10., -4.9));
         createRobotMove(sim::Vec3(15., -15., -4.9));
+        /*
         createSeeSaw();
         createBunny();
         */
@@ -203,6 +106,113 @@ class S : public sim::Sim {
     }
 
   protected:
+    void createShapes()
+    {
+        World *w = (World *)world();
+        sim::Body *b;
+
+        b = w->createBodySphere(1.3, 2.);
+        b->visBody()->setColor(osg::Vec4(0.5, 0.1, 0.8, 0.3));
+        b->setPos(-3., 0., -3.);
+        b->activate();
+
+
+        b = w->createBodyCube(1., 1.);
+        b->visBody()->setColor(osg::Vec4(0., 0., 0., 1.));
+        b->setPos(-3., 0.2, 3.);
+        b->activate();
+
+        /*
+        b = w->createBodyBox(sim::Vec3(20., 20., 1.), 0.);
+        b->setPos(0., 0., -10.);
+        b->activate();
+        */
+
+        b = w->createBodyCylinderZ(.5, 1., 3.);
+        b->visBody()->setTexture("wood.ppm");
+        b->visBody()->setColor(1., 0., 0., 1.);
+        b->visBody()->setText("CylZ", 1., osg::Vec4(0., 0., 0., 1.));
+        b->setPos(3., 0., 0.);
+        b->activate();
+
+        b = w->createBodyCylinderX(.5, 1., 3.);
+        b->visBody()->setText("CylX", 1., osg::Vec4(0., 0., 0., 1.));
+        b->setPos(0., 3., 0.);
+        b->activate();
+
+        b = w->createBodyCylinderY(.5, 1., 3.);
+        b->visBody()->setText("CylY", 1., osg::Vec4(0., 0., 0., 1.));
+        b->setPos(0., -3., 0.);
+        b->activate();
+    }
+
+    void createCompound()
+    {
+        World *w = (World *)world();
+        sim::Body *b;
+        int id;
+
+        BodyCompound *c = new BodyCompound(w);
+        c->addCube(1.);
+        c->addBox(Vec3(0.5, 0.1, 0.3), SIM_BODY_DEFAULT_VIS, Vec3(0.7, 0.7, 0.7));
+        c->addSphere(0.7, SIM_BODY_DEFAULT_VIS, Vec3(-0.7, 0.7, 0.7));
+        c->addCylinderZ(0.4, 1., SIM_BODY_DEFAULT_VIS, Vec3(1., 0., 0.));
+        c->addCylinderY(0.4, 1., SIM_BODY_DEFAULT_VIS, Vec3(2., 0., 0.));
+        c->addCylinderX(0.4, 1., SIM_BODY_DEFAULT_VIS, Vec3(3., 0., 0.));
+        c->addTriMesh(bunny_coords, bunny_coords_len,
+                      bunny_ids, bunny_ids_len,
+                      SIM_BODY_DEFAULT_VIS,
+                      Vec3(5., 3., 0.),
+                      Quat(Vec3(1., 0., 0.), M_PI * .5));
+        c->setPos(Vec3(15., 0., 13.));
+        c->activate();
+
+        c = new BodyCompound(w);
+        c->addCube(1.);
+        c->addBox(Vec3(0.5, 0.1, 0.3), SIM_BODY_DEFAULT_VIS, Vec3(0.7, 0.7, 0.7));
+        c->addSphere(0.7, SIM_BODY_DEFAULT_VIS, Vec3(-0.7, 0.7, 0.7));
+        c->addCylinderZ(0.4, 1., SIM_BODY_DEFAULT_VIS, Vec3(1., 0., 0.));
+        c->addCylinderY(0.4, 1., SIM_BODY_DEFAULT_VIS, Vec3(2., 0., 0.));
+        c->addCylinderX(0.4, 1., SIM_BODY_DEFAULT_VIS, Vec3(3., 0., 0.));
+        c->addTriMesh(bunny_coords, bunny_coords_len,
+                      bunny_ids, bunny_ids_len,
+                      SIM_BODY_DEFAULT_VIS,
+                      Vec3(5., 3., 0.),
+                      Quat(Vec3(1., 0., 0.), M_PI * .5));
+        c->setPos(Vec3(15., -5., 13.));
+        c->setMassCube(3., 3.);
+        c->activate();
+
+        c = new BodyCompound(w);
+        id = c->addBox(Vec3(15., 15., 0.5));
+        c->visBody(id)->setColor(0.6, 0., 0.6, 0.1);
+        id = c->addBox(Vec3(5., 15., 0.5), SIM_BODY_DEFAULT_VIS,
+                       Vec3(9., 0., 2.), Quat(Vec3(0., 1., 0.), -M_PI / 4.));
+        c->visBody(id)->setColor(0.6, 0., 0.6, 0.1);
+        id = c->addBox(Vec3(5., 15., 0.5), SIM_BODY_DEFAULT_VIS,
+                       Vec3(-9., 0., 2.), Quat(Vec3(0., 1., 0.), M_PI / 4.));
+        c->visBody(id)->setColor(0.6, 0., 0.6, 0.1);
+        id = c->addBox(Vec3(19., .5, 5.), SIM_BODY_DEFAULT_VIS,
+                       Vec3(0., 7.5, 2.5));
+        c->visBody(id)->setColor(0.6, 0., 0.6, 0.1);
+        id = c->addBox(Vec3(19., .5, 5.), SIM_BODY_DEFAULT_VIS,
+                       Vec3(0., -7.5, 2.5));
+        c->visBody(id)->setColor(0.6, 0., 0.6, 0.1);
+
+        c->setPos(Vec3(15., 0., 10.));
+        c->activate();
+
+        Vec3 start(13., -2., 20.);
+        for (size_t i = 0; i < 15; i++){
+            for (size_t j = 0; j < 15; j++){
+                b = w->createBodyCube(0.5, 1.);
+                b->visBody()->setColor(0., 0.6, 0.6, 0.3);
+                b->setPos(start + Vec3(0.55 * i, 0.55 * j, 0.));
+                b->activate();
+            }
+        }
+    }
+
     void createFixed()
     {
         sim::Vec3 pos(-6., -6., -3.);
