@@ -58,6 +58,20 @@ class Joint {
 
     /* \{ */
     /**
+     * Returns true if joint is JointFixed.
+     */
+    virtual bool isFixed() const { return false; }
+    virtual bool isHinge() const { return false; }
+    virtual bool isHinge2() const { return false; }
+    /* \} */
+
+    /* \{ */
+    /**
+     * Returns angle position of hinge joint (-pi..pi).
+     */
+    virtual Scalar angle() const { return -1000; }
+
+    /**
      * Low and high stop angle or position.
      * Default values are -infinity, infinity
      */

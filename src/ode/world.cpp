@@ -440,9 +440,9 @@ sim::Body *World::createBodyCylinderZ(Scalar radius, Scalar height, Scalar mass,
 
 sim::Body *World::createBodyTriMesh(const Vec3 *coords, size_t coords_len,
                                     const unsigned int *indices, size_t indices_len,
-                                    Scalar mass, VisBody *vis)
+                                    VisBody *vis)
 {
-    sim::Body *b = new BodyTriMesh(this, coords, coords_len, indices, indices_len, mass, vis);
+    sim::Body *b = new BodyTriMesh(this, coords, coords_len, indices, indices_len, vis);
     _bodies.push_back(b);
     return b;
 }

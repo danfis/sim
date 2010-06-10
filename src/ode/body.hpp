@@ -231,7 +231,7 @@ class BodyTriMesh : public BodySimple {
   public:
     BodyTriMesh(World *w, const sim::Vec3 *coords, size_t coords_len,
                 const unsigned int *indices, size_t indices_len,
-                Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS);
+                VisBody *vis = SIM_BODY_DEFAULT_VIS);
 };
 
 

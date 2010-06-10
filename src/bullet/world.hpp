@@ -93,7 +93,7 @@ class World : public sim::World {
                                    VisBody *vis = SIM_BODY_DEFAULT_VIS);
     sim::Body *createBodyTriMesh(const Vec3 *coords, size_t coords_len,
                                  const unsigned int *indices, size_t indices_len,
-                                 Scalar mass = 0., VisBody *vis = SIM_BODY_DEFAULT_VIS);
+                                 VisBody *vis = SIM_BODY_DEFAULT_VIS);
     sim::Body *createBodyCompound();
 
     sim::Joint *createJointFixed(sim::Body *oA, sim::Body *oB);

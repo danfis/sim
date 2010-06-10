@@ -91,7 +91,7 @@ class S : public sim::Sim {
                                6, 7, 4,
                                4, 7, 5,
                                7, 8, 5 };
-        b = w->createBodyTriMesh(verts, 9, ind, 24, 0.);
+        b = w->createBodyTriMesh(verts, 9, ind, 24);
         b->visBody()->setColor(0.9, 0.6, 0.3, 1.);
         b->setPos(0., 0., -5.3);
         b->activate();
@@ -254,7 +254,7 @@ class S : public sim::Sim {
         cy->setPos(pos + sim::Vec3(0., 0., 2.));
 
         j = world()->createJointHinge(cu, cy, pos + sim::Vec3(0., 0., 1.), sim::Vec3(0., 1., 0.));
-        ((sim::bullet::JointHinge *)j)->setParamLimitLoHi(-M_PI / 2., 0.);
+        j->setParamLimitLoHi(-M_PI / 2., 0.);
 
         cu->activate();
         cy->activate();
@@ -303,7 +303,7 @@ class S : public sim::Sim {
         j = world()->createJointHinge2(b, s, pos + Vec3(0., 0., 1.),
                                        Vec3(0., 0., 1.), Vec3(1., 0., 0.));
 
-        ((sim::bullet::JointHinge2 *)j)->setParamLimitLoHi(-M_PI / 4., M_PI / 4.);
+        j->setParamLimitLoHi(-M_PI / 4., M_PI / 4.);
 
         b->activate();
         s->activate();
@@ -373,10 +373,10 @@ class S : public sim::Sim {
             jw[i] = world()->createJointHinge(chasis, w[i], w[i]->pos(), Vec3(1., 0., 0.));
         }
 
-        ((sim::bullet::JointHinge *)jw[0])->setParamVel(5.);
-        ((sim::bullet::JointHinge *)jw[0])->setParamFMax(10.);
-        ((sim::bullet::JointHinge *)jw[1])->setParamVel(5.);
-        ((sim::bullet::JointHinge *)jw[1])->setParamFMax(10.);
+        jw[0]->setParamVel(5.);
+        jw[0]->setParamFMax(10.);
+        jw[1]->setParamVel(5.);
+        jw[1]->setParamFMax(10.);
 
         chasis->activate();
         for (i = 0; i < 4; i++){
@@ -392,7 +392,7 @@ class S : public sim::Sim {
         sim::Body *bunny;
 
         bunny = world()->createBodyTriMesh(bunny_coords, bunny_coords_len,
-                                           bunny_ids, bunny_ids_len, 20.);
+                                           bunny_ids, bunny_ids_len);
         bunny->visBody()->setColor(0.4, 0.4, 0.4, 1.);
         bunny->setRot(sim::Quat(Vec3(1., 0., 0.), M_PI * 0.5));
         bunny->activate();

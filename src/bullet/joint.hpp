@@ -60,10 +60,6 @@ class Joint : public sim::Joint {
      */
     void deactivate();
 
-    virtual bool isFixed() const { return false; }
-    virtual bool isHinge() const { return false; }
-    virtual bool isHinge2() const { return false; }
-
   protected:
     void _setJoint(btTypedConstraint *c) { _joint = c; }
 };

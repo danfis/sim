@@ -88,7 +88,7 @@ class World {
         { return 0; }
     virtual Body *createBodyTriMesh(const Vec3 *coords, size_t coords_len,
                                     const unsigned int *indices, size_t indices_len,
-                                    Scalar mass, VisBody *vis = SIM_BODY_DEFAULT_VIS)
+                                    VisBody *vis = SIM_BODY_DEFAULT_VIS)
         { return 0; }
     virtual Body *createBodyCompound()
         { return 0; }

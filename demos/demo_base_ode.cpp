@@ -184,7 +184,7 @@ class S : public sim::Sim {
                                6, 7, 4,
                                4, 7, 5,
                                7, 8, 5 };
-        b = w->createBodyTriMesh(verts, 9, ind, 24, 0.);
+        b = w->createBodyTriMesh(verts, 9, ind, 24);
         b->visBody()->setColor(0.9, 0.6, 0.3, 1.);
         b->setPos(0., 0., -5.3);
         b->activate();
@@ -402,7 +402,7 @@ class S : public sim::Sim {
         sim::Body *bunny;
 
         bunny = world()->createBodyTriMesh(bunny_coords, bunny_coords_len,
-                                           bunny_ids, bunny_ids_len, 20.);
+                                           bunny_ids, bunny_ids_len);
         bunny->visBody()->setColor(0.4, 0.4, 0.4, 1.);
         bunny->setRot(sim::Quat(Vec3(1., 0., 0.), M_PI * 0.5));
         bunny->activate();

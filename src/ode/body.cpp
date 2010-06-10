@@ -475,7 +475,7 @@ BodyCylinderY::BodyCylinderY(World *w, Scalar radius, Scalar height, Scalar mass
 
 BodyTriMesh::BodyTriMesh(World *w, const sim::Vec3 *coords, size_t coords_len,
                          const unsigned int *ids, size_t ids_len,
-                         Scalar mass, VisBody *vis)
+                         VisBody *vis)
     : BodySimple(w)
 {
     addTriMesh(coords, coords_len, ids, ids_len, vis);

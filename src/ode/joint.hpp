@@ -79,6 +79,7 @@ class Joint : public sim::Joint {
 class JointFixed : public Joint {
   public:
     JointFixed(World *w, Body *oA, Body *oB);
+    bool isFixed() const { return true; }
     void activate();
 };
 
@@ -94,6 +95,8 @@ class JointHinge2 : public Joint {
 
   public:
     JointHinge2(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis1, const Vec3 &axis2);
+
+    bool isHinge2() const { return true; }
 
     void activate();
 
@@ -120,6 +123,8 @@ class JointHinge : public Joint {
   public:
     JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor,
                const Vec3 &axis, Scalar axis_offset = 0.);
+
+    bool isHinge() const { return true; }
 
     void activate();
 
