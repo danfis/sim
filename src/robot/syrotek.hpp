@@ -22,8 +22,7 @@
 #ifndef _SIM_ROBOT_SYROTEK_HPP_
 #define _SIM_ROBOT_SYROTEK_HPP_
 
-#include <sim/ode/world.hpp>
-#include <sim/ode/body.hpp>
+#include <sim/world.hpp>
 
 namespace sim {
 
@@ -36,8 +35,8 @@ class Syrotek {
 
     sim::Body *_chasis;
     sim::Body *_wheel[2], *_ball[2];
-    sim::ode::JointFixed *_jball[2];
-    sim::ode::JointHinge *_jwheel[2];
+    sim::Joint *_jball[2];
+    sim::Joint *_jwheel[2];
 
     sim::Scalar _vel[2];
 

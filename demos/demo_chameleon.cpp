@@ -21,12 +21,11 @@
 
 #include <iostream>
 #include <sim/sim.hpp>
-#include <sim/ode/world.hpp>
+#include <sim/world.hpp>
 #include <sim/msg.hpp>
 #include <sim/comp/syrotek.hpp>
 #include "sim/comp/povray.hpp"
 
-using namespace sim::ode;
 using sim::Scalar;
 using sim::Vec3;
 using sim::Quat;
@@ -93,29 +92,56 @@ static void randColor(osg::Vec4 *color)
     color->set(r, g, b, 1.);
 }
 
+bool use_ode = true;
+
 class S : public sim::Sim {
   public:
     S()
         : Sim()
     {
-        World *w = new World();
+        if (use_ode){
+            initODE();
+        }else{
+            initBullet();
+        }
 
         setTimeStep(Time::fromMs(20));
         setTimeSubSteps(2);
 
-        setWorld(w);
+        pauseSimulation();
 
+        createArena();
+        createRobot();
+    }
+
+  protected:
+    void initBullet()
+    {
+#ifdef SIM_HAVE_BULLET
+        DBG("Using Bullet");
+
+        sim::bullet::World *w = new sim::bullet::World();
+        setWorld(w);
+#endif /* SIM_HAVE_BULLET */
+    }
+
+    void initODE()
+    {
+#ifdef SIM_HAVE_ODE
+        DBG("Using ODE");
+
+        sim::ode::World *w = new sim::ode::World();
+
+        setWorld(w);
         w->setCFM(0.0001);
         w->setERP(0.8);
-        //w->setStepType(World::STEP_TYPE_QUICK);
+        w->setStepType(sim::ode::World::STEP_TYPE_QUICK);
         w->setAutoDisable(0.01, 0.01, 5, 0.);
 
         w->setContactApprox1(true);
         w->setContactApprox2(true);
         w->setContactBounce(0.1, 0.1);
-
-        createArena();
-        createRobot();
+#endif /* SIM_HAVE_ODE */
     }
 
     void createArena()
@@ -126,7 +152,7 @@ class S : public sim::Sim {
         osg::Vec4 color(0., 0.7, 0.1, 1.);
         sim::Body *c;
         int id;
-        sim::ode::World *w = (sim::ode::World *)world();
+        sim::World *w = world();
 
         srand(3456789);
         c = w->createBodyCompound();
@@ -151,6 +177,14 @@ class S : public sim::Sim {
 
 int main(int argc, char *argv[])
 {
+    for (int i = 1; i < argc; i++){
+        if (strcmp(argv[i], "--ode") == 0){
+            use_ode = true;
+        }else if (strcmp(argv[i], "--bullet") == 0){
+            use_ode = false;
+        }
+    }
+
     S s;
     s.run();
 

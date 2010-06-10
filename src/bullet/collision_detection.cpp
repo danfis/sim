@@ -21,6 +21,7 @@
 
 #include "sim/bullet/collision_detection.hpp"
 #include "sim/bullet/body.hpp"
+#include "sim/msg.hpp"
 
 
 namespace sim {

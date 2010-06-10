@@ -28,10 +28,10 @@ ifeq '$(HAVE_ODE)' 'yes'
   LDFLAGS += -L../src/ode -lsim-ode
 endif
 ifeq '$(HAVE_BT)' 'yes'
-  LIBDEPS += ../src/ode/libsim-ode.a
+  LIBDEPS += ../src/bullet/libsim-bullet.a
   LDFLAGS += -L../src/bullet -lsim-bullet
 endif
-LIBDEPS = ../src/libsim.a
+LIBDEPS += ../src/libsim.a
 LDFLAGS += -L../src -lsim
 
 

@@ -22,7 +22,6 @@
 
 #include "sssa.hpp"
 #include <sim/msg.hpp>
-#include <sim/ode/body.hpp>
 
 #include "meshes/sssa_body.hpp"
 #include "meshes/sssa_arm.hpp"
@@ -357,9 +356,8 @@ void SSSA::_createArm(const osg::Vec4 &color)
 
     _arm.body = b;
 
-    _arm.joint = (sim::ode::JointHinge *)
-                    _world->createJointHinge(_chasis, _arm.body,
-                                             _chasis->pos(), axis);
+    _arm.joint = _world->createJointHinge(_chasis, _arm.body,
+                                          _chasis->pos(), axis);
 
     _arm.joint->setParamBounce(0.01);
     _arm.joint->setParamLimitLoHi(-M_PI / 2., M_PI / 2.);
@@ -375,7 +373,7 @@ void SSSA::_createArmJoint()
 
 void SSSA::_createWheels()
 {
-    sim::ode::JointHinge *j;
+    sim::Joint *j;
 
     const sim::Vec3 wheel_pos[] = {
         sim::Vec3( 0.250, -0.458, -0.419),
@@ -405,13 +403,13 @@ void SSSA::_createWheels()
         _wright.body[i]->setRot(_wright.body[i]->rot() * _rot);
 
         // create joints
-        j = (sim::ode::JointHinge *)_world->createJointHinge(_chasis, _wleft.body[i],
-                                                             _wleft.body[i]->pos(),
-                                                             _rot * Vec3(0., 1., 0.));
+        j = _world->createJointHinge(_chasis, _wleft.body[i],
+                                     _wleft.body[i]->pos(),
+                                     _rot * Vec3(0., 1., 0.));
         _wleft.joint[i] = j;
-        j = (sim::ode::JointHinge *)_world->createJointHinge(_chasis, _wright.body[i],
-                                                             _wright.body[i]->pos(),
-                                                             _rot * Vec3(0., 1., 0.));
+        j = _world->createJointHinge(_chasis, _wright.body[i],
+                                     _wright.body[i]->pos(),
+                                     _rot * Vec3(0., 1., 0.));
         _wright.joint[i] = j;
 
 

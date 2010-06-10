@@ -62,6 +62,7 @@ class Joint : public sim::Joint {
 
   protected:
     void _setJoint(btTypedConstraint *c) { _joint = c; }
+    void _enable();
 };
 
 /**

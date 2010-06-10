@@ -54,6 +54,18 @@ void Joint::deactivate()
     _world->world()->removeConstraint(_joint);
 }
 
+void Joint::_enable()
+{
+    Body *a = 0, *b = 0;
+    a = (Body *)objA();
+    b = (Body *)objB();
+
+    if (a)
+        a->body()->activate(true);
+    if (b)
+        b->body()->activate(true);
+}
+
 JointFixed::JointFixed(World *w, Body *oA, Body *oB)
     : Joint(w, oA, oB)
 {
@@ -216,11 +228,13 @@ void JointHinge::_applyVelFMax(const sim::Time &time)
 {
     Scalar imp;
 
-    imp = _fmax * time.inSF();
-
     if (_joint){
+        //DBG(this << " " << _vel << " " << _fmax);
         if (!isZero(_fmax) && !isZero(_vel)){
+            imp = _fmax * time.inSF();
+            //DBG(imp << " " << _fmax << " " << time.inSF());
             ((btHingeConstraint *)_joint)->enableAngularMotor(true, -_vel, imp);
+            _enable();
         }else{
             ((btHingeConstraint *)_joint)->enableAngularMotor(false, 0., 0.);
         }

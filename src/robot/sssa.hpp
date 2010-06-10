@@ -24,9 +24,6 @@
 #define _SIM_ROBOT_SYROTEK_HPP_
 
 #include <sim/world.hpp>
-#include <sim/body.hpp>
-#include <sim/joint.hpp>
-#include <sim/ode/joint.hpp>
 
 namespace sim {
 
@@ -36,7 +33,7 @@ class SSSA {
   protected:
     struct arm_t {
         sim::Body *body;
-        sim::ode::JointHinge *joint;
+        sim::Joint *joint;
         Scalar vel;
         bool fixed;
         osg::Vec4 color;
@@ -48,7 +45,7 @@ class SSSA {
 
     struct belt_t {
         sim::Body *body[6];
-        sim::ode::JointHinge *joint[6];
+        sim::Joint *joint[6];
         Scalar vel;
 
         belt_t() : vel(0.)

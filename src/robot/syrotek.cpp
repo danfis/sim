@@ -166,15 +166,13 @@ Syrotek::Syrotek(sim::World *w, const Vec3 &pos,
         _ball[1]->collSetDontCollideId(robot_coll_id);
         //DBG("_ball[1]: " << _ball[1]);
 
-        _jball[0] = (sim::ode::JointFixed *)_world->createJointFixed(_chasis, _ball[0]);
-        _jball[1] = (sim::ode::JointFixed *)_world->createJointFixed(_chasis, _ball[1]);
+        _jball[0] = _world->createJointFixed(_chasis, _ball[0]);
+        _jball[1] = _world->createJointFixed(_chasis, _ball[1]);
 
-        _jwheel[0] = (sim::ode::JointHinge *)
-                        _world->createJointHinge(_chasis, _wheel[0], _wheel[0]->pos(),
-                                                 Vec3(0., -1., 0.));
-        _jwheel[1] = (sim::ode::JointHinge *)
-                        _world->createJointHinge(_chasis, _wheel[1], _wheel[1]->pos(),
-                                                 Vec3(0., -1., 0.));
+        _jwheel[0] = _world->createJointHinge(_chasis, _wheel[0], _wheel[0]->pos(),
+                                              Vec3(0., -1., 0.));
+        _jwheel[1] = _world->createJointHinge(_chasis, _wheel[1], _wheel[1]->pos(),
+                                              Vec3(0., -1., 0.));
 
         _jwheel[0]->setParamVel(0.);
         _jwheel[0]->setParamFMax(100.);
