@@ -21,8 +21,7 @@
 
 -include ../../Makefile.local
 -include ../../Makefile.include
-CXXFLAGS += -I../ $(OSG_CXXFLAGS) $(ODE_CXXFLAGS)
-
+CXXFLAGS += -I..
 
 TARGETS = libsim-ode.a
 OBJS = world.o body.o joint.o

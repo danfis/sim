@@ -22,10 +22,12 @@
 #ifndef _SIM_WORLD_HPP_
 #define _SIM_WORLD_HPP_
 
-#include "sim/body.hpp"
-#include "sim/joint.hpp"
-#include "sim/visworld.hpp"
-#include "sim/time.hpp"
+#include <sim/config.hpp>
+
+#include <sim/body.hpp>
+#include <sim/joint.hpp>
+#include <sim/visworld.hpp>
+#include <sim/time.hpp>
 
 namespace sim {
 
@@ -104,6 +106,14 @@ class World {
 };
 
 } /* namespace sim */
+
+#ifdef SIM_HAVE_ODE
+# include <sim/ode/world.hpp>
+#endif /* SIM_HAVE_ODE */
+
+#ifdef SIM_HAVE_BULLET
+# include <sim/bullet/world.hpp>
+#endif /* SIM_HAVE_BULLET */
 
 #endif /* _SIM_WORLD_HPP_ */
 

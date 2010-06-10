@@ -21,23 +21,30 @@
 
 -include ../Makefile.local
 -include ../Makefile.include
-CXXFLAGS += -I. $(OSG_CXXFLAGS)
+CXXFLAGS += -I.
 
+CONFIG_FLAGS =
+ifeq '$(HAVE_ODE)' 'yes'
+  CONFIG_FLAGS += -DHAVE_ODE=1
+endif
+ifeq '$(HAVE_BT)' 'yes'
+  CONFIG_FLAGS += -DHAVE_BULLET=1
+endif
 ifeq '$(HAVE_SDL)' 'yes'
-  CXXFLAGS += $(SDL_CXXFLAGS)
+  CONFIG_FLAGS += -DHAVE_SDL=1
 endif
 
 SUBTARGETS =
 
-ifeq '$(WANT_ODE)' 'yes'
+ifeq '$(HAVE_ODE)' 'yes'
   SUBTARGETS += ode
 endif
 
-ifeq '$(WANT_BT)' 'yes'
+ifeq '$(HAVE_BT)' 'yes'
   SUBTARGETS += bullet
 endif
 
-TARGETS = libsim.a
+TARGETS = libsim.a config.hpp
 OBJS = visbody.o visworld.o body.o joint.o sim.o component.o message.o \
        time.o visworldmanip.o
 OBJS += sensor/camera.o sensor/rangefinder.o
@@ -47,18 +54,21 @@ OBJS += robot/syrotek.o robot/sssa.o
 
 all: $(TARGETS) $(SUBTARGETS)
 
-libsim.a: $(OBJS)
-	ar cr $@ $^
+libsim.a: $(OBJS) config.hpp
+	ar cr $@ $(OBJS)
 	ranlib $@
+
+config.hpp: config.hpp.in
+	$(M4) $(CONFIG_FLAGS) $< > $@
 
 ode: libsim.a
 	$(MAKE) -C ode
 bullet: libsim.a
 	$(MAKE) -C bullet
 
-%.o: %.cpp %.hpp
+%.o: %.cpp %.hpp config.hpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
-%.o: %.cpp
+%.o: %.cpp config.hpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 clean:

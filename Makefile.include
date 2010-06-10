@@ -26,6 +26,7 @@ FLEX ?= flex
 DOXYGEN ?= doxygen
 DIA ?= dia
 CONVERT ?= convert
+M4 ?= m4
 
 SYSTEM = $(shell uname)
 
@@ -106,7 +107,8 @@ ifeq '$(WANT_OSG)' 'yes'
     HAVE_OSG = $(shell if pkg-config openscenegraph --exists; then echo "yes"; else echo "no"; fi;)
     ifeq '$(HAVE_OSG)' 'yes'
       OSG_CXXFLAGS = $(shell pkg-config openscenegraph --cflags)
-      OSG_LDFLAGS  = $(shell pkg-config openscenegraph --libs)
+      OSG_LDFLAGS  = $(shell pkg-config openscenegraph --libs-only-L)
+      OSG_LDFLAGS += -losg -losgGA -losgViewer
     endif
   endif
 endif
@@ -117,7 +119,8 @@ ifeq '$(WANT_BT)' 'yes'
     HAVE_BT = $(shell if pkg-config bullet --exists; then echo "yes"; else echo "no"; fi;)
     ifeq '$(HAVE_BT)' 'yes'
       BT_CXXFLAGS  = $(shell pkg-config bullet --cflags)
-      BT_LDFLAGS   = $(shell pkg-config bullet --libs)
+      BT_LDFLAGS   = $(shell pkg-config bullet --libs-only-L)
+      BT_LDFLAGS  += -lBulletDynamics -lBulletCollision -lLinearMath
     endif
   endif
 endif
@@ -129,11 +132,20 @@ ifeq '$(WANT_SDL)' 'yes'
     ifeq '$(HAVE_SDL)' 'yes'
       SDL_CXXFLAGS  = $(shell pkg-config sdl --cflags)
       SDL_LDFLAGS   = $(shell pkg-config sdl --libs)
-
-      SDL_CXXFLAGS += -DHAVE_SDL
     endif
   endif
 endif
+
+
+CXXFLAGS += $(OSG_CXXFLAGS)
+CXXFLAGS += $(ODE_CXXFLAGS)
+CXXFLAGS += $(BT_CXXFLAGS)
+CXXFLAGS += $(SDL_CXXFLAGS)
+
+LDFLAGS += $(OSG_LDFLAGS)
+LDFLAGS += $(ODE_LDFLAGS)
+LDFLAGS += $(BT_LDFLAGS)
+LDFLAGS += $(SDL_LDFLAGS)
 
 check-dep-osg:
 	@echo "Checking Openscenegraph..."
@@ -184,6 +196,7 @@ showvars:
 	@echo "FLEX    = $(FLEX)"
 	@echo "AWK     = $(AWK)"
 	@echo "SED     = $(SED)"
+	@echo "M4      = $(M4)"
 	@echo "DOXYGEN = $(DOXYGEN)"
 	@echo "SED     = $(SED)"
 	@echo "DIA     = $(DIA)"

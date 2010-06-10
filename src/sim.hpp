@@ -22,6 +22,8 @@
 #ifndef _SIM_SIM_HPP_
 #define _SIM_SIM_HPP_
 
+#include <sim/config.hpp>
+
 #include "world.hpp"
 #include "visworld.hpp"
 #include "component.hpp"

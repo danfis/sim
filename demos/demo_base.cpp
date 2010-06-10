@@ -22,9 +22,9 @@
 #include <unistd.h>
 #include <iostream>
 
-#include "sim/bullet/world.hpp"
-#include "sim/sim.hpp"
-#include "msg.hpp"
+#include <sim/sim.hpp>
+#include <sim/world.hpp>
+#include <sim/msg.hpp>
 
 #include "bunny.hpp"
 
@@ -32,11 +32,19 @@ using sim::Vec3;
 using sim::Quat;
 using namespace std;
 
+bool use_ode = true;
+
 class S : public sim::Sim {
   public:
     S()
         : Sim()
     {
+        if (use_ode){
+            initODE();
+        }else{
+            initBullet();
+        }
+
         setTimeStep(sim::Time::fromMs(20));
         setTimeSubSteps(2);
 
@@ -44,22 +52,8 @@ class S : public sim::Sim {
 
         pauseSimulation();
 
-        sim::bullet::World *w = new sim::bullet::World();
         sim::Body *b;
-
-        setWorld(w);
-        /*
-        w->setCFM(1e-10);
-        w->setCFM(0.01);
-        w->setERP(0.5);
-        w->setStepType(World::STEP_TYPE_QUICK);
-        w->setAutoDisable(0.01, 0.01, 5, 0.);
-        */
-        //w->setContactSoftCFM(0.0000001);
-        //w->setContactApprox1(false);
-        //w->setContactApprox2(false);
-        //w->setContactBounce(0.1, 0.1);
-    
+        sim::World *w = world();
 
         createShapes();
         createCompound();
@@ -98,6 +92,37 @@ class S : public sim::Sim {
     }
 
   protected:
+    void initBullet()
+    {
+#ifdef SIM_HAVE_BULLET
+        DBG("Using Bullet");
+
+        sim::bullet::World *w = new sim::bullet::World();
+        setWorld(w);
+#endif /* SIM_HAVE_BULLET */
+    }
+
+    void initODE()
+    {
+#ifdef SIM_HAVE_ODE
+        DBG("Using ODE");
+
+        sim::ode::World *w = new sim::ode::World();
+
+        setWorld(w);
+        w->setCFM(1e-10);
+        w->setCFM(0.01);
+        w->setERP(0.5);
+        w->setStepType(sim::ode::World::STEP_TYPE_QUICK);
+        w->setAutoDisable(0.01, 0.01, 5, 0.);
+
+        //w->setContactSoftCFM(0.0000001);
+        //w->setContactApprox1(false);
+        //w->setContactApprox2(false);
+        //w->setContactBounce(0.1, 0.1);
+#endif /* SIM_HAVE_ODE */
+    }
+
     void createShapes()
     {
         sim::World *w = world();
@@ -419,8 +444,15 @@ class S : public sim::Sim {
 
 int main(int argc, char *argv[])
 {
-    S s;
+    for (int i = 1; i < argc; i++){
+        if (strcmp(argv[i], "--ode") == 0){
+            use_ode = true;
+        }else if (strcmp(argv[i], "--bullet") == 0){
+            use_ode = false;
+        }
+    }
 
+    S s;
     s.run();
 
     return 0;

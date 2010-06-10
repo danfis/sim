@@ -1,0 +1,8 @@
+#ifndef _SIM_CONFIG_HPP_
+#define _SIM_CONFIG_HPP_
+
+ifelse(HAVE_ODE, `1', `#define SIM_HAVE_ODE 1', `')
+ifelse(HAVE_BULLET, `1', `#define SIM_HAVE_BULLET 1', `')
+ifelse(HAVE_SDL, `1', `#define SIM_HAVE_SDL 1', `')
+
+#endif /* _SIM_CONFIG_HPP_ */

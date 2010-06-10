@@ -21,8 +21,7 @@
 
 -include ../../Makefile.local
 -include ../../Makefile.include
-CXXFLAGS += -I../ $(OSG_CXXFLAGS) $(BT_CXXFLAGS)
-
+CXXFLAGS += -I..
 
 TARGETS = libsim-bullet.a
 OBJS = body.o joint.o world.o collision_detection.o sim.o

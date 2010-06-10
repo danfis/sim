@@ -314,7 +314,6 @@ void Body::activate()
         dBodyDestroy(_body);
 
     if (!isZero(_mass.mass)){
-        DBG("");
         _body = dBodyCreate(world()->world());
         dBodySetData(_body, this);
 
@@ -323,7 +322,6 @@ void Body::activate()
         for_each(_shapes_it_t, _shapes){
             dGeomSetBody(it->second->shape, _body);
         }
-        DBG(_body);
     }
 
     _enableShape();
@@ -397,10 +395,8 @@ void Body::_enableVisBody()
     if (!vw)
         return;
 
-    DBG(_body);
     for_each(_shapes_it_t, _shapes){
         if (it->second->vis){
-            DBG("");
             vw->addBody(it->second->vis);
         }
     }

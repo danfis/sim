@@ -39,7 +39,7 @@ Joystick::~Joystick()
 
 void Joystick::init(sim::Sim *sim)
 {
-#ifdef HAVE_SDL
+#ifdef SIM_HAVE_SDL
     bool init = false;
 
     _sim = sim;
@@ -77,22 +77,22 @@ void Joystick::init(sim::Sim *sim)
 
         _sim->regPostStep(this);
     }
-#endif /* HAVE_SDL */
+#endif /* SIM_HAVE_SDL */
 }
 
 void Joystick::finish()
 {
-#ifdef HAVE_SDL
+#ifdef SIM_HAVE_SDL
     if (_joystick){
         SDL_JoystickClose(_joystick);
         _joystick = 0;
     }
-#endif /* HAVE_SDL */
+#endif /* SIM_HAVE_SDL */
 }
 
 void Joystick::cbPostStep()
 {
-#ifdef HAVE_SDL
+#ifdef SIM_HAVE_SDL
     if (_timer.stop() < _delay)
         return;
 
@@ -107,7 +107,7 @@ void Joystick::cbPostStep()
     _timer.start();
 
     _sim->sendMessage(msg);
-#endif /* HAVE_SDL */
+#endif /* SIM_HAVE_SDL */
 }
 
 }
