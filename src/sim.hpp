@@ -155,6 +155,8 @@ class Sim {
     VisWorld *visWorld() { return _visworld; }
     const VisWorld *visWorld() const { return _visworld; }
 
+    void components(std::list<Component *> *list);
+
     void setWorld(World *w);
     void setVisWorld(VisWorld *w);
 

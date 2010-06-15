@@ -209,6 +209,12 @@ Sim::~Sim()
         delete _visworld;
 }
 
+void Sim::components(std::list<Component *> *list)
+{
+    for_each(std::list<Component *>::iterator, _cs){
+        list->push_back(*it);
+    }
+}
 
 void Sim::setWorld(World *w)
 {

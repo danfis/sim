@@ -34,9 +34,6 @@ endif
 LIBDEPS += ../src/libsim.a
 LDFLAGS += -L../src -lsim
 
-
-OBJS_SSSA = demo_sssa.cpp robot_sssa.cpp
-
 TARGETS =
 
 TARGETS += demo_base
@@ -79,8 +76,8 @@ demo_intersection: demo_intersection.cpp $(LIBDEPS)
 demo_chameleon: demo_chameleon.cpp $(LIBDEPS)
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
-demo_sssa: $(OBJS_SSSA) $(LIBDEPS)
-	$(CXX) $(CXXFLAGS) -o $@ $(OBJS_SSSA) $(LDFLAGS)
+demo_sssa: demo_sssa.cpp $(LIBDEPS)
+	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 demo_movement_tunning: demo_movement_tunning.cpp $(LIBDEPS)
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)

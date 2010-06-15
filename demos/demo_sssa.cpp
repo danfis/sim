@@ -22,10 +22,9 @@
 #include <iostream>
 #include <sim/sim.hpp>
 #include <sim/world.hpp>
-#include <sim/msg.hpp>
 #include <sim/sensor/camera.hpp>
-
-#include "robot_sssa.hpp"
+#include <sim/comp/sssa.hpp>
+#include <sim/msg.hpp>
 
 using sim::Vec3;
 using sim::Quat;
@@ -33,6 +32,156 @@ using sim::Time;
 using namespace std;
 
 bool use_ode = true;
+
+class SSSA;
+
+SSSA *active = 0;
+
+class SSSA : public sim::comp::SSSA {
+  public:
+    SSSA(const Vec3 &pos, const Quat &rot = Quat(0., 0., 0., 1.))
+        : sim::comp::SSSA(pos, rot)
+    {
+    }
+
+    void init(sim::Sim *sim)
+    {
+        sim::comp::SSSA::init(sim);
+        sim->regMessage(this, sim::MessageKeyPressed::Type);
+    }
+
+    void processMessage(const sim::Message &msg)
+    {
+        if (msg.type() == sim::MessageKeyPressed::Type){
+            if (active == this)
+                _keyPressedMsg((const sim::MessageKeyPressed &)msg);
+        }
+    }
+
+    void _keyPressedMsg(const sim::MessageKeyPressed &msg)
+    {
+        int key = msg.key();
+
+        //DBG("Component: " << this << " - key pressed: " << msg.key());
+
+        if (key == 'h'){
+            _robot->addVelLeft(0.1);
+        }else if (key == 'j'){
+            _robot->addVelLeft(-0.1);
+        }else if (key == 'k'){
+            _robot->addVelRight(0.1);
+        }else if (key == 'l'){
+            _robot->addVelRight(-0.1);
+
+        }else if (key == 'n'){
+            _robot->addVelArm(0.1);
+        }else if (key == 'm'){
+            _robot->addVelArm(-0.1);
+        }else if (key == ','){
+            _robot->fixArm();
+        }else if (key == '.'){
+            _robot->unfixArm();
+        }else if (key == 'v'){
+            _robot->reachArmAngle(M_PI / 4.);
+        }else if (key == 'b'){
+            _robot->reachArmAngle(-M_PI / 4.);
+        }
+        DBG("Velocity: " << _robot->velLeft() << " " << _robot->velRight() << " " << _robot->velArm());
+    }
+};
+
+class RobotsManager : public sim::Component {
+    std::vector<SSSA *> sssas;
+    size_t active_id;
+
+  public:
+    RobotsManager()
+        : active_id(0)
+    {
+    }
+
+    void init(sim::Sim *sim)
+    {
+        std::list<sim::Component *> comps;
+        sim->components(&comps);
+
+        std::list<sim::Component *>::iterator it, it_end;
+        SSSA *sssa;
+
+        it = comps.begin();
+        it_end = comps.end();
+        for (; it != it_end; ++it){
+            sssa = dynamic_cast<SSSA *>(*it);
+
+            if (sssa && sssa->robot()){
+                DBG(sssa << " " << sssa->robot());
+                sssas.push_back(sssa);
+            }
+        }
+
+        for (size_t i = 0; i < sssas.size(); i++){
+            for (size_t j = i + 1; j < sssas.size(); j++){
+                if (!sssas[i]->robot()->connectTo(*sssas[j]->robot())){
+                    sssas[j]->robot()->connectTo(*sssas[i]->robot());
+                }
+            }
+        }
+
+        _activateRobot(0);
+
+        sim->regMessage(this, sim::MessageKeyPressed::Type);
+    }
+
+    void processMessage(const sim::Message &msg)
+    {
+        if (msg.type() == sim::MessageKeyPressed::Type){
+            const sim::MessageKeyPressed &m = (const sim::MessageKeyPressed &)msg;
+            if (m.key() == 'u'){
+                _activateRobot(active_id + 1);
+            }else if (m.key() == 'i'){
+                _activateRobot(active_id - 1);
+            }
+        }
+    }
+
+  protected:
+    void _activateRobot(size_t i)
+    {
+        std::list<sim::VisBody *> vis;
+        std::list<sim::VisBody *>::iterator it, it_end;
+
+        if (i < 0){
+            i = sssas.size() - 1;
+        }else if (i >= sssas.size()){
+            i = 0;
+        }
+
+        active_id = i;
+
+        if (active){
+            active->robot()->chasis()->visBodyAll(&vis);
+
+            it = vis.begin();
+            it_end = vis.end();
+            for (; it != it_end; ++it){
+                (*it)->setColor(0., 0.1, 0.7, 0.6);
+            }
+
+            vis.clear();
+        }
+
+        active = sssas[i];
+
+        vis.clear();
+        active->robot()->chasis()->visBodyAll(&vis);
+
+        it = vis.begin();
+        it_end = vis.end();
+        for (; it != it_end; ++it){
+            (*it)->setColor(0.7, 0.1, 0., 0.6);
+        }
+    }
+};
 
 class S : public sim::Sim {
   public:
@@ -116,33 +265,22 @@ class S : public sim::Sim {
 
     void createRobot()
     {
-        sim::robot::SSSA *r1, *r2;
-        r1 = new sim::robot::SSSA(world(), Vec3(2., 2., .6));
-        r1->activate();
+        SSSA *rob;
 
-        r2 = new sim::robot::SSSA(world(), Vec3(.746, 2., .6));
-        r2->activate();
+        rob = new SSSA(Vec3(2., 2., .6));
+        addComponent(rob);
 
-        DBG("can connect: " << r1->canConnectTo(*r2));
-        r1->connectTo(*r2);
+        rob = new SSSA(Vec3(.746, 2., .6));
+        addComponent(rob);
 
-        SSSAComp *comp;
-        comp = new SSSAComp(r1);
-        addComponent(comp);
+        rob = new SSSA(Vec3(2., 3.254, .6), Quat(Vec3(0., 0., 1.), M_PI / 2.));
+        addComponent(rob);
 
-        r2 = new sim::robot::SSSA(world(), Vec3(2., 3.254, .6),
-                                  Quat(Vec3(0., 0., 1.), M_PI / 2.));
-        r2->activate();
-        DBG("can connect: " << r2->canConnectTo(*r1));
-        r2->connectTo(*r1);
+        rob = new SSSA(Vec3(2., 0.746, .6), Quat(Vec3(0., 0., 1.), -M_PI / 2.));
+        addComponent(rob);
 
-
-        r2 = new sim::robot::SSSA(world(), Vec3(2., 0.746, .6),
-                                  Quat(Vec3(0., 0., 1.), -M_PI / 2.));
-        r2->activate();
-        DBG("can connect: " << r2->canConnectTo(*r1));
-        r2->connectTo(*r1);
-
+        // and as last add component which will connect all robots
+        addComponent(new RobotsManager());
     }
 
 };

@@ -19,32 +19,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ROBOT_SSSA_HPP_
-#define _ROBOT_SSSA_HPP_
+#ifndef _SIM_COMP_SSSA_HPP_
+#define _SIM_COMP_SSSA_HPP_
 
+#include <sim/sim.hpp>
 #include <sim/component.hpp>
 #include <sim/robot/sssa.hpp>
 
+namespace sim {
 
-class SSSAComp : public sim::Component {
+namespace comp {
+
+class SSSA : public sim::Component {
+  protected:
     sim::Sim *_sim;
 
     sim::robot::SSSA *_robot;
     sim::Vec3 _pos;
+    sim::Quat _rot;
 
   public:
-    SSSAComp(const sim::Vec3 &pos);
-    SSSAComp(sim::robot::SSSA *robot);
+    SSSA(const sim::Vec3 &pos, const sim::Quat &rot = sim::Quat(0., 0., 0., 1.));
+    ~SSSA();
 
+    const sim::Sim *sim() const { return _sim; }
+    sim::Sim *sim() { return _sim; }
+    const sim::robot::SSSA *robot() const { return _robot; }
     sim::robot::SSSA *robot() { return _robot; }
 
     void init(sim::Sim *sim);
-    void finish();
-    void cbPostStep();
-    void processMessage(const sim::Message &msg);
-
-  protected:
-    void _keyPressedMsg(const sim::MessageKeyPressed &msg);
 };
 
-#endif
+} /* namespace comp */
+
+} /* namespace sim */
+
+#endif /* _SIM_COMP_SSSA_HPP_ */

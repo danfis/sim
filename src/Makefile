@@ -49,7 +49,7 @@ OBJS = visbody.o visworld.o body.o joint.o sim.o component.o message.o \
        time.o visworldmanip.o
 OBJS += sensor/camera.o sensor/rangefinder.o
 OBJS += comp/povray.o comp/snake.o comp/frequency.o comp/watchdog.o \
-        comp/syrotek.o comp/joystick.o
+        comp/syrotek.o comp/joystick.o comp/sssa.o
 OBJS += robot/syrotek.o robot/sssa.o
 
 all: $(TARGETS) $(SUBTARGETS)
