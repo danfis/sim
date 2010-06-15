@@ -181,7 +181,7 @@ Sim::Sim(World *world, VisWorld *visworld)
       _in_cb(false),
       _time_step(0, 20000000), _time_substeps(10),
       _vis_time_step(0, 50000000),
-      _simulate(true), _simulate_real(true),
+      _simulate(true), _simulate_real(true), _terminate(false),
       _time_limit_enabled(false)
 {
     if (!_visworld)
@@ -364,7 +364,10 @@ bool Sim::done()
 
     pthread_mutex_lock(&_step_lock);
 
-    if (_visworld)
+    if (_terminate)
+        done = true;
+
+    if (!done && _visworld)
         done = _visworld->done();
     if (!done && _world)
         done = _world->done();

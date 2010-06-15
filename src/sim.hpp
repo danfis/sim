@@ -138,6 +138,7 @@ class Sim {
     bool _simulate; //!< True if simulation is running
     bool _simulate_real; //!< True if simulator should try to synchorinze
                          //!< real time with simulated
+    bool _terminate; //!< True if simulation should be terminated
 
     Time _time_limit; //!< Max simulated time
     bool _time_limit_enabled; //!< True if _time_limit is considered
@@ -254,6 +255,7 @@ class Sim {
     void toggleSimulation()
         { if (_simulate) pauseSimulation();
           else continueSimulation(); }
+    void terminateSimulation() { _terminate = true; }
 
     bool simulateReal() const { return _simulate_real; }
     void setSimulateReal(bool yes = true) { _simulate_real = yes; }
