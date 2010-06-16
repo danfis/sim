@@ -20,10 +20,13 @@
  */
 
 #include <iostream>
+#include <sys/time.h>
+
 #include <sim/sim.hpp>
 #include <sim/world.hpp>
 #include <sim/sensor/camera.hpp>
 #include <sim/comp/sssa.hpp>
+#include <sim/rand.hpp>
 #include <sim/msg.hpp>
 
 using sim::Scalar;
@@ -32,37 +35,65 @@ using sim::Quat;
 using sim::Time;
 using namespace std;
 
-bool use_ode = true;
-size_t step = 0;
-size_t STEPS = 1000;
-Scalar maxvel = 5.;
-Scalar minvel = -5.;
-
 struct State {
     Scalar vel_left;
     Scalar vel_right;
     Scalar vel_arm;
 };
 
+struct Solution {
+    std::vector<std::vector<State> > states;
+    double fitness;
+};
+
+
+const char *fn_prefix = "sssa_gen/";
+const size_t fn_len = 100;
+
+size_t STEPS = 300;
+Scalar maxvel = 5.;
+Scalar minvel = -5.;
+Scalar maxstep = 0.5;
+size_t population_size = 300;
+size_t maxgen = 400;
+size_t gen = 0;
+std::vector<Solution *> population(population_size);
+size_t mutation_num = 20;
+
+bool use_ode = false;
+size_t step = 0;
+
+class SSSA;
+
+/**
+ * Initializes states by random values.
+ */
+static void randStates(std::vector<State> *states);
+
+static void crossover(Solution *a, Solution *b, Solution *out);
+static void mutation(Solution *sol, size_t num = 1);
+static void readStates(std::vector<State> *states, const char *fn);
+static void makeFnState(int gen, int indiv, int id, char *fn);
+static void makeFnFitness(int gen, int indiv, char *fn);
+static double fitness(SSSA *r);
+
+static int mainMain(int argc, char *argv[]);
+
 class SSSA : public sim::comp::SSSA {
     std::vector<State> _states;
-    int id;
+    int _id;
 
   public:
-    SSSA(int id, const Vec3 &pos, const Quat &rot = Quat(0., 0., 0., 1.))
-        : sim::comp::SSSA(pos, rot), _states(STEPS)
+    SSSA(int id, int gen, int pop, const Vec3 &pos, const Quat &rot = Quat(0., 0., 0., 1.))
+        : sim::comp::SSSA(pos, rot), _states(STEPS), _id(id)
     {
-        Scalar r;
-
-        for (size_t i = 0; i < STEPS; i++){
-            r = (((Scalar)rand() / (Scalar)RAND_MAX) * .5) - .25;
-            _states[i].vel_left = r;
-            r = (((Scalar)rand() / (Scalar)RAND_MAX) * .5) - .25;
-            _states[i].vel_right = r;
-            r = (((Scalar)rand() / (Scalar)RAND_MAX) * .5) - .25;
-            _states[i].vel_arm = r;
-        }
+        char *fn = new char[fn_len];
+        makeFnState(gen, pop, id, fn);
+        readStates(&_states, fn);
+        delete fn;
     }
+
+    std::vector<State> &states() { return _states; }
 
     void init(sim::Sim *sim)
     {
@@ -148,9 +179,12 @@ class RobotsManager : public sim::Component {
 };
 
 class S : public sim::Sim {
+    int _gen, _pop;
+    SSSA *_center_robot;
+
   public:
-    S()
-        : Sim()
+    S(int gen, int pop)
+        : Sim(), _gen(gen), _pop(pop)
     {
         if (use_ode){
             initODE();
@@ -162,10 +196,24 @@ class S : public sim::Sim {
         setTimeSubSteps(2);
 
         setSimulateReal(false);
-        pauseSimulation();
 
         createArena();
-        createRobot();
+        createRobot(gen, pop);
+    }
+
+    void finish()
+    {
+        char *fn = new char[fn_len];
+        double f;
+
+        f = fitness(_center_robot);
+        makeFnFitness(_gen, _pop, fn);
+
+        std::ofstream fout(fn);
+        fout << f << std::endl;
+        fout.close();
+
+        delete fn;
     }
 
     void initBullet()
@@ -228,35 +276,36 @@ class S : public sim::Sim {
         c->activate();
     }
 
-    void createRobot()
+    void createRobot(int gen, int pop)
     {
         SSSA *rob;
 
-        rob = new SSSA(0, Vec3(2., 2., .6));
+        rob = new SSSA(0, gen, pop, Vec3(2., 2., .6));
+        _center_robot = rob;
         addComponent(rob);
 
-        rob = new SSSA(1, Vec3(.746, 2., .6));
+        rob = new SSSA(1, gen, pop, Vec3(.746, 2., .6));
         addComponent(rob);
 
-        rob = new SSSA(2, Vec3(-.508, 2., .6));
+        rob = new SSSA(2, gen, pop, Vec3(-.508, 2., .6));
         addComponent(rob);
 
-        rob = new SSSA(3, Vec3(3.254, 2., .6));
+        rob = new SSSA(3, gen, pop, Vec3(3.254, 2., .6));
         addComponent(rob);
 
-        rob = new SSSA(4, Vec3(4.508, 2., .6));
+        rob = new SSSA(4, gen, pop, Vec3(4.508, 2., .6));
         addComponent(rob);
 
-        rob = new SSSA(5, Vec3(2., 3.254, .6), Quat(Vec3(0., 0., 1.), M_PI / 2.));
+        rob = new SSSA(5, gen, pop, Vec3(2., 3.254, .6), Quat(Vec3(0., 0., 1.), M_PI / 2.));
         addComponent(rob);
 
-        rob = new SSSA(6, Vec3(2., 4.508, .6), Quat(Vec3(0., 0., 1.), M_PI / 2.));
+        rob = new SSSA(6, gen, pop, Vec3(2., 4.508, .6), Quat(Vec3(0., 0., 1.), M_PI / 2.));
         addComponent(rob);
 
-        rob = new SSSA(7, Vec3(2., 0.746, .6), Quat(Vec3(0., 0., 1.), -M_PI / 2.));
+        rob = new SSSA(7, gen, pop, Vec3(2., 0.746, .6), Quat(Vec3(0., 0., 1.), -M_PI / 2.));
         addComponent(rob);
 
-        rob = new SSSA(8, Vec3(2., -.508, .6), Quat(Vec3(0., 0., 1.), -M_PI / 2.));
+        rob = new SSSA(8, gen, pop, Vec3(2., -.508, .6), Quat(Vec3(0., 0., 1.), -M_PI / 2.));
         addComponent(rob);
 
         // and as last add component which will connect all robots
@@ -265,9 +314,235 @@ class S : public sim::Sim {
 
 };
 
-int main(int argc, char *argv[])
+
+static void randStates(std::vector<State> *states)
 {
-    for (int i = 1; i < argc; i++){
+    static sim::Rand r;
+
+    // resize vector if needed
+    if (states->size() != STEPS)
+        states->resize(STEPS);
+
+    for (size_t i = 0; i < STEPS; i++){
+        (*states)[i].vel_left = r.randF(-maxstep / 2., maxstep / 2.);
+        (*states)[i].vel_right = r.randF(-maxstep / 2., maxstep / 2.);
+        (*states)[i].vel_arm = r.randF(-maxstep / 2., maxstep / 2.);
+    }
+}
+
+static void crossover(Solution *a, Solution *b, Solution *out)
+{
+    sim::Rand r;
+    int cut, swap;
+    std::vector<State> *st[2];
+
+    for (size_t i = 0; i < 9; i++){
+        swap = r.rand();
+        if (swap % 2 == 0){
+            st[0] = &a->states[i];
+            st[1] = &b->states[i];
+        }else{
+            st[0] = &b->states[i];
+            st[1] = &a->states[i];
+        }
+        //DBG("0: " << st[0] << ", 1: " << st[1]);
+
+        cut = r.rand(0, STEPS);
+        //DBG("cut: " << cut);
+
+        if (out->states[i].size() != STEPS)
+            out->states[i].resize(STEPS);
+
+        int oi = 0;
+        for (int j = 0; j < cut; j++, oi++){
+            out->states[i][oi] = (*(st[0]))[j];
+        }
+        for (int j = cut; j < (int)STEPS; j++, oi++){
+            out->states[i][oi] = (*(st[1]))[j];
+        }
+    }
+}
+
+static void mutation(Solution *sol, size_t num)
+{
+    sim::Rand r;
+    int pos;
+
+    for (size_t i = 0; i < 9; i++){
+        for (size_t j = 0; j < num; j++){
+            pos = r.rand(0, STEPS);
+            sol->states[i][pos].vel_left  = r.randF(-maxstep / 2., maxstep / 2.);
+            sol->states[i][pos].vel_right = r.randF(-maxstep / 2., maxstep / 2.);
+            sol->states[i][pos].vel_arm   = r.randF(-maxstep / 2., maxstep / 2.);
+        }
+    }
+}
+
+static void readStates(std::vector<State> *states, const char *fn)
+{
+    std::ifstream fin(fn);
+    Scalar l, r, a;
+
+    if (states->size() != STEPS)
+        states->resize(STEPS);
+
+    for (size_t i = 0; i < STEPS && fin.good(); i++){
+        fin >> l >> r >> a;
+        (*states)[i].vel_left  = l;
+        (*states)[i].vel_right = r;
+        (*states)[i].vel_arm   = a;
+    }
+
+    fin.close();
+}
+
+static void writeStates(std::vector<State> &states, const char *fn)
+{
+    std::ofstream fout(fn);
+
+    for (size_t i = 0; i < STEPS && i < states.size(); i++){
+        fout << states[i].vel_left << " ";
+        fout << states[i].vel_right << " ";
+        fout << states[i].vel_arm << std::endl;
+    }
+
+    fout.close();
+}
+
+static void makeFnState(int gen, int indiv, int id, char *fn)
+{
+    sprintf(fn, "%s%06d-%03d-%03d.state", fn_prefix, gen, indiv, id);
+}
+
+static void makeFnFitness(int gen, int indiv, char *fn)
+{
+    sprintf(fn, "%s%06d-%03d.fitness", fn_prefix, gen, indiv);
+}
+
+static void makeCommand(const char *bin, int gen, int pop, char *comm)
+{
+    sprintf(comm, "%s -- %d %d 1>/dev/null 2>&1", bin, gen, pop);
+    //sprintf(comm, "%s -- %d %d", bin, gen, pop);
+}
+
+static double fitness(SSSA *r)
+{
+    Vec3 p = r->robot()->pos();
+    Vec3 goal = Vec3(0., 0., 0.);
+
+    p[2] = 0;
+
+    return (p - goal).length();
+}
+
+static bool popCmp(Solution *s1, Solution *s2)
+{
+    if (s1->fitness < s2->fitness)
+        return true;
+    return false;
+}
+
+static int mainMain(int argc, char *argv[])
+{
+    char *fn = new char[fn_len];
+    char *comm = new char[fn_len];
+    double f;
+
+    for (; gen < maxgen; gen++){
+        fprintf(stderr, "Generation: %06d.\n", gen);
+
+        if (gen == 0){
+            // generate random states
+            for (size_t p = 0; p < population_size; p++){
+                Solution *sol = new Solution;
+                sol->states.resize(9);
+                sol->fitness = 999999;
+
+                for (size_t r = 0; r < 9; r++){
+                    fprintf(stderr, "  -- gen states -- Individual: %03d, Robot: %03d, random...\r", p, r);
+                    randStates(&sol->states[r]);
+                }
+
+                population[p] = sol;
+            }
+            fprintf(stderr, "\n");
+        }else{
+            sim::Rand r;
+
+            // sort population
+            std::sort(population.begin(), population.end(), popCmp);
+
+            // crossover upper half into lower half and mutate lower half
+            size_t newi = population_size / 4;
+            size_t a, b;
+            while (newi < population_size){
+                fprintf(stderr, "  -- gen states -- Individual: %03d, ", newi);
+                a = r.rand(0, population_size / 4);
+                do {
+                    b = r.rand(0, population_size / 4);
+                } while (a == b);
+
+                population[newi]->fitness = 999999;
+
+                fprintf(stderr, "crossover (%03d, %03d), ", a, b);
+                crossover(population[a], population[b], population[newi]);
+
+                fprintf(stderr, "mutation(%d)\r", mutation_num);
+                mutation(population[newi], mutation_num);
+
+                newi++;
+            }
+            fprintf(stderr, "\n");
+        }
+
+        // print states
+        for (size_t p = 0; p < population_size; p++){
+            Solution *sol = population[p];
+
+            for (size_t r = 0; r < 9; r++){
+                fprintf(stderr, "  -- print states -- Individual: %03d, Robot: %03d\r", p, r);
+                makeFnState(gen, p, r, fn);
+                writeStates(sol->states[r], fn);
+            }
+        }
+        fprintf(stderr, "\n");
+
+        // test states
+        for (size_t p = 0; p < population_size; p++){
+            fprintf(stderr, "  -- testing -- Individual: %03d", p);
+            makeCommand(argv[0], gen, p, comm);
+            system(comm);
+
+            // pick up fitness
+            makeFnFitness(gen, p, fn);
+
+            std::ifstream fin(fn);
+            if (fin.good()){
+                fin >> f;
+                population[p]->fitness = f;
+                fprintf(stderr, ", fitness: %f", f);
+            }
+            fin.close();
+
+            fprintf(stderr, "\r");
+        }
+        fprintf(stderr, "\n");
+    }
+
+    delete fn;
+    delete comm;
+
+    for (size_t i = 0; i < population_size; i++){
+        delete population[i];
+    }
+    population.clear();
+
+    return 0;
+}
+
+static int mainTest(int argc, char *argv[])
+{
+    for (int i = 3; i < argc; i++){
         if (strcmp(argv[i], "--ode") == 0){
             use_ode = true;
         }else if (strcmp(argv[i], "--bullet") == 0){
@@ -275,11 +550,21 @@ int main(int argc, char *argv[])
         }
     }
 
-    srand(587165789);
+    int gen = atoi(argv[2]);
+    int pop = atoi(argv[3]);
 
-    S s;
+    S s(gen, pop);
     s.run();
 
     return 0;
+}
+
+int main(int argc, char *argv[])
+{
+    if (argc > 1 && strcmp(argv[1], "--") == 0){
+        return mainTest(argc, argv);
+    }else{
+        return mainMain(argc, argv);
+    }
 }
 
