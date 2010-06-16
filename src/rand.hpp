@@ -50,20 +50,20 @@ class Rand {
         return rand_r(&_seed);
     }
 
+    inline int rand(int from, int to)
+    {
+        int r = randF(from, to);
+        if (r >= to)
+            r = to - 1;
+        return r;
+    }
+
     inline double randF(double from, double to)
     {
         double r = rand();
         r /= (double)RAND_MAX + (double)1;
         r *= to - from;
         r += from;
-        return r;
-    }
-
-    inline int randRange(int from, int to)
-    {
-        int r = randF(from, to);
-        if (r >= to)
-            r = to - 1;
         return r;
     }
 };
