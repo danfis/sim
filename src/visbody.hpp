@@ -120,6 +120,7 @@ class VisBody {
     virtual void setText(const char *text, float size = 1.,
                          const osg::Vec4 &color = osg::Vec4(0., 0., 0., 1.)) {}
 	virtual void exportToPovray(std::ofstream &ofs, PovrayMode mode);
+	virtual void exportToBlender(std::ofstream &ofs, const int idx);
 
   protected:
     /**
@@ -150,6 +151,7 @@ class VisBodyShape : public VisBody {
 	  * 2 .. export geometry+position+rotations
 	  */
 	virtual void exportToPovray(std::ofstream &ofs, PovrayMode mode);
+	virtual void exportToBlender(std::ofstream &ofs, const int idx);
 
 
   protected:
@@ -168,6 +170,7 @@ class VisBodyBox : public VisBodyShape {
   public:
     VisBodyBox(Vec3 dim);
 	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
+	void exportToBlender(std::ofstream &ofs, const int idx);
 };
 
 /**
@@ -178,6 +181,7 @@ class VisBodyCube : public VisBodyBox {
   public:
     VisBodyCube(Scalar width) : VisBodyBox(Vec3(width, width, width)) {}
 	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
+	void exportToBlender(std::ofstream &ofs, const int idx);
 };
 
 /**
@@ -187,6 +191,7 @@ class VisBodySphere : public VisBodyShape {
   public:
     VisBodySphere(Scalar radius);
 	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
+	void exportToBlender(std::ofstream &ofs, const int idx);
 };
 
 /**
@@ -196,6 +201,7 @@ class VisBodyCylinder : public VisBodyShape {
   public:
     VisBodyCylinder(Scalar radius, Scalar height);
 	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
+	void exportToBlender(std::ofstream &ofs, const int idx);
 };
 
 /**
@@ -205,6 +211,7 @@ class VisBodyCone : public VisBodyShape {
   public:
     VisBodyCone(Scalar radius, Scalar height);
 	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
+	void exportToBlender(std::ofstream &ofs, const int idx);
 };
 
 
@@ -215,6 +222,7 @@ class VisBodyTriMesh : public VisBody {
                    const unsigned int *indices, size_t indices_len);
     void setColor(const osg::Vec4 &c);
 	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
+	void exportToBlender(std::ofstream &ofs, const int idx);
 };
 
 } /* namespace sim */

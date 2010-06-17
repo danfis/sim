@@ -59,7 +59,14 @@ static void povColor(std::ofstream &ofs, const osg::Vec4 &color) {
     //ofs << "color rgb <" << color[0]<<","<<color[1]<<","<<color[2]<<"> ";
     ofs << "color rgbf <" << color[0]<<","<<color[1]<<","<<color[2]<<"," << (1-color[3]) << "> ";
 }
-
+static void printBlenderMaterial(std::ofstream &ofs, const osg::Vec4 &color, const int idx) {
+    ofs << "    mat = Material.New('mat_" << idx << "')\n";
+    ofs << "    mat.rgbCol = [" << color[0] << ","  << color[1] << "," << color[2] << "]\n";
+    ofs << "    mat.setAlpha(" << color[3] << ")\n";
+    ofs << "    n = ob.getData()\n";
+    ofs << "    n.materials = [ mat ]\n";
+    ofs << "    n.update()\n";
+}
 
 VisBody::VisBody()
     : _node(0), _offset(0., 0., 0.)
@@ -135,6 +142,10 @@ void VisBody::setOsgText(osg::ref_ptr<osgText::TextBase> t)
 
 void VisBody::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
 }
+
+void VisBody::exportToBlender(std::ofstream &ofs, const int idx) {
+}
+
 
 const osg::Vec4 &VisBody::getColor() const {
     osg::ShapeDrawable *draw;
@@ -216,9 +227,10 @@ void VisBodyShape::_setShape(osg::Shape *shape)
 }
 
 void VisBodyShape::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
-
 }
 
+void VisBodyShape::exportToBlender(std::ofstream &ofs, const int idx) {
+}
 
 VisBodyBox::VisBodyBox(Vec3 dim)
     : VisBodyShape()
@@ -256,9 +268,37 @@ void VisBodyBox::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
     if (mode == POVRAY_TRANSFORM || mode == POVRAY_GEOMTRANSFROM) {
         povTransformation(ofs,pos(),rot());
     } 
-
-
 }
+
+void VisBodyBox::exportToBlender(std::ofstream &ofs, const int idx) {
+    osg::Geode *g = _node->asGeode();
+
+    if (!g) {
+        return;
+    }
+
+    for(int i=0;i<(int)g->getNumDrawables();i++) {
+        osg::Drawable *d = g->getDrawable(i);
+        if (d) {
+            osg::Box *b = (osg::Box *)d->getShape();
+            osg::ShapeDrawable *sd = (osg::ShapeDrawable *)d;
+            Vec3 center(b->getCenter());
+            Vec3 lengths(b->getHalfLengths());
+            ofs << "try:\n";
+            ofs << "    ob = Blender.Object.Get('object_" << idx << "')\n";
+            ofs << "except:\n";
+            ofs << "    me = Mesh.Primitives.Cube(1.0)\n";
+            ofs << "    sc.objects.new(me,'object_" << idx << "')\n";
+            ofs << "    ob = Blender.Object.Get('object_" << idx << "')\n";
+            ofs << "    ob.setSize(" << (lengths[0]*2) << "," << (lengths[1]*2) << "," << (lengths[2]*2) << ")\n";
+            printBlenderMaterial(ofs,sd->getColor(),idx);
+            ofs << "\n";
+
+        }
+    }
+ 
+}
+
 
 void VisBodyCube::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
     osg::Geode *g = _node->asGeode();
@@ -291,6 +331,36 @@ void VisBodyCube::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
         povTransformation(ofs,pos(),rot());
     } 
 
+}
+
+void VisBodyCube::exportToBlender(std::ofstream &ofs, const int idx) {
+
+    osg::Geode *g = _node->asGeode();
+
+    if (!g) {
+        return;
+    }
+
+
+    for(int i=0;i<(int)g->getNumDrawables();i++) {
+        osg::Drawable *d = g->getDrawable(i);
+        if (d) {
+            osg::Box *b = (osg::Box *)d->getShape();
+            osg::ShapeDrawable *sd = (osg::ShapeDrawable *)d;
+            Vec3 center(b->getCenter());
+            Vec3 lengths(b->getHalfLengths());
+
+            ofs << "try:\n";
+            ofs << "    ob = Blender.Object.Get('object_" << idx << "')\n";
+            ofs << "except:\n";
+            ofs << "    me = Mesh.Primitives.Cube(1.0)\n";
+            ofs << "    ob = Blender.Object.Get('object_" << idx << "')\n";
+            ofs << "    ob.setSize(" << lengths[0]*2 << "," << lengths[1]*2 << "," << lengths[2]*2 << ")\n";
+            printBlenderMaterial(ofs,sd->getColor(),idx);
+            ofs << "\n";
+        }
+    }
+ 
 }
 
 
@@ -336,6 +406,35 @@ void VisBodySphere::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
 
 }
 
+void VisBodySphere::exportToBlender(std::ofstream &ofs, const int idx) {
+    osg::Geode *g = _node->asGeode();
+
+    if (!g) {
+        return;
+    }
+
+    for(int i=0;i<(int)g->getNumDrawables();i++) {
+        osg::Drawable *d = g->getDrawable(i);
+        if (d) {
+            osg::Sphere *b = (osg::Sphere *)d->getShape();
+            osg::ShapeDrawable *sd = (osg::ShapeDrawable *)d;
+            Vec3 center(b->getCenter());
+            double radius = b->getRadius();
+
+            ofs << "try:\n";
+            ofs << "    ob = Blender.Object.Get('object_" << idx << "')\n";
+            ofs << "except:\n";
+            ofs << "    me = Mesh.Primitives.UVsphere(32,32," << radius << ")\n";
+            ofs << "    sc.objects.new(me,'object_" << idx << "')\n";
+            printBlenderMaterial(ofs,sd->getColor(),idx);
+            ofs << "\n";
+
+        }
+    }
+     
+}
+
+
 
 VisBodyCylinder::VisBodyCylinder(Scalar radius, Scalar height)
     : VisBodyShape()
@@ -377,6 +476,38 @@ void VisBodyCylinder::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
     } 
 
 }
+
+
+void VisBodyCylinder::exportToBlender(std::ofstream &ofs, const int idx) {
+    osg::Geode *g = _node->asGeode();
+
+    if (!g) {
+        return;
+    }
+
+    for(int i=0;i<(int)g->getNumDrawables();i++) {
+        osg::Drawable *d = g->getDrawable(i);
+        if (d) {
+            osg::Cylinder *b = (osg::Cylinder *)d->getShape();
+            osg::ShapeDrawable *sd = (osg::ShapeDrawable *)d;
+            Vec3 center(b->getCenter());
+            double radius = b->getRadius();
+            double height = b->getHeight();
+
+            ofs << "try:\n";
+            ofs << "    ob = Blender.Object.Get('object_" << idx << "')\n";
+            ofs << "except:\n";
+            ofs << "    me = Mesh.Primitives.Cylinder(32," << 2*radius <<","<< height << ")\n";
+            ofs << "    sc.objects.new(me,'object_" << idx << "')\n";
+            printBlenderMaterial(ofs,sd->getColor(),idx);
+            ofs << "\n";
+        }
+    }
+    ofs << "\n";
+
+}
+
+
 
 
 VisBodyCone::VisBodyCone(Scalar radius, Scalar height)
@@ -424,6 +555,8 @@ void VisBodyCone::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
     */
 }
 
+void VisBodyCone::exportToBlender(std::ofstream &ofs, const int idx) {
+}
 
 
 
@@ -514,8 +647,58 @@ void VisBodyTriMesh::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
     } 
 }
 
+void VisBodyTriMesh::exportToBlender(std::ofstream &ofs, const int idx) {
+    
+    osg::Geode *g = _node->asGeode();
+
+    if (!g) {
+        return;
+    }
+
+    ofs << "try:\n";
+    ofs << "    ob = Blender.Object.Get('object_" << idx << "')\n";
+    ofs << "except:\n";
+    ofs << "    me = Mesh.New('mesh_" << idx << "')\n";
+
+    for(int i=0;i<(int)g->getNumDrawables();i++) {
+        osg::Drawable *d = g->getDrawable(i);
+        if (d) {
+            osg::Geometry *gm = d->asGeometry();
+            if (gm) {
+                int indices = 0;
+                osg::Vec3Array *points = (osg::Vec3Array *)gm->getVertexArray();
+                osg::Geometry::DrawElementsList l;
+                gm->getDrawElementsList(l);
+                for(int j=0;j<(int)l.size();j++) {
+                    ofs << "    me.verts.extend([";
+                    osg::DrawElementsUInt *dui = (osg::DrawElementsUInt *)l[j];
+                    for(int k=0;k<(int)dui->getNumIndices();k++) {
+                        osg::Vec3 v = (*points)[dui->index(k)];
+                        ofs << "[" << v[0] <<","<<v[1]<<","<<v[2] << "]";
+                        if (k < 2) {
+                            ofs << ",";
+                        }
+                    }    
+                    ofs << "])\n";
+                }
+                for(int j=0;j<(int)l.size();j++) {
+                    ofs << "    me.faces.extend([[" << (indices*3+0) << "," << (indices*3+1) << "," << (indices*3+2) << "]])\n";
+                    indices++;
+                }
+                ofs << "    ob = sc.objects.new(me,'object_" << idx << "')\n";
+                osg::Vec4Array *colorArray = (osg::Vec4Array *)gm->getColorArray();
+                printBlenderMaterial(ofs,(*colorArray)[0],idx);
+
+            }
+        }
+    }
+    ofs << "\n";
+}
+
 
 
 
 
 }
+
+
