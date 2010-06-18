@@ -81,11 +81,11 @@ static int mainMain(int argc, char *argv[]);
 
 class SSSA : public sim::comp::SSSA {
     std::vector<State> _states;
-    int _id;
+    int _id, _counter;
 
   public:
     SSSA(int id, int gen, int pop, const Vec3 &pos, const Quat &rot = Quat(0., 0., 0., 1.))
-        : sim::comp::SSSA(pos, rot), _states(STEPS), _id(id)
+        : sim::comp::SSSA(pos, rot), _states(STEPS), _id(id), _counter(0)
     {
         char *fn = new char[fn_len];
         makeFnState(gen, pop, id, fn);
@@ -103,10 +103,13 @@ class SSSA : public sim::comp::SSSA {
 
     void cbPreStep()
     {
+        if (_counter++ % 4 != 0)
+            return;
+
         State state = _states[step];
         //DBG(step << " " << state.vel_left << " " << state.vel_right << " " << state.vel_arm);
-        robot()->addVelLeft(state.vel_left);
-        robot()->addVelRight(state.vel_right);
+        //robot()->addVelLeft(state.vel_left);
+        //robot()->addVelRight(state.vel_right);
         robot()->addVelArm(state.vel_arm);
 
         if (robot()->velLeft() > maxvel)
@@ -129,9 +132,11 @@ class SSSA : public sim::comp::SSSA {
 class RobotsManager : public sim::Component {
     sim::Sim *_sim;
     std::vector<SSSA *> sssas;
+    int _counter;
 
   public:
     RobotsManager()
+        : _counter(0)
     {
     }
 
@@ -168,6 +173,9 @@ class RobotsManager : public sim::Component {
 
     void cbPostStep()
     {
+        if (_counter++ % 4 != 0)
+            return;
+
         //DBG("Step " << step);
 
         if (step >= STEPS){
@@ -270,7 +278,7 @@ class S : public sim::Sim {
         c->visBody(id)->setColor(color);
         c->visBody(id)->setTexture("wood.ppm");
 
-        id = c->addCube(.2, SIM_BODY_DEFAULT_VIS, Vec3(0.5, 0.5, .1));
+        id = c->addCube(.2, SIM_BODY_DEFAULT_VIS, Vec3(0., 0., 0.));
         c->visBody(id)->setColor(0., .1, .8, 1.);
         c->visBody(id)->setTexture("wood.ppm");
         c->activate();
