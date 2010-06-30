@@ -36,11 +36,12 @@ static bool use_cam = false;
 static bool use_rf = false;
 
 class Syrotek : public sim::comp::Syrotek {
-    sim::alg::SurfNav _surf;
+    sim::alg::SurfSegment _surf;
 
   public:
     Syrotek(const sim::Vec3 &pos)
-        : sim::comp::Syrotek(pos)
+        : sim::comp::Syrotek(pos),
+          _surf(pos.x(), pos.y())
     {
     }
 
@@ -63,9 +64,10 @@ class Syrotek : public sim::comp::Syrotek {
 
     void cbPreStep()
     {
-        DBG(cam()->image());
         if (cam()->image() && cam()->image()->s() > 0 && cam()->image()->t() > 0){
-            _surf.update(cam()->image());
+            float x = robot()->chasis()->pos().x();
+            float y = robot()->chasis()->pos().y();
+            _surf.update(cam()->image(), x, y);
         }
     }
 };
