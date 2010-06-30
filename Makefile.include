@@ -73,14 +73,16 @@ endif
 CXXFLAGS += $(SYSTEM_CXXFLAGS)
 LDFLAGS += $(SYSTEM_LDFLAGS)
 
-HAVE_ODE ?= no
-HAVE_BT  ?= no
-HAVE_OSG ?= no
-HAVE_SDL ?= no
-WANT_ODE ?= yes
-WANT_OSG ?= yes
-WANT_BT  ?= yes
-WANT_SDL ?= yes
+HAVE_ODE    ?= no
+HAVE_BT     ?= no
+HAVE_OSG    ?= no
+HAVE_SDL    ?= no
+HAVE_OPENCV ?= no
+WANT_ODE    ?= yes
+WANT_OSG    ?= yes
+WANT_BT     ?= yes
+WANT_SDL    ?= yes
+WANT_OPENCV ?= yes
 
 # Try to find ODE
 ifeq '$(WANT_ODE)' 'yes'
@@ -136,16 +138,29 @@ ifeq '$(WANT_SDL)' 'yes'
   endif
 endif
 
+# Try to find OpenCV
+ifeq '$(WANT_OPENCV)' 'yes'
+  ifeq '$(HAVE_OPENCV)' 'no'
+    HAVE_OPENCV = $(shell if pkg-config opencv --exists; then echo "yes"; else echo "no"; fi;)
+    ifeq '$(HAVE_OPENCV)' 'yes'
+      OPENCV_CXXFLAGS = $(shell pkg-config opencv --cflags)
+      OPENCV_LDFLAGS  = $(shell pkg-config opencv --libs)
+    endif
+  endif
+endif
+
 
 CXXFLAGS += $(OSG_CXXFLAGS)
 CXXFLAGS += $(ODE_CXXFLAGS)
 CXXFLAGS += $(BT_CXXFLAGS)
 CXXFLAGS += $(SDL_CXXFLAGS)
+CXXFLAGS += $(OPENCV_CXXFLAGS)
 
 LDFLAGS += $(OSG_LDFLAGS)
 LDFLAGS += $(ODE_LDFLAGS)
 LDFLAGS += $(BT_LDFLAGS)
 LDFLAGS += $(SDL_LDFLAGS)
+LDFLAGS += $(OPENCV_LDFLAGS)
 
 check-dep-osg:
 	@echo "Checking Openscenegraph..."
@@ -171,6 +186,12 @@ check-dep-sdl:
 	@echo "  SDL_CXXFLAGS = $(SDL_CXXFLAGS)"
 	@echo "  SDL_LDFLAGS  = $(SDL_LDFLAGS)"
 	
+check-dep-opencv:
+	@echo "Checking OpenCV..."
+	@if [ "$(HAVE_OPENCV)" != "yes" ]; then echo "Dependecy error: pkg-config can't find OpenCV package"; else echo "Openscenegraph found"; fi;
+	@echo "  OPENCV_CXXFLAGS = $(OPENCV_CXXFLAGS)"
+	@echo "  OPENCV_LDFLAGS  = $(OPENCV_LDFLAGS)"
+
 CHECKTARGETS = 
 ifeq '$(WANT_OSG)' 'yes'
   CHECKTARGETS += check-dep-osg
@@ -183,6 +204,10 @@ ifeq '$(WANT_BT)' 'yes'
 endif
 ifeq '$(WANT_SDL)' 'yes'
   CHECKTARGETS += check-dep-sdl
+endif
+
+ifeq '$(WANT_OPENCV)' 'yes'
+  CHECKTARGETS += check-dep-opencv
 endif
 
 check-dep: $(CHECKTARGETS)

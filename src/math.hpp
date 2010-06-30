@@ -25,6 +25,8 @@
 #include <osg/Vec3>
 #include <osg/Quat>
 
+#define SIM_CUBE(x) ((x) * (x))
+
 /***
  * sim uses right handed coordinate system: Y+ up, X+ right and Z+ from
  * screen.

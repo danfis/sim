@@ -25,6 +25,7 @@
 #include <sim/msg.hpp>
 #include <sim/comp/syrotek.hpp>
 #include "sim/comp/povray.hpp"
+#include "sim/alg/surfnav.hpp"
 
 using namespace sim::ode;
 using sim::Vec3;
@@ -35,6 +36,8 @@ static bool use_cam = false;
 static bool use_rf = false;
 
 class Syrotek : public sim::comp::Syrotek {
+    sim::alg::SurfNav _surf;
+
   public:
     Syrotek(const sim::Vec3 &pos)
         : sim::comp::Syrotek(pos)
@@ -48,12 +51,21 @@ class Syrotek : public sim::comp::Syrotek {
         _useJoystick();
 
         if (use_cam){
-            _useCamera(100, 100);
+            _useCamera(300, 350);
             cam()->enableView();
+            sim->regPreStep(this);
         }
 
         if (use_rf){
             _useRangeFinder();
+        }
+    }
+
+    void cbPreStep()
+    {
+        DBG(cam()->image());
+        if (cam()->image() && cam()->image()->s() > 0 && cam()->image()->t() > 0){
+            _surf.update(cam()->image());
         }
     }
 };

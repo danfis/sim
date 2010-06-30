@@ -52,6 +52,15 @@ OBJS += comp/povray.o comp/snake.o comp/frequency.o comp/watchdog.o \
         comp/syrotek.o comp/joystick.o comp/sssa.o comp/blender.o
 OBJS += robot/syrotek.o robot/sssa.o
 
+ifeq '$(HAVE_OPENCV)' 'yes'
+  OBJS += alg/surfnav.o
+#  OBJS += ext/OpenSURF/fasthessian.o ext/OpenSURF/integral.o \
+#          ext/OpenSURF/ipoint.o ext/OpenSURF/utils.o \
+#          ext/OpenSURF/surf.o
+  OBJS += alg/surf/fasthessian.o alg/surf/integral.o \
+          alg/surf/utils.o alg/surf/surf.o
+endif
+
 all: $(TARGETS) $(SUBTARGETS)
 
 libsim.a: $(OBJS) config.hpp
