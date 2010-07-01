@@ -180,6 +180,24 @@ Syrotek::Syrotek(sim::World *w, const Vec3 &pos,
         _jwheel[1]->setParamFMax(100.);
 }
 
+Vec3 Syrotek::odometry()
+{
+    Scalar x, y, phi;
+    const Vec3 &p = pos();
+
+    x = p.x() - _odo_pos.x();
+    y = p.y() - _odo_pos.y();
+    Quat().slerp(phi, _odo_rot, rot());
+
+    return Vec3(x, y, phi);
+}
+
+void Syrotek::resetOdometry()
+{
+    _odo_pos = pos();
+    _odo_rot = rot();
+}
+
 void Syrotek::activate()
 {
     _chasis->activate();
@@ -191,6 +209,8 @@ void Syrotek::activate()
     _jball[1]->activate();
     _jwheel[0]->activate();
     _jwheel[1]->activate();
+
+    resetOdometry();
 }
 
 void Syrotek::setColor(const osg::Vec4 &color)

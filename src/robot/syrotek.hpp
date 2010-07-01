@@ -31,7 +31,10 @@ namespace robot {
 class Syrotek {
   protected:
     sim::World *_world;
-    sim::Vec3 _pos;
+    sim::Vec3 _pos; //!< Initial position
+
+    sim::Vec3 _odo_pos; //!< Initial position from where odometry is computed
+    sim::Quat _odo_rot; //!< Initial rotation from which odometry is computed
 
     sim::Body *_chasis;
     sim::Body *_wheel[2], *_ball[2];
@@ -50,6 +53,19 @@ class Syrotek {
     void setColor(const osg::Vec4 &color);
     void setColor(Scalar r, Scalar g, Scalar b, Scalar a = 1.)
         { setColor(osg::Vec4(r, g, b, a)); }
+
+    const Vec3 &pos() const { return chasis()->pos(); }
+    const Quat &rot() const { return chasis()->rot(); }
+
+    /**
+     * Returns current odometry (x, y, phi)
+     */
+    Vec3 odometry();
+
+    /**
+     * Resets odometry sensor.
+     */
+    void resetOdometry();
 
     void activate();
 
