@@ -51,43 +51,41 @@ class SurfLandmark {
 
 class SurfSegment {
   protected:
-    bool _started;
+    bool _learning; //!< True if segment is learning
     float _pos_x, _pos_y; //!< Initial position of segment
+    float _dist; //!< Overall traveled distance
     std::list<SurfLandmark> _tracked_lms; //!< List of tracked landmarks
     std::list<SurfLandmark> _learned_lms; //!< List of learned landmarks
 
   public:
-    SurfSegment() : _started(false) {}
-
-    /**
-     * Constructor. Starts segment at same time.
-     */
-    SurfSegment(float x, float y) { start(x, y); }
-
+    SurfSegment() : _learning(false) {}
     ~SurfSegment();
 
-    bool started() const { return _started; }
+    /**
+     * Returns true if segment is in learning state.
+     */
+    bool learning() const { return _learning; }
 
     /**
-     * Starts segment.
+     * Starts learning on segment.
      */
-    void start(float x, float y);
+    void learnStart(float x, float y);
 
     /**
-     * Finishes segment.
+     * Finishes learning segment.
      */
-    void finish();
+    void learnFinish();
 
     /**
      * Update segment using image and position.
      */
-    void update(const osg::Image *image, float posx, float posy);
+    void learn(const osg::Image *image, float posx, float posy);
 
   protected:
     /**
      * Returns distance from initial position.
      */
-    float _dist(float x, float y) const
+    float _distFromInit(float x, float y) const
         { return std::sqrt(SIM_CUBE(_pos_x - x) + SIM_CUBE(_pos_y - y)); }
 
     /**

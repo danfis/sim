@@ -18,39 +18,39 @@ SurfSegment::~SurfSegment()
 {
 }
 
-void SurfSegment::start(float x, float y)
+void SurfSegment::learnStart(float x, float y)
 {
     _pos_x = x;
     _pos_y = y;
+    _dist = 0;
 
     _tracked_lms.clear();
     _learned_lms.clear();
 
-    _started = true;
+    _learning = true;
 }
 
-void SurfSegment::finish()
+void SurfSegment::learnFinish()
 {
     for_each(std::list<SurfLandmark>::iterator, _tracked_lms){
         _learned_lms.push_back(*it);
     }
     _tracked_lms.clear();
 
-    _started = false;
+    _learning = false;
 
     drawLearned(_learned_lms);
 }
 
-void SurfSegment::update(const osg::Image *im, float posx, float posy)
+void SurfSegment::learn(const osg::Image *im, float posx, float posy)
 {
     std::vector<SurfLandmark> lms; // List of current landmarks waiting for processing
-    float dist;
    
-    // compute distance
-    dist = _dist(posx, posy);
+    // update distance
+    _dist = _distFromInit(posx, posy);
 
-    _obtainLandmarks(im, posx, posy, dist, lms);
-    _trackLandmarks(lms, dist);
+    _obtainLandmarks(im, posx, posy, _dist, lms);
+    _trackLandmarks(lms, _dist);
 }
 
 void SurfSegment::_obtainLandmarks(const osg::Image *im, float posx, float posy,

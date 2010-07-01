@@ -69,13 +69,14 @@ class Syrotek : public sim::comp::Syrotek {
 
     void cbPreStep()
     {
-        if (_surf.started()
+        //DBG("odo: " << DBGV(robot()->odometry()));
+
+        if (_surf.learning()
                 && cam()->image()
                 && cam()->image()->s() > 0
                 && cam()->image()->t() > 0){
-            float x = robot()->chasis()->pos().x();
-            float y = robot()->chasis()->pos().y();
-            _surf.update(cam()->image(), x, y);
+            Vec3 odo = robot()->odometry();
+            _surf.learn(cam()->image(), odo.x(), odo.y());
         }
     }
 
@@ -86,12 +87,11 @@ class Syrotek : public sim::comp::Syrotek {
         if (key == 's'){
             float x = robot()->chasis()->pos().x();
             float y = robot()->chasis()->pos().y();
-            _surf.start(x, y);
+            _surf.learnStart(x, y);
 
             DBG("SurfNav segment started");
-            DBG(_surf.started());
         }else if (key == 'S'){
-            _surf.finish();
+            _surf.learnFinish();
 
             DBG("SurfNav segment finished");
         }else{
