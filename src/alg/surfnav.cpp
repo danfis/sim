@@ -9,31 +9,55 @@ namespace alg {
 
 static IplImage *iplImageFromOsg(const osg::Image *img);
 static void drawPoint(IplImage *img, sim::alg::SurfLandmark &ipt);
+static void drawLearned(std::list<SurfLandmark> &learned);
+static void sortLandmarksByVisibility(std::list<SurfLandmark> &lms);
+static void rgb2hsv(const osg::Vec4 &rgb, float *h, float *s, float *v);
 
-SurfSegment::SurfSegment(float x, float y)
-    : _pos_x(x), _pos_y(y)
-{
-}
 
 SurfSegment::~SurfSegment()
 {
 }
 
+void SurfSegment::start(float x, float y)
+{
+    _pos_x = x;
+    _pos_y = y;
+
+    _tracked_lms.clear();
+    _learned_lms.clear();
+
+    _started = true;
+}
+
+void SurfSegment::finish()
+{
+    for_each(std::list<SurfLandmark>::iterator, _tracked_lms){
+        _learned_lms.push_back(*it);
+    }
+    _tracked_lms.clear();
+
+    _started = false;
+
+    drawLearned(_learned_lms);
+}
+
 void SurfSegment::update(const osg::Image *im, float posx, float posy)
 {
-    SurfLandmark s1, s2; // first and second best matching landmarks
     std::vector<SurfLandmark> lms; // List of current landmarks waiting for processing
+    float dist;
+   
+    // compute distance
+    dist = _dist(posx, posy);
 
-    _obtainLandmarks(im, posx, posy, lms);
-    _trackLandmarks(lms);
+    _obtainLandmarks(im, posx, posy, dist, lms);
+    _trackLandmarks(lms, dist);
 }
 
 void SurfSegment::_obtainLandmarks(const osg::Image *im, float posx, float posy,
-                               std::vector<SurfLandmark> &lms)
+                                   float dist, std::vector<SurfLandmark> &lms)
 
 {
     IplImage *image = 0;
-    float dist;
 
     // create image
     image = iplImageFromOsg(im);
@@ -57,19 +81,16 @@ void SurfSegment::_obtainLandmarks(const osg::Image *im, float posx, float posy,
     // delete created image
     cvReleaseImage(&image);
 
-    // compute distance
-    dist = _dist(posx, posy);
-
     // initialize all Landmarks
     for_each(std::vector<SurfLandmark>::iterator, lms){
-        it->x = it->last_x = posx;
-        it->y = it->last_y = posy;
+        it->last_x = it->x;
+        it->last_y = it->y;
 
         it->distance = it->last_distance = dist;
     }
 }
 
-void SurfSegment::_trackLandmarks(std::vector<SurfLandmark> &lms)
+void SurfSegment::_trackLandmarks(std::vector<SurfLandmark> &lms, float dist)
 {
     std::vector<SurfLandmark>::iterator best[2]; // two best matching landmarks from _lms
     std::list<SurfLandmark>::iterator it, it_end;
@@ -81,21 +102,21 @@ void SurfSegment::_trackLandmarks(std::vector<SurfLandmark> &lms)
     while (it != it_end){
         found = _bestMatching(*it, lms, best + 0, best + 1);
 
-        if (found && best[0]->dist(*it) * 10. < best[1]->dist(*it) /*TODO best[0] << best[1] */){
+        if (found && best[0]->dist(*it) * 5. < best[1]->dist(*it) /*TODO best[0] << best[1] */){
             // increase visibility
             it->visibility++;
 
             // set last position
-            it->last_x = best[0]->last_x;
-            it->last_y = best[0]->last_y;
+            it->last_x = best[0]->x;
+            it->last_y = best[0]->y;
 
             // set last distance
-            it->last_distance = _dist(it->last_x, it->last_y);
+            it->last_distance = dist;
 
             // disable landmark from _lms
             best[0]->enabled = false;
 
-            // step to nest landmark
+            // step to next landmark
             ++it;
         }else{
             // add tracked landmark to list of learned ones
@@ -111,6 +132,7 @@ void SurfSegment::_trackLandmarks(std::vector<SurfLandmark> &lms)
         if (it->enabled)
             _tracked_lms.push_back(*it);
     }
+    lms.clear();
 }
 
 bool SurfSegment::_bestMatching(const SurfLandmark &l, std::vector<SurfLandmark> &lms,
@@ -155,6 +177,7 @@ static IplImage *iplImageFromOsg(const osg::Image *img)
     CvSize size;
     char *data;
     osg::Vec4 color;
+    float h, s, v;
 
     // set size of image
     size.width = img->s();
@@ -170,7 +193,9 @@ static IplImage *iplImageFromOsg(const osg::Image *img)
     for (int i = 0; i < size.width; i++){
         for (int j = 0; j < size.height; j++){
             color = img->getColor(i, j);
-            data[i + j * image->widthStep] = (color.x() * 255 + color.y() * 255 + color.z() * 255) / 3.;
+            rgb2hsv(color, &h, &s, &v);
+            //data[i + j * image->widthStep] = (color.x() * 255 + color.y() * 255 + color.z() * 255) / 3.;
+            data[i + j * image->widthStep] = h * 255;
         }
     }
 
@@ -210,6 +235,75 @@ static void drawPoint(IplImage *img, sim::alg::SurfLandmark &ipt)
     cvCircle(img, cvPoint(c1,r1), surf::fRound(s), cvScalar(0, 0, 255),1);
   }
 }
+
+static void drawLearned(std::list<SurfLandmark> &learned)
+{
+    int i;
+
+    sortLandmarksByVisibility(learned);
+
+    i = 0;
+    for_each(std::list<SurfLandmark>::iterator, learned){
+        if (i++ >= 10)
+            break;
+
+#ifndef NDEBUG
+        DBG("(" << it->x << " " << it->y << ")"
+                << " -> "
+                << "(" << it->last_x << " " << it->last_y << ")"
+                << ", "
+                << it->distance << " -> " << it->last_distance
+                << " :: "
+                << it->visibility);
+#endif /* NDEBUG */
+
+    }
+
+}
+
+static bool cmpVis(const SurfLandmark &a, const SurfLandmark &b)
+{
+    return a.visibility > b.visibility;
+}
+
+static void sortLandmarksByVisibility(std::list<SurfLandmark> &lms)
+{
+    lms.sort(cmpVis);
+}
+
+static void rgb2hsv(const osg::Vec4 &rgb, float *h, float *s, float *v)
+{
+    float r, g, b;
+    float max, min;
+
+    r = rgb.r();
+    g = rgb.g();
+    b = rgb.b();
+
+    max = std::max(r, std::max(g, b));
+    min = std::min(r, std::min(g, b));
+
+    if (eq(max, min)){
+        *h = 0;
+    }else if (eq(max, r) && g >= b){
+        *h = 60.f / 360.f * ((g - b) / (max - min));
+    }else if (eq(max, r)){ // g < b is implicit
+        *h = (60.f / 360.f * ((g - b) / (max - min))) + 1;
+    }else if (eq(max, g)){
+        *h = (60.f / 360.f * ((b - r) / (max - min))) + (120.f / 360.f);
+    }else{ // eq(max, b)
+        *h = (60.f / 360.f * ((r - g) / (max - min))) + (240.f / 360.f);
+    }
+
+    if (sim::isZero(max)){
+        *s = 0.f;
+    }else{
+        *s = 1 - (min / max);
+    }
+
+    *v = max;
+}
+
 
 }
 }

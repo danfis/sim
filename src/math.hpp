@@ -65,7 +65,10 @@ class Quat : public osg::Quat {
 
 
 // TODO: parametrize epsilon
-inline bool isZero(Scalar f) { return fabs(f) < 1E-6; }
+inline bool isZero(float f) { return fabs(f) < 1E-6; }
+inline bool isZero(double f) { return fabs(f) < 1E-10; }
+inline bool eq(float a, float b) { return isZero(fabsf(a - b)); }
+inline bool eq(Scalar a, Scalar b) { return isZero(fabs(a - b)); }
 
 } /* namespace sim */
 

@@ -34,15 +34,17 @@ using namespace std;
 
 static bool use_cam = false;
 static bool use_rf = false;
+static bool use_surfnav = false;
 
 class Syrotek : public sim::comp::Syrotek {
     sim::alg::SurfSegment _surf;
 
   public:
     Syrotek(const sim::Vec3 &pos)
-        : sim::comp::Syrotek(pos),
-          _surf(pos.x(), pos.y())
+        : sim::comp::Syrotek(pos)
     {
+        if (use_surfnav)
+            use_cam = true;
     }
 
     void init(sim::Sim *sim)
@@ -54,20 +56,46 @@ class Syrotek : public sim::comp::Syrotek {
         if (use_cam){
             _useCamera(300, 350);
             cam()->enableView();
-            sim->regPreStep(this);
         }
 
         if (use_rf){
             _useRangeFinder();
         }
+
+        if (use_surfnav){
+            sim->regPreStep(this);
+        }
     }
 
     void cbPreStep()
     {
-        if (cam()->image() && cam()->image()->s() > 0 && cam()->image()->t() > 0){
+        if (_surf.started()
+                && cam()->image()
+                && cam()->image()->s() > 0
+                && cam()->image()->t() > 0){
             float x = robot()->chasis()->pos().x();
             float y = robot()->chasis()->pos().y();
             _surf.update(cam()->image(), x, y);
+        }
+    }
+
+    void _keyPressedMsg(const sim::MessageKeyPressed &msg)
+    {
+        int key = msg.key();
+
+        if (key == 's'){
+            float x = robot()->chasis()->pos().x();
+            float y = robot()->chasis()->pos().y();
+            _surf.start(x, y);
+
+            DBG("SurfNav segment started");
+            DBG(_surf.started());
+        }else if (key == 'S'){
+            _surf.finish();
+
+            DBG("SurfNav segment finished");
+        }else{
+            sim::comp::Syrotek::_keyPressedMsg(msg);
         }
     }
 };
@@ -160,6 +188,8 @@ int main(int argc, char *argv[])
             use_cam = true;
         }else if (strcmp(argv[i], "--rf") == 0){
             use_rf = true;
+        }else if (strcmp(argv[i], "--surf") == 0){
+            use_surfnav = true;
         }else if (strcmp(argv[i], "--help") == 0){
             printf("%s [OPTIONS]\n", argv[0]);
             printf("  OPTIONS:\n");

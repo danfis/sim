@@ -51,13 +51,32 @@ class SurfLandmark {
 
 class SurfSegment {
   protected:
+    bool _started;
     float _pos_x, _pos_y; //!< Initial position of segment
     std::list<SurfLandmark> _tracked_lms; //!< List of tracked landmarks
     std::list<SurfLandmark> _learned_lms; //!< List of learned landmarks
 
   public:
-    SurfSegment(float x, float y);
+    SurfSegment() : _started(false) {}
+
+    /**
+     * Constructor. Starts segment at same time.
+     */
+    SurfSegment(float x, float y) { start(x, y); }
+
     ~SurfSegment();
+
+    bool started() const { return _started; }
+
+    /**
+     * Starts segment.
+     */
+    void start(float x, float y);
+
+    /**
+     * Finishes segment.
+     */
+    void finish();
 
     /**
      * Update segment using image and position.
@@ -76,13 +95,13 @@ class SurfSegment {
      * position posx, posy.
      */
     void _obtainLandmarks(const osg::Image *image, float posx, float posy,
-                          std::vector<SurfLandmark> &lms);
+                          float dist, std::vector<SurfLandmark> &lms);
 
     /**
      * Compares current landmarks (_lms) with tracked ones (_tracked_lms)
      * and updates _lms, _tracked_lms and _learned_lms lists.
      */
-    void _trackLandmarks(std::vector<SurfLandmark> &lms);
+    void _trackLandmarks(std::vector<SurfLandmark> &lms, float dist);
 
     /**
      * Returns first and second best matching landmarks (with l) from lms

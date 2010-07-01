@@ -73,8 +73,8 @@ class Syrotek : public sim::Component {
     void processMessage(const sim::Message &msg);
 
   protected:
-    void _keyPressedMsg(const sim::MessageKeyPressed &msg);
-    void _joystickMsg(const sim::comp::JoystickMessage &msg);
+    virtual void _keyPressedMsg(const sim::MessageKeyPressed &msg);
+    virtual void _joystickMsg(const sim::comp::JoystickMessage &msg);
 
     void _useCamera(int width, int height);
     void _useRangeFinder();
