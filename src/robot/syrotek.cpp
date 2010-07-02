@@ -19,6 +19,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cmath>
 #include "syrotek.hpp"
 #include <sim/msg.hpp>
 
@@ -187,7 +188,37 @@ Vec3 Syrotek::odometry()
 
     x = p.x() - _odo_pos.x();
     y = p.y() - _odo_pos.y();
-    Quat().slerp(phi, _odo_rot, rot());
+
+    // phi
+    {
+        Vec3 init_dir = _odo_rot * Vec3(1., 0., 0.);
+        Vec3 cur_dir = rot() * Vec3(1., 0., 0.);
+        Scalar ax, ay, bx, by, cx, cy, alen, blen, cosphi, area;
+
+        ax = init_dir.x();
+        ay = init_dir.y();
+        bx = cur_dir.x();
+        by = cur_dir.y();
+        alen = std::sqrt(SIM_CUBE(ax) + SIM_CUBE(ay));
+        blen = std::sqrt(SIM_CUBE(bx) + SIM_CUBE(by));
+
+        if (isZero(alen) || isZero(blen)){
+            phi = 0;
+        }else{
+            // come out of dot product
+            cosphi = (ax * bx + ay * by) / (alen * blen);
+            phi = std::acos(cosphi);
+
+            // decide sign
+            cx = p.x();
+            cy = p.y();
+            area = cx * ax - cy * ay +
+                   cy * bx - cx * by +
+                   ax * by - ay * bx;
+            if (area > 0.)
+                phi = -phi;
+        }
+    }
 
     return Vec3(x, y, phi);
 }

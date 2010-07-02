@@ -76,6 +76,7 @@ class Syrotek : public sim::comp::Syrotek {
                 && cam()->image()->s() > 0
                 && cam()->image()->t() > 0){
             Vec3 odo = robot()->odometry();
+            //DBG("odo: " << odo.x() << " " << odo.y() << " " << odo.z());
             _surf.learn(cam()->image(), odo.x(), odo.y());
         }else if (_surf.traversing()
                     && cam()->image()
