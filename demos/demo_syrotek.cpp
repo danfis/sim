@@ -77,6 +77,13 @@ class Syrotek : public sim::comp::Syrotek {
                 && cam()->image()->t() > 0){
             Vec3 odo = robot()->odometry();
             _surf.learn(cam()->image(), odo.x(), odo.y());
+        }else if (_surf.traversing()
+                    && cam()->image()
+                    && cam()->image()->s() > 0
+                    && cam()->image()->t() > 0){
+            Vec3 odo = robot()->odometry();
+            float hd = _surf.traverse(cam()->image(), odo.x(), odo.y());
+            DBG("SURF hd = " << hd);
         }
     }
 
@@ -88,12 +95,18 @@ class Syrotek : public sim::comp::Syrotek {
             float x = robot()->chasis()->pos().x();
             float y = robot()->chasis()->pos().y();
             _surf.learnStart(x, y);
-
             DBG("SurfNav segment started");
         }else if (key == 'S'){
             _surf.learnFinish();
-
             DBG("SurfNav segment finished");
+        }else if (key == 't'){
+            float x = robot()->chasis()->pos().x();
+            float y = robot()->chasis()->pos().y();
+            _surf.traverseStart(x, y);
+            DBG("SurfNav traverse");
+        }else if (key == 'T'){
+            _surf.traverseFinish();
+            DBG("SurfNav traverse STOPED");
         }else{
             sim::comp::Syrotek::_keyPressedMsg(msg);
         }

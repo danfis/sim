@@ -49,16 +49,46 @@ class SurfLandmark {
     }
 };
 
+/**
+ * Histogram of floats.
+ */
+class SurfHist {
+  protected:
+    struct _bin_t {
+        float *nums;
+        size_t size;
+        _bin_t *next;
+
+        _bin_t() : nums(0), size(0), next(0){}
+    };
+
+    float _binsize;
+    float *_nums;
+    size_t _nums_size;
+    _bin_t *_bins_head, *_bins_tail;
+
+  public:
+    SurfHist(float binsize, std::list<float> &nums);
+    ~SurfHist();
+
+    /**
+     * Returns horizontal difference as average value from highest bin and
+     * two surrounding one.
+     */
+    float hd() const;
+};
+
 class SurfSegment {
   protected:
     bool _learning; //!< True if segment is learning
+    bool _traversing; //!< True is segment is traversing
     float _pos_x, _pos_y; //!< Initial position of segment
     float _dist; //!< Overall traveled distance
     std::list<SurfLandmark> _tracked_lms; //!< List of tracked landmarks
     std::list<SurfLandmark> _learned_lms; //!< List of learned landmarks
 
   public:
-    SurfSegment() : _learning(false) {}
+    SurfSegment() : _learning(false), _traversing(false) {}
     ~SurfSegment();
 
     /**
@@ -81,6 +111,16 @@ class SurfSegment {
      */
     void learn(const osg::Image *image, float posx, float posy);
 
+    /**
+     * Returns true if segment is traversing learned data.
+     */
+    bool traversing() const { return _traversing; }
+
+    // TODO: comments
+    void traverseStart(float x, float y);
+    void traverseFinish();
+    float traverse(const osg::Image *image, float posx, float posy);
+
   protected:
     /**
      * Returns distance from initial position.
@@ -93,7 +133,7 @@ class SurfSegment {
      * position posx, posy.
      */
     void _obtainLandmarks(const osg::Image *image, float posx, float posy,
-                          float dist, std::vector<SurfLandmark> &lms);
+                          float dist, std::vector<SurfLandmark> *lms);
 
     /**
      * Compares current landmarks (_lms) with tracked ones (_tracked_lms)
@@ -109,6 +149,19 @@ class SurfSegment {
     bool _bestMatching(const SurfLandmark &l, std::vector<SurfLandmark> &lms,
                        std::vector<SurfLandmark>::iterator *s1,
                        std::vector<SurfLandmark>::iterator *s2);
+
+    /**
+     * Stores in tracked all learned landmarks that were detected in
+     * dist distance.
+     */
+    void _pickLearned(float dist, std::list<SurfLandmark> *tracked);
+
+    /**
+     * Returns histogram of horizontal differences found when
+     * matching tracked landmarks with currently obtained landmarks (lms).
+     */
+    SurfHist *_horizontalDiffsHist(float dist, std::list<SurfLandmark> &tracked,
+                                   std::vector<SurfLandmark> &lms);
 };
 
 } /* namespace alg */

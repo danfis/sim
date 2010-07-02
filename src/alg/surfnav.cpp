@@ -9,9 +9,132 @@ namespace alg {
 
 static IplImage *iplImageFromOsg(const osg::Image *img);
 static void drawPoint(IplImage *img, sim::alg::SurfLandmark &ipt);
-static void drawLearned(std::list<SurfLandmark> &learned);
 static void sortLandmarksByVisibility(std::list<SurfLandmark> &lms);
 static void rgb2hsv(const osg::Vec4 &rgb, float *h, float *s, float *v);
+
+
+SurfHist::SurfHist(float binsize, std::list<float> &nums)
+    : _binsize(binsize), _nums(0), _nums_size(0),
+      _bins_head(0), _bins_tail(0)
+{
+    size_t i;
+    _bin_t *bin = 0;
+    float first;
+    size_t first_idx;
+
+    // allocate memory for numbers
+    _nums = new float[nums.size()];
+    _nums_size = nums.size();
+
+    // sort list
+    nums.sort();
+
+    // copy list to allocated array
+    i = 0;
+    for_each(std::list<float>::iterator, nums){
+        _nums[i++] = *it;
+    }
+
+    if (_nums_size > 1){
+        // create bins
+        first_idx = 0;
+        first = _nums[0];
+        for (i = 1; i < _nums_size; i++){
+            if (bin == 0){
+                bin = new _bin_t;
+                bin->nums = _nums + first_idx;
+
+                // insert to list
+                if (_bins_head){
+                    _bins_tail->next = bin;
+                    _bins_tail = bin;
+                }else{
+                    _bins_head = _bins_tail = bin;
+                }
+            }
+
+            if (fabsf(_nums[i] - first) > binsize){
+                bin->size = i - first_idx;
+
+                first = _nums[i];
+                first_idx = i;
+
+                bin = 0;
+            }
+        }
+
+        if (bin != 0){
+            bin->size = _nums_size - first_idx;
+        }
+    }else if (_nums_size == 1){
+        bin = new _bin_t;
+        bin->nums = _nums;
+        bin->size = 1;
+
+        // insert to list
+        if (_bins_head){
+            _bins_tail->next = bin;
+            _bins_tail = bin;
+        }else{
+            _bins_head = _bins_tail = bin;
+        }
+    }
+}
+
+SurfHist::~SurfHist()
+{
+    _bin_t *bin = _bins_head;
+    _bin_t *bin_del;
+
+    while (bin){
+        bin_del = bin;
+        bin = bin->next;
+        delete bin_del;
+    }
+
+    delete _nums;
+}
+
+float SurfHist::hd() const
+{
+    _bin_t *bin, *bin_prev;
+    _bin_t *best[3];
+    size_t best_size = 0;
+    float hd, size;
+
+    best[0] = best[1] = best[2] = 0;
+
+    // find highest bin and two surrounding ones
+    bin_prev = 0;
+    bin = _bins_head;
+    while (bin){
+        if (bin->size >= best_size){
+            best[1] = bin;
+            best[0] = bin_prev;
+            best[2] = bin->next;
+        }
+
+        bin_prev = bin;
+        bin = bin->next;
+    }
+
+    // compute average value
+    size = 0.f;
+    hd = 0.f;
+    for (size_t i = 0; i < 3; i++){
+        if (best[i] == 0)
+            continue;
+
+        for (size_t j = 0; j < best[i]->size; j++){
+            hd += best[i]->nums[j];
+            size++;
+        }
+    }
+
+    if (!isZero(size))
+        hd = hd / size;
+    return hd;
+}
 
 
 SurfSegment::~SurfSegment()
@@ -38,23 +161,57 @@ void SurfSegment::learnFinish()
     _tracked_lms.clear();
 
     _learning = false;
-
-    drawLearned(_learned_lms);
 }
 
 void SurfSegment::learn(const osg::Image *im, float posx, float posy)
 {
     std::vector<SurfLandmark> lms; // List of current landmarks waiting for processing
+
+    if (!_learning)
+        return;
    
     // update distance
     _dist = _distFromInit(posx, posy);
 
-    _obtainLandmarks(im, posx, posy, _dist, lms);
+    _obtainLandmarks(im, posx, posy, _dist, &lms);
     _trackLandmarks(lms, _dist);
 }
 
+void SurfSegment::traverseStart(float x, float y)
+{
+    _traversing = true;
+}
+
+void SurfSegment::traverseFinish()
+{
+    _traversing = false;
+}
+
+float SurfSegment::traverse(const osg::Image *image, float posx, float posy)
+{
+    float hd = 0.; // horizontal difference
+    std::vector<SurfLandmark> lms;
+    std::list<SurfLandmark> tracked;
+    SurfHist *hist;
+    float dist;
+
+    if (!_traversing)
+        return 0.;
+
+    dist = _distFromInit(posx, posy);
+
+    _obtainLandmarks(image, posx, posy, dist, &lms);
+    _pickLearned(dist, &tracked);
+    hist = _horizontalDiffsHist(dist, tracked, lms);
+
+    hd = hist->hd();
+    delete hist;
+
+    return hd;
+}
+
 void SurfSegment::_obtainLandmarks(const osg::Image *im, float posx, float posy,
-                                   float dist, std::vector<SurfLandmark> &lms)
+                                   float dist, std::vector<SurfLandmark> *lms)
 
 {
     IplImage *image = 0;
@@ -65,12 +222,12 @@ void SurfSegment::_obtainLandmarks(const osg::Image *im, float posx, float posy,
         return;
 
     // obtain landmarks
-    surf::surfDetDes(image, lms, false, 5, 4, 2, 0.0004);
+    surf::surfDetDes(image, *lms, false, 5, 4, 2, 0.0004);
 
-    DBG("landmarks: " << lms.size());
+    //DBG("landmarks: " << lms->size());
     {
-        for (size_t i = 0; i < lms.size(); i++){
-            drawPoint(image, lms[i]);
+        for (size_t i = 0; i < lms->size(); i++){
+            drawPoint(image, (*lms)[i]);
         }
         char fn[100];
         static int count = 0;
@@ -82,7 +239,7 @@ void SurfSegment::_obtainLandmarks(const osg::Image *im, float posx, float posy,
     cvReleaseImage(&image);
 
     // initialize all Landmarks
-    for_each(std::vector<SurfLandmark>::iterator, lms){
+    for_each(std::vector<SurfLandmark>::iterator, *lms){
         it->last_x = it->x;
         it->last_y = it->y;
 
@@ -136,8 +293,8 @@ void SurfSegment::_trackLandmarks(std::vector<SurfLandmark> &lms, float dist)
 }
 
 bool SurfSegment::_bestMatching(const SurfLandmark &l, std::vector<SurfLandmark> &lms,
-                            std::vector<SurfLandmark>::iterator *s1,
-                            std::vector<SurfLandmark>::iterator *s2)
+                                std::vector<SurfLandmark>::iterator *s1,
+                                std::vector<SurfLandmark>::iterator *s2)
 {
     bool found[2];
     double dist, best[2];
@@ -170,6 +327,55 @@ bool SurfSegment::_bestMatching(const SurfLandmark &l, std::vector<SurfLandmark>
         return true;
     return false;
 }
+
+void SurfSegment::_pickLearned(float dist, std::list<SurfLandmark> *tracked)
+{
+    for_each(std::list<SurfLandmark>::iterator, _learned_lms){
+        if ((it->distance < dist || eq(it->distance, dist))
+                && (it->last_distance > dist || eq(it->last_distance, dist))){
+            tracked->push_back(*it);
+        }
+    }
+}
+
+SurfHist *SurfSegment::_horizontalDiffsHist(float dist,
+                                            std::list<SurfLandmark> &tracked,
+                                            std::vector<SurfLandmark> &lms)
+{
+    SurfLandmark lm;
+    size_t max_count = 150; // TODO: parametrize this?
+    bool found;
+    float hd;
+    std::vector<SurfLandmark>::iterator best[2];
+    std::list<float> hds;
+
+    // sort landmarks - those seen most often are first
+    sortLandmarksByVisibility(tracked);
+
+    for (size_t i = 0; tracked.size() > 0 && i < max_count; i++){
+        // pick up best landmark
+        lm = tracked.front();
+        tracked.pop_front();
+
+        // find two best matching landmarks from lms
+        found = _bestMatching(lm, lms, best, best + 1);
+        //DBG("found: " << found << " " << best[0]->dist(lm) << " " << best[1]->dist(lm));
+        if (found && best[0]->dist(lm) * 2. < best[1]->dist(lm) /*TODO best[0] << best[1] */){
+            // compute horizontal difference
+            hd  = fabsf(lm.last_x - lm.x);
+            hd /= fabsf(lm.last_distance - lm.distance);
+            hd *= dist - lm.last_distance;
+            hd += lm.distance - best[0]->distance;
+
+            // store difference in list
+            hds.push_back(hd);
+        }
+    }
+
+    // TODO: parametrize binsize
+    return new SurfHist(.1f, hds);
+}
+
 
 static IplImage *iplImageFromOsg(const osg::Image *img)
 {
@@ -234,31 +440,6 @@ static void drawPoint(IplImage *img, sim::alg::SurfLandmark &ipt)
   { // Red circles indicate light blobs on dark backgrounds
     cvCircle(img, cvPoint(c1,r1), surf::fRound(s), cvScalar(0, 0, 255),1);
   }
-}
-
-static void drawLearned(std::list<SurfLandmark> &learned)
-{
-    int i;
-
-    sortLandmarksByVisibility(learned);
-
-    i = 0;
-    for_each(std::list<SurfLandmark>::iterator, learned){
-        if (i++ >= 10)
-            break;
-
-#ifndef NDEBUG
-        DBG("(" << it->x << " " << it->y << ")"
-                << " -> "
-                << "(" << it->last_x << " " << it->last_y << ")"
-                << ", "
-                << it->distance << " -> " << it->last_distance
-                << " :: "
-                << it->visibility);
-#endif /* NDEBUG */
-
-    }
-
 }
 
 static bool cmpVis(const SurfLandmark &a, const SurfLandmark &b)
