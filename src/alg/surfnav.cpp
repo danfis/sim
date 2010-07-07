@@ -182,12 +182,30 @@ void SurfSegment::learn(const osg::Image *im, float posx, float posy)
 
 void SurfSegment::learnSave(const char *fn)
 {
-    // TODO
+    std::ofstream fout(fn);
+
+    fout << _pos_x << " " << _pos_y << " " << _dist << std::endl;
+
+    if (fout.good()){
+        for_each(std::list<SurfLandmark>::iterator, _learned_lms){
+            it->write(fout);
+        }
+        fout.close();
+    }
 }
 
 void SurfSegment::learnLoad(const char *fn)
 {
-    // TODO
+    std::ifstream fin(fn);
+    SurfLandmark lm;
+
+    fin >> _pos_x >> _pos_y >> _dist;
+
+    _learned_lms.clear();
+    while (fin.good() && !fin.eof() && lm.read(fin)){
+        _learned_lms.push_back(lm);
+    }
+    fin.close();
 }
 
 void SurfSegment::traverseStart(float x, float y)

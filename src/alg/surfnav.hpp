@@ -3,6 +3,7 @@
 
 #include <list>
 #include <cmath>
+#include <fstream>
 #include <osg/Image>
 #include <sim/math.hpp>
 
@@ -46,6 +47,29 @@ class SurfLandmark {
         for (size_t i = 0; i < 64; i++)
             d += SIM_CUBE(desc[i] - l.desc[i]);
         return std::sqrt(d);
+    }
+
+    /**
+     * Reads landmark data from ifstream.
+     */
+    bool read(std::ifstream &fin)
+    { fin >> x >> y >> last_x >> last_y;
+      fin >> distance >> last_distance;
+      fin >> laplacian_sign >> scale >> orientation;
+      fin >> visibility;
+      for (size_t i = 0; i < 64; i++)
+          fin >> desc[i];
+      return fin.good(); }
+
+    bool write(std::ofstream &fout)
+    { fout << " " << x << " " << y << " " << last_x << " " << last_y;
+      fout << " " << distance << " " << last_distance;
+      fout << " " << laplacian_sign << " " << scale << " " << orientation;
+      fout << " " << visibility;
+      for (size_t i = 0; i < 64; i++)
+          fout << " " << desc[i];
+      fout << std::endl;
+      return fout.good();
     }
 };
 

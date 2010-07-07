@@ -30,6 +30,9 @@ using sim::Vec3;
 using sim::Time;
 using namespace std;
 
+static const char *load = 0;
+static const char *save = 0;
+
 class Syrotek : public sim::comp::Syrotek {
     sim::alg::SurfSegment _surf;
     float _fwd, _k;
@@ -38,6 +41,10 @@ class Syrotek : public sim::comp::Syrotek {
     Syrotek(const sim::Vec3 &pos)
         : sim::comp::Syrotek(pos)
     {
+        if (load != 0){
+            DBG("Loading SurfSegment from " << load);
+            _surf.learnLoad(load);
+        }
     }
 
     void init(sim::Sim *sim)
@@ -89,7 +96,13 @@ class Syrotek : public sim::comp::Syrotek {
             _surf.learnFinish();
             robot()->setVelLeft(0.);
             robot()->setVelRight(0.);
+
             DBG("SurfNav segment finished");
+
+            if (save != 0){
+                DBG("Saving SurfSegment into " << save);
+                _surf.learnSave(save);
+            }
         }else if (key == 't'){
             float x = robot()->chasis()->pos().x();
             float y = robot()->chasis()->pos().y();
@@ -268,6 +281,16 @@ class S : public sim::Sim {
 
 int main(int argc, char *argv[])
 {
+    for (int i = 1; i < argc; i++){
+        if (strcmp(argv[i], "--save") == 0 && i + 1 < argc){
+            save = argv[i + 1];
+            i++;
+        }else if (strcmp(argv[i], "--load") == 0 && i + 1 < argc){
+            load = argv[i + 1];
+            i++;
+        }
+    }
+
     S s;
     s.run();
 

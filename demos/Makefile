@@ -47,10 +47,9 @@ ifeq '$(WANT_ODE)' 'yes'
   TARGETS += demo_sssa
   TARGETS += demo_movement_tunning
   TARGETS += demo_pso
-endif
-
-ifeq '$(WANT_BT)' 'yes'
-  TARGETS += demo_surfnav
+  ifeq '$(WANT_OPENCV)' 'yes'
+    TARGETS += demo_surfnav
+  endif
 endif
 
 all: $(TARGETS)
