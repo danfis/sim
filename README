@@ -2,15 +2,15 @@ sim is robotic simulator originaly created for Symbrion/Replicator european
 project [1]. The goal of project is to create full library/framework for
 simulation of robots, sensors and environment.
 
-sim is written mostly in C++ and is currently based on OpenSceneGraph and
-ODE libraries.
+sim is written mostly in C++ and is currently based on OpenSceneGraph,
+ODE and Bullet libraries.
 
 
 License
 --------
-sim is licensed under LGPLv3 license. Text of license can be found
-at http://www.gnu.org/licenses/lgpl.html or in COPYING.LESSER file
-distributed along with sources.
+sim is licensed under GPLv3 license. Text of license can be found
+at http://www.gnu.org/licenses/gpl.html or in COPYING file distributed
+along with sources.
 
 
 Documentation
