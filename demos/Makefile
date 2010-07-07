@@ -45,6 +45,7 @@ ifeq '$(WANT_ODE)' 'yes'
   TARGETS += demo_intersection
   TARGETS += demo_chameleon
   TARGETS += demo_sssa
+  TARGETS += demo_sssa_gen
   TARGETS += demo_movement_tunning
   TARGETS += demo_pso
   ifeq '$(WANT_OPENCV)' 'yes'
@@ -80,6 +81,9 @@ demo_chameleon: demo_chameleon.cpp $(LIBDEPS)
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 demo_sssa: demo_sssa.cpp $(LIBDEPS)
+	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+
+demo_sssa_gen: demo_sssa_gen.cpp $(LIBDEPS)
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 demo_movement_tunning: demo_movement_tunning.cpp $(LIBDEPS)

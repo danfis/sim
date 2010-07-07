@@ -49,23 +49,6 @@ SSSA::SSSA(sim::World *w, const Vec3 &pos,
 
 SSSA::~SSSA()
 {
-    if (_chasis)
-        delete _chasis;
-    if (_arm.body)
-        delete _arm.body;
-    if (_arm.joint)
-        delete _arm.joint;
-
-    for (size_t i = 0; i < 6; i++){
-        if (_wleft.body[i])
-            delete _wleft.body[i];
-        if (_wleft.joint[i])
-            delete _wleft.joint[i];
-        if (_wright.body[i])
-            delete _wright.body[i];
-        if (_wright.joint[i])
-            delete _wright.joint[i];
-    }
 }
 
 Scalar SSSA::armAngle() const
