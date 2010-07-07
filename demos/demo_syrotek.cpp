@@ -25,7 +25,6 @@
 #include <sim/msg.hpp>
 #include <sim/comp/syrotek.hpp>
 #include "sim/comp/povray.hpp"
-#include "sim/alg/surfnav.hpp"
 
 using namespace sim::ode;
 using sim::Vec3;
@@ -34,17 +33,12 @@ using namespace std;
 
 static bool use_cam = false;
 static bool use_rf = false;
-static bool use_surfnav = false;
 
 class Syrotek : public sim::comp::Syrotek {
-    sim::alg::SurfSegment _surf;
-
   public:
     Syrotek(const sim::Vec3 &pos)
         : sim::comp::Syrotek(pos)
     {
-        if (use_surfnav)
-            use_cam = true;
     }
 
     void init(sim::Sim *sim)
@@ -60,56 +54,6 @@ class Syrotek : public sim::comp::Syrotek {
 
         if (use_rf){
             _useRangeFinder();
-        }
-
-        if (use_surfnav){
-            sim->regPreStep(this);
-        }
-    }
-
-    void cbPreStep()
-    {
-        //DBG("odo: " << DBGV(robot()->odometry()));
-
-        if (_surf.learning()
-                && cam()->image()
-                && cam()->image()->s() > 0
-                && cam()->image()->t() > 0){
-            Vec3 odo = robot()->odometry();
-            //DBG("odo: " << odo.x() << " " << odo.y() << " " << odo.z());
-            _surf.learn(cam()->image(), odo.x(), odo.y());
-        }else if (_surf.traversing()
-                    && cam()->image()
-                    && cam()->image()->s() > 0
-                    && cam()->image()->t() > 0){
-            Vec3 odo = robot()->odometry();
-            float hd = _surf.traverse(cam()->image(), odo.x(), odo.y());
-            DBG("SURF hd = " << hd);
-        }
-    }
-
-    void _keyPressedMsg(const sim::MessageKeyPressed &msg)
-    {
-        int key = msg.key();
-
-        if (key == 's'){
-            float x = robot()->chasis()->pos().x();
-            float y = robot()->chasis()->pos().y();
-            _surf.learnStart(x, y);
-            DBG("SurfNav segment started");
-        }else if (key == 'S'){
-            _surf.learnFinish();
-            DBG("SurfNav segment finished");
-        }else if (key == 't'){
-            float x = robot()->chasis()->pos().x();
-            float y = robot()->chasis()->pos().y();
-            _surf.traverseStart(x, y);
-            DBG("SurfNav traverse");
-        }else if (key == 'T'){
-            _surf.traverseFinish();
-            DBG("SurfNav traverse STOPED");
-        }else{
-            sim::comp::Syrotek::_keyPressedMsg(msg);
         }
     }
 };
@@ -202,8 +146,6 @@ int main(int argc, char *argv[])
             use_cam = true;
         }else if (strcmp(argv[i], "--rf") == 0){
             use_rf = true;
-        }else if (strcmp(argv[i], "--surf") == 0){
-            use_surfnav = true;
         }else if (strcmp(argv[i], "--help") == 0){
             printf("%s [OPTIONS]\n", argv[0]);
             printf("  OPTIONS:\n");

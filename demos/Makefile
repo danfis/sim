@@ -49,6 +49,10 @@ ifeq '$(WANT_ODE)' 'yes'
   TARGETS += demo_pso
 endif
 
+ifeq '$(WANT_BT)' 'yes'
+  TARGETS += demo_surfnav
+endif
+
 all: $(TARGETS)
 
 
@@ -84,6 +88,10 @@ demo_movement_tunning: demo_movement_tunning.cpp $(LIBDEPS)
 
 demo_pso: demo_pso.cpp $(LIBDEPS)
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+
+demo_surfnav: demo_surfnav.cpp $(LIBDEPS)
+	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+
 
 clean:
 	rm -f *.o *~ *.a

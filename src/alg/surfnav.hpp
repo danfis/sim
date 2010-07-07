@@ -107,6 +107,16 @@ class SurfSegment {
     void learnFinish();
 
     /**
+     * Saves learned landmarks into file.
+     */
+    void learnSave(const char *fn);
+
+    /**
+     * Loads learned landmarks from file.
+     */
+    void learnLoad(const char *fn);
+
+    /**
      * Update segment using image and position.
      */
     void learn(const osg::Image *image, float posx, float posy);

@@ -127,12 +127,15 @@ float SurfHist::hd() const
 
         for (size_t j = 0; j < best[i]->size; j++){
             hd += best[i]->nums[j];
-            size++;
+            size += 1.f;
         }
     }
 
     if (!isZero(size))
         hd = hd / size;
+
+    if (isnan(hd))
+        return 0.f;
     return hd;
 }
 
@@ -175,6 +178,16 @@ void SurfSegment::learn(const osg::Image *im, float posx, float posy)
 
     _obtainLandmarks(im, posx, posy, _dist, &lms);
     _trackLandmarks(lms, _dist);
+}
+
+void SurfSegment::learnSave(const char *fn)
+{
+    // TODO
+}
+
+void SurfSegment::learnLoad(const char *fn)
+{
+    // TODO
 }
 
 void SurfSegment::traverseStart(float x, float y)
@@ -225,6 +238,7 @@ void SurfSegment::_obtainLandmarks(const osg::Image *im, float posx, float posy,
     surf::surfDetDes(image, *lms, false, 5, 4, 2, 0.0004);
 
     //DBG("landmarks: " << lms->size());
+    /*
     {
         for (size_t i = 0; i < lms->size(); i++){
             drawPoint(image, (*lms)[i]);
@@ -234,6 +248,7 @@ void SurfSegment::_obtainLandmarks(const osg::Image *im, float posx, float posy,
         sprintf(fn, "surf/%06d.png", count++);
         cvSaveImage(fn, image);
     }
+    */
 
     // delete created image
     cvReleaseImage(&image);
@@ -365,7 +380,7 @@ SurfHist *SurfSegment::_horizontalDiffsHist(float dist,
             hd  = fabsf(lm.last_x - lm.x);
             hd /= fabsf(lm.last_distance - lm.distance);
             hd *= dist - lm.last_distance;
-            hd += lm.distance - best[0]->distance;
+            hd += lm.x - best[0]->x;
 
             // store difference in list
             hds.push_back(hd);
