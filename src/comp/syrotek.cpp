@@ -98,8 +98,9 @@ void Syrotek::_joystickMsg(const sim::comp::JoystickMessage &msg)
         _robot->addVelRight(0.1);
     }else if (msg.button(4)){
         _robot->addVelRight(-0.1);
+    }else if (msg.button(8)){
+        MSG("Velocity: " << _robot->velLeft() << " " << _robot->velRight() << "    ");
     }
-    DBG("Velocity: " << _robot->velLeft() << " " << _robot->velRight());
 }
 
 
