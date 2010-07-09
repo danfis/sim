@@ -135,7 +135,22 @@ class VisBody {
      * Exports VisBody as full povray object (with correct transformation
      * etc...).
      */
-    virtual void toPovrayFull(std::ostream &os) const {}
+    virtual void toPovrayFull(std::ostream &os) const
+    { toPovrayObject(os);
+      toPovrayTr(os); }
+
+    /**
+     * Exports VisBody as povray object without any transformations and as
+     * declaration of object:
+     *      #declare object_[id] = object { ... }
+     */
+    virtual void toPovrayObject(std::ostream &os) const {}
+
+    /**
+     * Exports VisBody as transformation of already declared object:
+     *      object { object_[id] [transformation] }
+     */
+    virtual void toPovrayTr(std::ostream &os) const {}
 
   protected:
     /**
@@ -146,11 +161,15 @@ class VisBody {
      */
     void _setNode(osg::Node *n);
 
+
     /**
      * Returns unique ID of body.
      */
     static unsigned long _getUniqueID();
     static unsigned long _last_id;
+
+  public:
+    static unsigned long lastId() { return _last_id; }
 };
 
 
@@ -166,7 +185,8 @@ class VisBodyShape : public VisBody {
                  const osg::Vec4 &color = osg::Vec4(0., 0., 0., 1.));
 
 
-    void toPovrayFull(std::ostream &os) const;
+    void toPovrayObject(std::ostream &os) const;
+    void toPovrayTr(std::ostream &os) const;
 
   protected:
     /**
@@ -262,7 +282,11 @@ class VisBodyTriMesh : public VisBody {
 	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 	void exportToBlender(std::ofstream &ofs, const int idx);
 
-    void toPovrayFull(std::ostream &os) const;
+    void toPovrayObject(std::ostream &os) const;
+    void toPovrayTr(std::ostream &os) const;
+
+  protected:
+    void _toPovrayMesh(std::ostream &os) const;
 };
 
 } /* namespace sim */

@@ -229,12 +229,11 @@ void VisBodyShape::_setShape(osg::Shape *shape)
     setColor(osg::Vec4(0.5, 0.5, 0.5, 1.));
 }
 
-void VisBodyShape::toPovrayFull(std::ostream &os) const
+void VisBodyShape::toPovrayObject(std::ostream &os) const
 {
     const osg::Geode *geo;
     const osg::ShapeDrawable *draw;
     const osg::Shape *shape;
-    const char *name;
 
     if (!(geo = (const osg::Geode *)node()))
         return;
@@ -242,14 +241,16 @@ void VisBodyShape::toPovrayFull(std::ostream &os) const
         return;
     if (!(shape = draw->getShape()))
         return;
-    if (!(name = shape->className()))
-        return;
 
-    os << "object { " << std::endl;
-
+    os << "#declare object_" << id() << " = object {" << std::endl;
     _toPovrayFullShape(os, shape, draw);
-    povTransformation(os, pos(), rot());
+    os << "}" << std::endl; // object
+}
 
+void VisBodyShape::toPovrayTr(std::ostream &os) const
+{
+    os << "object { object_" << id() << std::endl;
+    povTransformation(os, pos(), rot());
     os << "}" << std::endl; // object
 }
 
@@ -783,7 +784,21 @@ void VisBodyTriMesh::exportToBlender(std::ofstream &ofs, const int idx) {
 }
 
 
-void VisBodyTriMesh::toPovrayFull(std::ostream &os) const
+void VisBodyTriMesh::toPovrayObject(std::ostream &os) const
+{
+    os << "#declare object_" << id() << " = object {" << std::endl;
+    _toPovrayMesh(os);
+    os << "}" << std::endl; // object
+}
+
+void VisBodyTriMesh::toPovrayTr(std::ostream &os) const
+{
+    os << "object { object_" << id() << std::endl;
+    povTransformation(os, pos(), rot());
+    os << "}" << std::endl; // object
+}
+
+void VisBodyTriMesh::_toPovrayMesh(std::ostream &os) const
 {
     const osg::Geode *geo;
     const osg::Geometry *geom;
@@ -798,8 +813,6 @@ void VisBodyTriMesh::toPovrayFull(std::ostream &os) const
     if (!(points = (const osg::Vec3Array *)geom->getVertexArray()))
         return;
 
-
-    os << "object {" << std::endl;
 
     os << "mesh {";
     len = geom->getNumPrimitiveSets();
@@ -829,10 +842,6 @@ void VisBodyTriMesh::toPovrayFull(std::ostream &os) const
     }
 
     os << "}" << std::endl; // mesh
-
-    povTransformation(os, pos(), rot());
-
-    os << "}" << std::endl; // object
 }
 
 

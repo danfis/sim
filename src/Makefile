@@ -50,7 +50,7 @@ OBJS = visbody.o visworld.o body.o joint.o sim.o component.o message.o \
 OBJS += sensor/camera.o sensor/rangefinder.o
 OBJS += comp/povray.o comp/snake.o comp/frequency.o comp/watchdog.o \
         comp/syrotek.o comp/joystick.o comp/sssa.o comp/blender.o \
-        comp/povray_full.o
+        comp/povray_full.o comp/povray_step.o
 OBJS += robot/syrotek.o robot/sssa.o
 
 ifeq '$(HAVE_OPENCV)' 'yes'

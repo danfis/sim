@@ -26,6 +26,7 @@
 #include <sim/world.hpp>
 #include <sim/msg.hpp>
 #include <sim/comp/povray_full.hpp>
+#include <sim/comp/povray_step.hpp>
 
 #include "bunny.hpp"
 
@@ -35,6 +36,7 @@ using namespace std;
 
 bool use_ode = true;
 const char *povray_full = 0;
+const char *povray_step = 0;
 
 class S : public sim::Sim {
   public:
@@ -49,6 +51,11 @@ class S : public sim::Sim {
 
         if (povray_full){
             sim::comp::PovrayFull *pov = new sim::comp::PovrayFull(povray_full);
+            addComponent(pov);
+        }
+
+        if (povray_step){
+            sim::comp::PovrayStep *pov = new sim::comp::PovrayStep(povray_step);
             addComponent(pov);
         }
 
@@ -458,6 +465,9 @@ int main(int argc, char *argv[])
             use_ode = false;
         }else if (strcmp(argv[i], "--povray-full") == 0 && i + 1 < argc){
             povray_full = argv[i + 1];
+            i++;
+        }else if (strcmp(argv[i], "--povray-step") == 0 && i + 1 < argc){
+            povray_step = argv[i + 1];
             i++;
         }
     }
