@@ -33,7 +33,15 @@ namespace comp {
 
     
  /**
-  * Povray component
+  * Component for exporting whole scene into povray format (for later
+  * rendering of high quality images).
+  *
+  * This class generates one povray file after each simulation step this
+  * _one_ file contains _whole_ scene. Using this component significantly
+  * slows down a simulation but provides accurate description of scene.
+  *
+  * For rendering use program povray(1) directly or use processPovray.pl
+  * script shipped with this library.
   */
 class PovrayFull : public sim::Component {
     sim::Sim *_sim;
@@ -41,6 +49,10 @@ class PovrayFull : public sim::Component {
     const char *_dir;
 
   public:
+    /**
+     * Constructor. Takes path to directory where files will be put as
+     * first argument.
+     */
     PovrayFull(const char *dir = "povray");
     ~PovrayFull();
 
