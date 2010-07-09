@@ -19,8 +19,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _SIM_VIS_OBJ_HPP_
-#define _SIM_VIS_OBJ_HPP_
+#ifndef _SIM_VIS_BODY_HPP_
+#define _SIM_VIS_BODY_HPP_
 
 #include <osg/PositionAttitudeTransform>
 #include <osg/Geode>
@@ -37,6 +37,7 @@ namespace sim {
  */
 class VisBody {
   protected:
+    unsigned long _id; //!< Unique ID of object
     osg::ref_ptr<osg::PositionAttitudeTransform> _root;
     osg::ref_ptr<osg::Group> _group;
     osg::ref_ptr<osg::Geode> _text;
@@ -57,6 +58,11 @@ class VisBody {
   public:
     VisBody();
     virtual ~VisBody() {}
+
+    /**
+     * Returns unique ID assigned to body.
+     */
+    unsigned long id() const { return _id; }
 
     /**
      * Returns root node of osg scene graph.
@@ -119,6 +125,8 @@ class VisBody {
     virtual void setOsgText(osg::ref_ptr<osgText::TextBase> t);
     virtual void setText(const char *text, float size = 1.,
                          const osg::Vec4 &color = osg::Vec4(0., 0., 0., 1.)) {}
+
+
 	virtual void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 	virtual void exportToBlender(std::ofstream &ofs, const int idx);
 
@@ -130,6 +138,12 @@ class VisBody {
      * osg::PositionAttitudeTransform node.
      */
     void _setNode(osg::Node *n);
+
+    /**
+     * Returns unique ID of body.
+     */
+    static unsigned long _getUniqueID();
+    static unsigned long _last_id;
 };
 
 
@@ -227,4 +241,4 @@ class VisBodyTriMesh : public VisBody {
 
 } /* namespace sim */
 
-#endif /* _SIM_VIS_OBJ_HPP_ */
+#endif /* _SIM_VIS_BODY_HPP_ */

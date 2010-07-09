@@ -69,7 +69,7 @@ static void printBlenderMaterial(std::ofstream &ofs, const osg::Vec4 &color, con
 }
 
 VisBody::VisBody()
-    : _node(0), _offset(0., 0., 0.)
+    : _id(_getUniqueID()), _node(0), _offset(0., 0., 0.)
 {
     _root = new osg::PositionAttitudeTransform();
     _group = new osg::Group();
@@ -128,6 +128,15 @@ void VisBody::_setNode(osg::Node *n)
     _node = n;
     _group->addChild(_node);
 }
+
+
+unsigned long VisBody::_last_id = 0L;
+unsigned long VisBody::_getUniqueID()
+{
+    return ++_last_id;
+}
+
+
 
 void VisBody::setOsgText(osg::ref_ptr<osgText::TextBase> t)
 {
