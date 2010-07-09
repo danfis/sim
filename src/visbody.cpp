@@ -27,17 +27,18 @@
 #include <osgUtil/SmoothingVisitor>
 #include <osg/Material>
 #include <osgDB/ReadFile>
+#include <string.h>
 
 #include "visbody.hpp"
 #include "msg.hpp"
 
 namespace sim {
 
-static void povCoords(std::ofstream &ofs, const osg::Vec3 &vec) {
-    ofs << " <" << vec[0] << "," << vec[1] << "," << vec[2] << "> ";
+static void povCoords(std::ostream &os, const osg::Vec3 &vec) {
+    os << " <" << vec[0] << "," << vec[1] << "," << vec[2] << "> ";
 }
 
-static void povTransformation(std::ofstream &ofs, const osg::Vec3 &position, const osg::Quat &rotation) {
+static void povTransformation(std::ostream &ofs, const osg::Vec3 &position, const osg::Quat &rotation) {
     osg::Matrixd mt;
     mt.makeIdentity();
     mt.makeTranslate(position);
@@ -55,9 +56,9 @@ static void povTransformation(std::ofstream &ofs, const osg::Vec3 &position, con
     ofs << m(3,0) << "," << m(3,1) <<","<<m(3,2) <<">\n";
 }
 
-static void povColor(std::ofstream &ofs, const osg::Vec4 &color) {
+static void povColor(std::ostream &os, const osg::Vec4 &color) {
     //ofs << "color rgb <" << color[0]<<","<<color[1]<<","<<color[2]<<"> ";
-    ofs << "color rgbf <" << color[0]<<","<<color[1]<<","<<color[2]<<"," << (1-color[3]) << "> ";
+    os << "color rgbf <" << color[0]<<","<<color[1]<<","<<color[2]<<"," << (1-color[3]) << "> ";
 }
 static void printBlenderMaterial(std::ofstream &ofs, const osg::Vec4 &color, const int idx) {
     ofs << "    mat = Material.New('mat_" << idx << "')\n";
@@ -149,13 +150,6 @@ void VisBody::setOsgText(osg::ref_ptr<osgText::TextBase> t)
     }
 }
 
-void VisBody::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
-}
-
-void VisBody::exportToBlender(std::ofstream &ofs, const int idx) {
-}
-
-
 const osg::Vec4 &VisBody::getColor() const {
     osg::ShapeDrawable *draw;
     draw = (osg::ShapeDrawable *)((osg::Geode *)_node.get())->getDrawable(0);
@@ -235,11 +229,30 @@ void VisBodyShape::_setShape(osg::Shape *shape)
     setColor(osg::Vec4(0.5, 0.5, 0.5, 1.));
 }
 
-void VisBodyShape::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
+void VisBodyShape::toPovrayFull(std::ostream &os) const
+{
+    const osg::Geode *geo;
+    const osg::ShapeDrawable *draw;
+    const osg::Shape *shape;
+    const char *name;
+
+    if (!(geo = (const osg::Geode *)node()))
+        return;
+    if (!(draw = (const osg::ShapeDrawable *)geo->getDrawable(0)))
+        return;
+    if (!(shape = draw->getShape()))
+        return;
+    if (!(name = shape->className()))
+        return;
+
+    os << "object { " << std::endl;
+
+    _toPovrayFullShape(os, shape, draw);
+    povTransformation(os, pos(), rot());
+
+    os << "}" << std::endl; // object
 }
 
-void VisBodyShape::exportToBlender(std::ofstream &ofs, const int idx) {
-}
 
 VisBodyBox::VisBodyBox(Vec3 dim)
     : VisBodyShape()
@@ -308,6 +321,26 @@ void VisBodyBox::exportToBlender(std::ofstream &ofs, const int idx) {
  
 }
 
+void VisBodyBox::_toPovrayFullShape(std::ostream &os,
+                                      const osg::Shape *shape,
+                                      const osg::ShapeDrawable *draw) const
+{
+    const osg::Box *b = (const osg::Box *)shape;
+    Vec3 center(b->getCenter());
+    Vec3 lengths(b->getHalfLengths());
+
+    os << "box { <" << center[0] - lengths[0] << ","
+                    << center[1] - lengths[1] << ","
+                    << center[2]-lengths[2] << ">,"
+       << " <" << center[0]+lengths[0] << ","
+               << center[1]+lengths[1] << ","
+               << center[2]+lengths[2] << "> ";
+
+    os << " pigment {";
+    povColor(os, draw->getColor());
+    os << " } ";
+    os << "}" << std::endl;
+}
 
 void VisBodyCube::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
     osg::Geode *g = _node->asGeode();
@@ -371,7 +404,6 @@ void VisBodyCube::exportToBlender(std::ofstream &ofs, const int idx) {
     }
  
 }
-
 
 
 
@@ -441,6 +473,25 @@ void VisBodySphere::exportToBlender(std::ofstream &ofs, const int idx) {
         }
     }
      
+}
+
+void VisBodySphere::_toPovrayFullShape(std::ostream &os,
+                                      const osg::Shape *shape,
+                                      const osg::ShapeDrawable *draw) const
+{
+
+    const osg::Sphere *s = (const osg::Sphere *)shape;
+    Vec3 center(s->getCenter());
+    double radius = s->getRadius();
+
+    os << "sphere { ";
+    povCoords(os, center);
+    os << "," << radius << "\n";
+
+    os << " pigment {";
+    povColor(os, draw->getColor());
+    os << "} ";
+    os << "}\n";
 }
 
 
@@ -516,6 +567,26 @@ void VisBodyCylinder::exportToBlender(std::ofstream &ofs, const int idx) {
 
 }
 
+void VisBodyCylinder::_toPovrayFullShape(std::ostream &os,
+                                      const osg::Shape *shape,
+                                      const osg::ShapeDrawable *draw) const
+{
+
+    const osg::Cylinder *s = (const osg::Cylinder *)shape;
+    Vec3 center(s->getCenter());
+    double radius = s->getRadius();
+    double height = s->getHeight();
+
+    os << "cylinder { ";
+    os << "<" << center[0] << "," << center[1] <<"," << center[2]-height/2.0 << ">,";
+    os << "<" << center[0] << "," << center[1] <<"," << center[2]+height/2.0 << ">,";
+    os << radius << "\n";
+
+    os << " pigment {";
+    povColor(os, draw->getColor());
+    os << "} ";
+    os << "}\n";
+}
 
 
 
@@ -565,6 +636,13 @@ void VisBodyCone::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
 }
 
 void VisBodyCone::exportToBlender(std::ofstream &ofs, const int idx) {
+}
+
+void VisBodyCone::_toPovrayFullShape(std::ostream &os,
+                                       const osg::Shape *shape,
+                                       const osg::ShapeDrawable *draw) const
+{
+    // TODO
 }
 
 
@@ -705,7 +783,57 @@ void VisBodyTriMesh::exportToBlender(std::ofstream &ofs, const int idx) {
 }
 
 
+void VisBodyTriMesh::toPovrayFull(std::ostream &os) const
+{
+    const osg::Geode *geo;
+    const osg::Geometry *geom;
+    const osg::Vec3Array *points;
+    const osg::DrawElementsUInt *face;
+    size_t i, j, len, len2;
+   
+    if (!(geo = (const osg::Geode *)node()))
+        return;
+    if (!(geom = (const osg::Geometry *)geo->getDrawable(0)))
+        return;
+    if (!(points = (const osg::Vec3Array *)geom->getVertexArray()))
+        return;
 
+
+    os << "object {" << std::endl;
+
+    os << "mesh {";
+    len = geom->getNumPrimitiveSets();
+    for (i = 0; i < len; i++){
+        face = (const osg::DrawElementsUInt *)geom->getPrimitiveSet(i);
+        if (!face)
+            continue;
+
+        os << "triangle {";
+
+        len2 = face->getNumIndices();
+        for (j = 0; j < len2; j++){
+            const osg::Vec3 &v = (*points)[face->index(j)];
+            os << "<" << v[0] << "," << v[1] << "," << v[2] << ">";
+            if (j < len2 - 1)
+                os << ", ";
+        }
+
+        os << "}" << std::endl; // triangle
+    }
+
+    const osg::Vec4Array *colorArray = (const osg::Vec4Array *)geom->getColorArray();
+    if (colorArray){
+        os << "pigment {";
+        povColor(os, (*colorArray)[0]);
+        os << "}\n";
+    }
+
+    os << "}" << std::endl; // mesh
+
+    povTransformation(os, pos(), rot());
+
+    os << "}" << std::endl; // object
+}
 
 
 }

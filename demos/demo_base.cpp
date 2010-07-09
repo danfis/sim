@@ -25,6 +25,7 @@
 #include <sim/sim.hpp>
 #include <sim/world.hpp>
 #include <sim/msg.hpp>
+#include <sim/comp/povray_full.hpp>
 
 #include "bunny.hpp"
 
@@ -33,6 +34,7 @@ using sim::Quat;
 using namespace std;
 
 bool use_ode = true;
+const char *povray_full = 0;
 
 class S : public sim::Sim {
   public:
@@ -43,6 +45,11 @@ class S : public sim::Sim {
             initODE();
         }else{
             initBullet();
+        }
+
+        if (povray_full){
+            sim::comp::PovrayFull *pov = new sim::comp::PovrayFull(povray_full);
+            addComponent(pov);
         }
 
         setTimeStep(sim::Time::fromMs(20));
@@ -449,6 +456,9 @@ int main(int argc, char *argv[])
             use_ode = true;
         }else if (strcmp(argv[i], "--bullet") == 0){
             use_ode = false;
+        }else if (strcmp(argv[i], "--povray-full") == 0 && i + 1 < argc){
+            povray_full = argv[i + 1];
+            i++;
         }
     }
 

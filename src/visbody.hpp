@@ -26,6 +26,7 @@
 #include <osg/Geode>
 #include <osgText/TextBase>
 #include <osg/Vec4f>
+#include <osg/ShapeDrawable>
 #include "math.hpp"
 #include <fstream>
 
@@ -127,8 +128,14 @@ class VisBody {
                          const osg::Vec4 &color = osg::Vec4(0., 0., 0., 1.)) {}
 
 
-	virtual void exportToPovray(std::ofstream &ofs, PovrayMode mode);
-	virtual void exportToBlender(std::ofstream &ofs, const int idx);
+	virtual void exportToPovray(std::ofstream &ofs, PovrayMode mode) {}
+	virtual void exportToBlender(std::ofstream &ofs, const int idx) {}
+
+    /**
+     * Exports VisBody as full povray object (with correct transformation
+     * etc...).
+     */
+    virtual void toPovrayFull(std::ostream &os) const {}
 
   protected:
     /**
@@ -157,22 +164,19 @@ class VisBodyShape : public VisBody {
     void setTexture(const std::string &fn);
     void setText(const char *text, float size = 1.,
                  const osg::Vec4 &color = osg::Vec4(0., 0., 0., 1.));
-	/**
-	  * export body's geometry and position to povray file 
-	  * type:
-	  * 0 .. export only geometry (it is usefull for making .inc files
-	  * 1 .. export only position and rotations of the object 
-	  * 2 .. export geometry+position+rotations
-	  */
-	virtual void exportToPovray(std::ofstream &ofs, PovrayMode mode);
-	virtual void exportToBlender(std::ofstream &ofs, const int idx);
 
+
+    void toPovrayFull(std::ostream &os) const;
 
   protected:
     /**
      * Set up shape. This is easier way to set up node then via _setNode().
      */
     void _setShape(osg::Shape *shape);
+
+    virtual void _toPovrayFullShape(std::ostream &os,
+                                    const osg::Shape *shape,
+                                    const osg::ShapeDrawable *draw) const = 0;
 };
 
 
@@ -185,6 +189,11 @@ class VisBodyBox : public VisBodyShape {
     VisBodyBox(Vec3 dim);
 	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 	void exportToBlender(std::ofstream &ofs, const int idx);
+
+  protected:
+    void _toPovrayFullShape(std::ostream &os,
+                            const osg::Shape *shape,
+                            const osg::ShapeDrawable *draw) const;
 };
 
 /**
@@ -206,6 +215,11 @@ class VisBodySphere : public VisBodyShape {
     VisBodySphere(Scalar radius);
 	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 	void exportToBlender(std::ofstream &ofs, const int idx);
+
+  protected:
+    void _toPovrayFullShape(std::ostream &os,
+                            const osg::Shape *shape,
+                            const osg::ShapeDrawable *draw) const;
 };
 
 /**
@@ -216,6 +230,11 @@ class VisBodyCylinder : public VisBodyShape {
     VisBodyCylinder(Scalar radius, Scalar height);
 	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 	void exportToBlender(std::ofstream &ofs, const int idx);
+
+  protected:
+    void _toPovrayFullShape(std::ostream &os,
+                            const osg::Shape *shape,
+                            const osg::ShapeDrawable *draw) const;
 };
 
 /**
@@ -226,6 +245,11 @@ class VisBodyCone : public VisBodyShape {
     VisBodyCone(Scalar radius, Scalar height);
 	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 	void exportToBlender(std::ofstream &ofs, const int idx);
+
+  protected:
+    void _toPovrayFullShape(std::ostream &os,
+                            const osg::Shape *shape,
+                            const osg::ShapeDrawable *draw) const;
 };
 
 
@@ -237,6 +261,8 @@ class VisBodyTriMesh : public VisBody {
     void setColor(const osg::Vec4 &c);
 	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 	void exportToBlender(std::ofstream &ofs, const int idx);
+
+    void toPovrayFull(std::ostream &os) const;
 };
 
 } /* namespace sim */
