@@ -27,6 +27,7 @@
 #include <sim/msg.hpp>
 #include <sim/comp/povray_full.hpp>
 #include <sim/comp/povray_step.hpp>
+#include <sim/comp/blender.hpp>
 
 #include "bunny.hpp"
 
@@ -37,6 +38,7 @@ using namespace std;
 bool use_ode = true;
 const char *povray_full = 0;
 const char *povray_step = 0;
+const char *blender = 0;
 
 class S : public sim::Sim {
   public:
@@ -57,6 +59,11 @@ class S : public sim::Sim {
         if (povray_step){
             sim::comp::PovrayStep *pov = new sim::comp::PovrayStep(povray_step);
             addComponent(pov);
+        }
+
+        if (blender){
+            sim::comp::Blender *b = new sim::comp::Blender(blender);
+            addComponent(b);
         }
 
         setTimeStep(sim::Time::fromMs(20));
@@ -468,6 +475,9 @@ int main(int argc, char *argv[])
             i++;
         }else if (strcmp(argv[i], "--povray-step") == 0 && i + 1 < argc){
             povray_step = argv[i + 1];
+            i++;
+        }else if (strcmp(argv[i], "--blender") == 0 && i + 1 < argc){
+            blender = argv[i + 1];
             i++;
         }
     }

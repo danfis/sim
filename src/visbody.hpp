@@ -152,6 +152,11 @@ class VisBody {
      */
     virtual void toPovrayTr(std::ostream &os) const {}
 
+    /**
+     * Exports VisBody to blender format (used by Blender component).
+     */
+    virtual void toBlender(std::ostream &os) const {}
+
   protected:
     /**
      * Set top node of scene graph.
@@ -210,6 +215,8 @@ class VisBodyBox : public VisBodyShape {
 	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 	void exportToBlender(std::ofstream &ofs, const int idx);
 
+    void toBlender(std::ostream &os) const;
+
   protected:
     void _toPovrayFullShape(std::ostream &os,
                             const osg::Shape *shape,
@@ -236,6 +243,8 @@ class VisBodySphere : public VisBodyShape {
 	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 	void exportToBlender(std::ofstream &ofs, const int idx);
 
+    void toBlender(std::ostream &os) const;
+
   protected:
     void _toPovrayFullShape(std::ostream &os,
                             const osg::Shape *shape,
@@ -250,6 +259,8 @@ class VisBodyCylinder : public VisBodyShape {
     VisBodyCylinder(Scalar radius, Scalar height);
 	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 	void exportToBlender(std::ofstream &ofs, const int idx);
+
+    void toBlender(std::ostream &os) const;
 
   protected:
     void _toPovrayFullShape(std::ostream &os,
@@ -266,6 +277,8 @@ class VisBodyCone : public VisBodyShape {
 	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 	void exportToBlender(std::ofstream &ofs, const int idx);
 
+    void toBlender(std::ostream &os) const { /* TODO */ }
+
   protected:
     void _toPovrayFullShape(std::ostream &os,
                             const osg::Shape *shape,
@@ -281,6 +294,8 @@ class VisBodyTriMesh : public VisBody {
     void setColor(const osg::Vec4 &c);
 	void exportToPovray(std::ofstream &ofs, PovrayMode mode);
 	void exportToBlender(std::ofstream &ofs, const int idx);
+
+    void toBlender(std::ostream &os) const;
 
     void toPovrayObject(std::ostream &os) const;
     void toPovrayTr(std::ostream &os) const;

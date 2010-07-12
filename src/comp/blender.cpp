@@ -1,33 +1,54 @@
-/***
- * sim
- * ---------------------------------
- * Copyright (c)2010 Vojta Vonasek <vonasek@labe.felk.cvut.cz>
- *
- *  This file is part of sim.
- *
- *  sim is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as
- *  published by the Free Software Foundation; either version 3 of
- *  the License, or (at your option) any later version.
- *
- *  sim is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include "blender.hpp"
 #include "sim/common.hpp"
 
 namespace sim {
-
 namespace comp {
 
-Blender::Blender(const char *prefix, const double frameTime)
-    : sim::Component(), _frame(0), _prefix(prefix),_frameTime(frameTime)
+static void printLoadingIpoFunc(std::ofstream &ofs) {
+    
+    ofs << "def loadIpo(filename, objectName):\n";
+    ofs << "    print \"Loading IPO curve for \",objectName\n";
+    ofs << "    fin = open(filename,'r')\n";
+    ofs << "    count = 1\n";
+    ofs << "    obj = Blender.Object.Get(objectName)\n";
+    ofs << "    ipo = Ipo.New('Object','objectIpo')\n";
+    ofs << "    ipo.addCurve('LocX')\n";
+    ofs << "    ipo.addCurve('LocY')\n";
+    ofs << "    ipo.addCurve('LocZ')\n";
+    ofs << "    ipo.addCurve('RotX')\n";
+    ofs << "    ipo.addCurve('RotY')\n";
+    ofs << "    ipo.addCurve('RotZ')\n";
+    ofs << "    x = ipo[Ipo.OB_LOCX]\n";
+    ofs << "    y = ipo[Ipo.OB_LOCY]\n";
+    ofs << "    z = ipo[Ipo.OB_LOCZ]\n";
+    ofs << "    rx = ipo[Ipo.OB_ROTX]\n";
+    ofs << "    ry = ipo[Ipo.OB_ROTY]\n";
+    ofs << "    rz = ipo[Ipo.OB_ROTZ]\n";
+    ofs << "    x.setInterpolation('Constant')\n";
+    ofs << "    y.setInterpolation('Constant')\n";
+    ofs << "    z.setInterpolation('Constant')\n";
+    ofs << "    rx.setInterpolation('Constant')\n";
+    ofs << "    ry.setInterpolation('Constant')\n";
+    ofs << "    rz.setInterpolation('Constant')\n";
+    ofs << "    for line in fin:\n";
+    ofs << "        nums = [float(_) for _ in line.split()]\n";
+    ofs << "        x[count] = nums[0]\n";
+    ofs << "        y[count] = nums[1]\n";
+    ofs << "        z[count] = nums[2]\n";
+    ofs << "        q = Mathutils.Quaternion([nums[3],nums[4],nums[5],nums[6]])\n";
+    ofs << "        obj.setEuler(q.toEuler())\n";
+    ofs << "        euler = obj.getEuler()\n";
+    ofs << "        rx[count] = euler[0]/10\n";
+    ofs << "        ry[count] = euler[1]/10\n";
+    ofs << "        rz[count] = euler[2]/10\n";
+    ofs << "        count+=1\n";
+    ofs << "    obj.setIpo(ipo)\n\n";
+}
+
+
+Blender::Blender(const char *dir, const sim::Time &frame_duration)
+    : _sim(0), _dir(dir), _frame_duration(frame_duration),
+      _last_id(0)
 {
 }
 
@@ -35,116 +56,86 @@ Blender::~Blender()
 {
 }
 
-static void printLoadingIpoFunc(std::ofstream &ofs) {
-    
-    ofs << "def loadIpo(filename, objectName):\n";
-    ofs << "    fin = open(filename,'r');\n";
-    ofs << "    count = 1;\n";
-    ofs << "    obj = Blender.Object.Get(objectName);\n";
-    ofs << "    ipo = Ipo.New('Object','objectIpo');\n";
-    ofs << "    ipo.addCurve('LocX');\n";
-    ofs << "    ipo.addCurve('LocY');\n";
-    ofs << "    ipo.addCurve('LocZ');\n";
-    ofs << "    ipo.addCurve('RotX');\n";
-    ofs << "    ipo.addCurve('RotY');\n";
-    ofs << "    ipo.addCurve('RotZ');\n";
-    ofs << "    x = ipo[Ipo.OB_LOCX];\n";
-    ofs << "    y = ipo[Ipo.OB_LOCY];\n";
-    ofs << "    z = ipo[Ipo.OB_LOCZ];\n";
-    ofs << "    rx = ipo[Ipo.OB_ROTX];\n";
-    ofs << "    ry = ipo[Ipo.OB_ROTY];\n";
-    ofs << "    rz = ipo[Ipo.OB_ROTZ];\n";
-    ofs << "    for line in fin:\n";
-    ofs << "        nums = [float(_) for _ in line.split()]\n";
-    ofs << "        x[count] = nums[0];\n";
-    ofs << "        y[count] = nums[1];\n";
-    ofs << "        z[count] = nums[2];\n";
-    ofs << "        q = Mathutils.Quaternion([nums[3],nums[4],nums[5],nums[6]]);\n";
-    ofs << "        obj.setEuler(q.toEuler());\n";
-    ofs << "        euler = obj.getEuler();\n";
-    ofs << "        rx[count] = euler[0]/10;\n";
-    ofs << "        ry[count] = euler[1]/10;\n";
-    ofs << "        rz[count] = euler[2]/10;\n";
-    ofs << "        count+=1;\n";
-    ofs << "    obj.setIpo(ipo);\n\n";
-}
-
-
 void Blender::init(sim::Sim *sim){
 	char name[200];
 
 	_sim = sim;
 
-	sprintf(name, "%sobjects.py", _prefix);
+	sprintf(name, "%s/objects.py", _dir);
 	std::ofstream ofs(name);
     
-    ofs << "#definition of objects from Sim created by Blender component\n";
-    ofs << "import Blender\nfrom Blender import *\n\n";
-    ofs << "sc = Scene.GetCurrent()\n";
+    if (ofs.good()){
+        ofs << "#definition of objects from Sim created by Blender component\n";
+        ofs << "import Blender\nfrom Blender import *\n\n";
+        ofs << "sc = Scene.GetCurrent()\n";
 
-    printLoadingIpoFunc(ofs);
+        printLoadingIpoFunc(ofs);
+        ofs.close();
 
-    const std::list<VisBody *> &bodies = _sim->visWorld()->bodies();
-    int i = 0;
-    for_each(std::list<VisBody *>::const_iterator, bodies){
-        if (*it){
-            (*it)->exportToBlender(ofs, i);
-            i++;
-        }
+        _sim->regPostStep(this);
     }
-    ofs << "\n\n\n";
 
-    i = 0;
-    for_each(std::list<VisBody *>::const_iterator, bodies){
-        if (*it){
-            ofs << "loadIpo(\"object_" << i << ".ipo.dat\",\"object_" << i << "\")\n";
-            i++;
-        }
-    }
-    ofs << "\n\n\n";
-    ofs << "Window.RedrawAll()\n\n";
-    ofs.close();
- 
-
-    _sim->regPostStep(this);
-
-    _lastFrameTime = _sim->timeSimulated();
-
+    _timer.start();
 }
 
-void Blender::finish(){
+void Blender::finish()
+{
 }
 
-void Blender::cbPostStep(){
+void Blender::cbPostStep()
+{
+    sim::VisWorld *vw = _sim->visWorld();
 
+    if (!vw)
+        return;
 
-    sim::Time current = _sim->timeSimulated();
-    const double timeDiff = current.inSF() - _lastFrameTime.inSF();
+    if (_timer.stop() >= _frame_duration){
+        char fn[200];
+        const std::list<VisBody *> &bodies = vw->bodies();
 
-    if (timeDiff > _frameTime) {
+        if (_last_id < VisBody::lastId()){
+            _updateObjects();
+            _last_id = VisBody::lastId();
+        }
 
-        char name[200];
-        const std::list<VisBody *> &bodies = _sim->visWorld()->bodies();
-
-        int i = 0;
         for_each(std::list<VisBody *>::const_iterator, bodies){
             if (*it) {
-                sprintf(name,"%sobject_%d.ipo.dat",_prefix,i);
+                sprintf(fn, "%s/object_%ld.ipo.dat", _dir, (*it)->id());
                 const Vec3 pos((*it)->pos());
                 const Quat rot((*it)->rot());
-                std::ofstream ofs(name,std::ios::app);
+                std::ofstream ofs(fn, std::ios_base::app);
                 ofs << pos[0] << " " << pos[1] << " " << pos[2] << " " << rot.w() << " " << rot.x() << " " << rot.y() << " " << rot.z() << "\n";
                 ofs.close();
-                i++;
             }
         }
 
-        _frame++;
-        _lastFrameTime = current;
+        _timer.start();
     }
-
 }
 
+void Blender::_updateObjects()
+{
+    char fn[200];
+    // this method is called from cbPostStep() _after_ check of _sim and
+    // _sim->visWorld() so no more checks are needed
+    VisWorld *vw = _sim->visWorld();
+    const std::list<VisBody *> &bodies = vw->bodies();
+
+
+	sprintf(fn, "%s/objects.py", _dir);
+	std::ofstream fout(fn, std::ios_base::app);
+    if (fout.good()){
+        for_each(std::list<VisBody *>::const_iterator, bodies){
+            if ((*it)->id() > _last_id){
+                (*it)->toBlender(fout);
+                fout << "loadIpo(\"object_" << (*it)->id() << ".ipo.dat\",\"object_" << (*it)->id() << "\")\n";
+            }
+        }
+
+        fout.close();
+    }
 }
 
+
+}
 }

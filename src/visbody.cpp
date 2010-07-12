@@ -60,7 +60,7 @@ static void povColor(std::ostream &os, const osg::Vec4 &color) {
     //ofs << "color rgb <" << color[0]<<","<<color[1]<<","<<color[2]<<"> ";
     os << "color rgbf <" << color[0]<<","<<color[1]<<","<<color[2]<<"," << (1-color[3]) << "> ";
 }
-static void printBlenderMaterial(std::ofstream &ofs, const osg::Vec4 &color, const int idx) {
+static void printBlenderMaterial(std::ostream &ofs, const osg::Vec4 &color, const int idx) {
     ofs << "    mat = Material.New('mat_" << idx << "')\n";
     ofs << "    mat.rgbCol = [" << color[0] << ","  << color[1] << "," << color[2] << "]\n";
     ofs << "    mat.setAlpha(" << color[3] << ")\n";
@@ -261,6 +261,34 @@ VisBodyBox::VisBodyBox(Vec3 dim)
     _setShape(new osg::Box(osg::Vec3(0., 0., 0.), dim.x(), dim.y(), dim.z()));
 }
 
+void VisBodyBox::toBlender(std::ostream &os) const
+{
+    const osg::Geode *geo;
+    const osg::ShapeDrawable *draw;
+    const osg::Box *shape;
+
+    if (!(geo = (const osg::Geode *)node()))
+        return;
+    if (!(draw = (const osg::ShapeDrawable *)geo->getDrawable(0)))
+        return;
+    if (!(shape = (const osg::Box *)draw->getShape()))
+        return;
+
+    Vec3 center(shape->getCenter());
+    Vec3 lengths(shape->getHalfLengths());
+
+    os << "try:\n";
+    os << "    ob = Blender.Object.Get('object_" << id() << "')\n";
+    os << "except:\n";
+    os << "    me = Mesh.Primitives.Cube(1.0)\n";
+    os << "    sc.objects.new(me,'object_" << id() << "')\n";
+    os << "    ob = Blender.Object.Get('object_" << id() << "')\n";
+    os << "    ob.setSize(" << (lengths[0]*2) << "," << (lengths[1]*2) << "," << (lengths[2]*2) << ")\n";
+
+    printBlenderMaterial(os, draw->getColor(), id());
+    os << "\n";
+}
+
 void VisBodyBox::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
     osg::Geode *g = _node->asGeode();
 
@@ -415,6 +443,31 @@ VisBodySphere::VisBodySphere(Scalar radius)
 }
 
 
+void VisBodySphere::toBlender(std::ostream &os) const
+{
+    const osg::Geode *geo;
+    const osg::ShapeDrawable *draw;
+    const osg::Sphere *shape;
+
+    if (!(geo = (const osg::Geode *)node()))
+        return;
+    if (!(draw = (const osg::ShapeDrawable *)geo->getDrawable(0)))
+        return;
+    if (!(shape = (const osg::Sphere *)draw->getShape()))
+        return;
+
+    double radius = shape->getRadius();
+
+    os << "try:\n";
+    os << "    ob = Blender.Object.Get('object_" << id() << "')\n";
+    os << "except:\n";
+    os << "    me = Mesh.Primitives.UVsphere(32,32," << radius << ")\n";
+    os << "    ob = sc.objects.new(me,'object_" << id() << "')\n";
+
+    printBlenderMaterial(os, draw->getColor(), id());
+    os << "\n";
+}
+
 void VisBodySphere::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
     osg::Geode *g = _node->asGeode();
 
@@ -502,6 +555,33 @@ VisBodyCylinder::VisBodyCylinder(Scalar radius, Scalar height)
 {
     _setShape(new osg::Cylinder(Vec3(0., 0., 0.), radius, height));
 }
+
+void VisBodyCylinder::toBlender(std::ostream &os) const
+{
+    const osg::Geode *geo;
+    const osg::ShapeDrawable *draw;
+    const osg::Cylinder *shape;
+
+    if (!(geo = (const osg::Geode *)node()))
+        return;
+    if (!(draw = (const osg::ShapeDrawable *)geo->getDrawable(0)))
+        return;
+    if (!(shape = (const osg::Cylinder *)draw->getShape()))
+        return;
+
+    double radius = shape->getRadius();
+    double height = shape->getHeight();
+
+    os << "try:\n";
+    os << "    ob = Blender.Object.Get('object_" << id() << "')\n";
+    os << "except:\n";
+    os << "    me = Mesh.Primitives.Cylinder(32," << 2. * radius << "," << height << ")\n";
+    os << "    sc.objects.new(me,'object_" << id() << "')\n";
+
+    printBlenderMaterial(os, draw->getColor(), id());
+    os << "\n";
+}
+
 
 void VisBodyCylinder::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
     osg::Geode *g = _node->asGeode();
@@ -734,6 +814,63 @@ void VisBodyTriMesh::exportToPovray(std::ofstream &ofs, PovrayMode mode) {
         povTransformation(ofs,pos(),rot());
     } 
 }
+
+void VisBodyTriMesh::toBlender(std::ostream &os) const
+{
+    const osg::Geode *geo;
+    const osg::Geometry *geom;
+    const osg::Vec3Array *points;
+    const osg::DrawElementsUInt *face;
+    size_t i, j, len, len2, idx;
+   
+    if (!(geo = (const osg::Geode *)node()))
+        return;
+    if (!(geom = (const osg::Geometry *)geo->getDrawable(0)))
+        return;
+    if (!(points = (const osg::Vec3Array *)geom->getVertexArray()))
+        return;
+
+    len = geom->getNumPrimitiveSets();
+    if (len == 0)
+        return;
+
+    os << "try:\n";
+    os << "    ob = Blender.Object.Get('object_" << id() << "')\n";
+    os << "except:\n";
+    os << "    me = Mesh.New('mesh_" << id() << "')\n";
+
+    idx = 0;
+    for (i = 0; i < len; i++){
+        face = (const osg::DrawElementsUInt *)geom->getPrimitiveSet(i);
+        if (!face)
+            continue;
+
+        len2 = face->getNumIndices();
+        for (j = 0; j < len2; j++){
+            const osg::Vec3 &v = (*points)[face->index(j)];
+            os << "    me.verts.extend([[" << v[0] << ", " << v[1] << ", " << v[2] << "]])\n";
+        }
+
+        os << "    me.faces.extend([[";
+        for (j = 0; j < len2; j++){
+            os << idx;
+            if (j < len2 - 1)
+                os << ", ";
+            idx++;
+        }
+        os << "]])\n";
+    }
+
+    os << "    ob = sc.objects.new(me,'object_" << id() << "')\n";
+
+    const osg::Vec4Array *colorArray = (const osg::Vec4Array *)geom->getColorArray();
+    if (colorArray){
+        printBlenderMaterial(os, (*colorArray)[0], id());
+    }
+
+    os << "\n";
+}
+
 
 void VisBodyTriMesh::exportToBlender(std::ofstream &ofs, const int idx) {
     
