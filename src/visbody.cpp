@@ -2,6 +2,7 @@
  * sim
  * ---------------------------------
  * Copyright (c)2010 Daniel Fiser <danfis@danfis.cz>
+ *                   Vojta Vonasek <vonasek@labe.felk.cvut.cz>
  *
  *  This file is part of sim.
  *
@@ -150,7 +151,7 @@ void VisBody::setOsgText(osg::ref_ptr<osgText::TextBase> t)
     }
 }
 
-const osg::Vec4 &VisBody::getColor() const {
+const osg::Vec4 &VisBody::color() const {
     osg::ShapeDrawable *draw;
     draw = (osg::ShapeDrawable *)((osg::Geode *)_node.get())->getDrawable(0);
 

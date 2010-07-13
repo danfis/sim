@@ -22,6 +22,7 @@
 
 #include "sssa.hpp"
 #include <sim/msg.hpp>
+#include <sim/common.hpp>
 
 #include "meshes/sssa_body.hpp"
 #include "meshes/sssa_arm.hpp"
@@ -49,6 +50,27 @@ SSSA::SSSA(sim::World *w, const Vec3 &pos,
 
 SSSA::~SSSA()
 {
+}
+
+osg::Vec4 SSSA::chasisColor() const
+{
+    std::list<const VisBody *> bodies;
+    chasis()->visBodyAll(&bodies);
+
+    if (bodies.size() > 0){
+        return bodies.front()->color();
+    }
+    return osg::Vec4(0., 0., 0., 1.);
+}
+
+void SSSA::setChasisColor(const osg::Vec4 &color)
+{
+    std::list<VisBody *> bodies;
+    chasis()->visBodyAll(&bodies);
+
+    for_each(std::list<VisBody *>::iterator, bodies){
+        (*it)->setColor(color);
+    }
 }
 
 Scalar SSSA::armAngle() const

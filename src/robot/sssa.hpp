@@ -87,6 +87,9 @@ class SSSA {
     const sim::Joint *ballJoint() const { return _ball_joint; }
     sim::Joint *ballJoint() { return _ball_joint; }
 
+    osg::Vec4 chasisColor() const;
+    void setChasisColor(const osg::Vec4 &color);
+
     const Vec3 &pos() const { return _chasis->pos(); }
     const Quat &rot() const { return _chasis->rot(); }
 

@@ -2,6 +2,7 @@
  * sim
  * ---------------------------------
  * Copyright (c)2010 Vojta Vonasek <vonasek@labe.felk.cvut.cz>
+ *                   Daniel Fiser <danfis@danfis.cz>
  *
  *  This file is part of sim.
  *
@@ -19,60 +20,66 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "snake.hpp"
+#include "snake2.hpp"
 #include <sim/msg.hpp>
 #include <osgGA/GUIEventAdapter>
-
+#include <vector>
 
 namespace sim {
 
 namespace comp {
 
 
-Snake::Snake(const std::vector<sim::Joint *> &snakeBodies)
-    : _snakeBodies(snakeBodies), selectedRobot(0)
-{
-//	oldColor = snakeBodies[0]->getColor();
+SnakeBody::SnakeBody(const std::vector<sim::robot::SSSA *> &snakeBodies) {
+	_snakeBodies = snakeBodies;
+	selectedRobot = 0;
+    oldColor = snakeBodies[selectedRobot]->chasisColor();
+    snakeBodies[selectedRobot]->setChasisColor(osg::Vec4(0.8,0.5,0.9,1));
 }
 
-Snake::~Snake(){
+SnakeBody::~SnakeBody(){
 	_snakeBodies.clear();
 }
 
-void Snake::init(sim::Sim *sim) {
+void SnakeBody::init(sim::Sim *sim) {
 	_sim = sim;
 	for(int i=0;i<(int)_snakeBodies.size();i++) {
 		vel1.push_back(0);
 		vel2.push_back(0);
-		_snakeBodies[i]->setParamVel(0);			
-		_snakeBodies[i]->setParamVel2(0);			
 	}
+    sim->regMessage(this,sim::MessageKeyPressed::Type);
 
 }
 
-void Snake::finish(){
+void SnakeBody::finish(){
 }
 
-void Snake::cbPreStep() {
+void SnakeBody::cbPreStep() {
 
 }
 
-void Snake::processMessage(const Message &msg) {
+void SnakeBody::processMessage(const Message &msg) {
 
 	const int step = 1;
-
 	if (msg.type() == MessageKeyPressed::Type) {
 		const MessageKeyPressed &m = (const MessageKeyPressed &)msg;
 		if (m.key() == 'n') {
 			// 'n'
+            _snakeBodies[selectedRobot]->setChasisColor(oldColor);
+
 			selectedRobot = (selectedRobot + 1) % _snakeBodies.size();
+            
+            oldColor = _snakeBodies[selectedRobot]->chasisColor();
+            _snakeBodies[selectedRobot]->setChasisColor(osg::Vec4(0.8,0.5,0.9,1));
 			DBG("Body " << selectedRobot << " is selected");
 		} else if (m.key() == 'm') {
 			// 'm'
+            _snakeBodies[selectedRobot]->setChasisColor(oldColor);
 			selectedRobot--;
 			if (selectedRobot < 0) {
 				selectedRobot = (int)_snakeBodies.size()-1;
 			}
+            _snakeBodies[selectedRobot]->setChasisColor(osg::Vec4(0.8,0.5,0.9,1));
 			DBG("Body " << selectedRobot << " is selected");
 
 		} else if (m.key() == osgGA::GUIEventAdapter::KEY_Up) {
@@ -92,12 +99,10 @@ void Snake::processMessage(const Message &msg) {
 		}
 
 		for(int i=0;i<(int)_snakeBodies.size();i++) {
-			_snakeBodies[i]->setParamVel(vel1[i]);			
-			_snakeBodies[i]->setParamVel2(vel2[i]);	
-			_snakeBodies[i]->setParamFMax(40);	
-			_snakeBodies[i]->setParamFMax2(40);	
+            _snakeBodies[i]->setVelArm(vel1[i]);
 			DBG("Joint " << i << ", vel1=" << vel1[i] << ", vel2=" << vel2[i]);	
 		}
+        DBG("");
 	}	
 }
 

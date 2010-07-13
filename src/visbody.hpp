@@ -2,6 +2,7 @@
  * sim
  * ---------------------------------
  * Copyright (c)2010 Daniel Fiser <danfis@danfis.cz>
+ *                   Vojta Vonasek <vonasek@labe.felk.cvut.cz>
  *
  *  This file is part of sim.
  *
@@ -119,7 +120,7 @@ class VisBody {
     virtual void setColor(float r, float g, float b, float a)
         { setColor(osg::Vec4(r, g, b, a)); }
 
-	const osg::Vec4& getColor() const;
+	const osg::Vec4& color() const;
 
     virtual void setTexture(const std::string &fn) {}
 

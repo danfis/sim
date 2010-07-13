@@ -48,6 +48,7 @@ ifeq '$(WANT_ODE)' 'yes'
   TARGETS += demo_sssa_gen
   TARGETS += demo_movement_tunning
   TARGETS += demo_pso
+  TARGETS += demo_carpet
   ifeq '$(WANT_OPENCV)' 'yes'
     TARGETS += demo_surfnav
   endif
@@ -95,6 +96,8 @@ demo_pso: demo_pso.cpp $(LIBDEPS)
 demo_surfnav: demo_surfnav.cpp $(LIBDEPS)
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
+demo_carpet: demo_carpet.cpp $(LIBDEPS)
+	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 clean:
 	rm -f *.o *~ *.a
