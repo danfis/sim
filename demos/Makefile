@@ -38,7 +38,7 @@ TARGETS =
 
 TARGETS += demo_base
 
-ifeq '$(WANT_ODE)' 'yes'
+ifeq '$(HAVE_ODE)' 'yes'
   TARGETS += demo_syrotek
   TARGETS += demo_follow_color
 #  TARGETS += main
@@ -49,7 +49,7 @@ ifeq '$(WANT_ODE)' 'yes'
   TARGETS += demo_movement_tunning
   TARGETS += demo_pso
   TARGETS += demo_carpet
-  ifeq '$(WANT_OPENCV)' 'yes'
+  ifeq '$(HAVE_OPENCV)' 'yes'
     TARGETS += demo_surfnav
   endif
 endif
