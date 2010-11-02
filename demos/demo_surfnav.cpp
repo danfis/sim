@@ -167,24 +167,20 @@ class S : public sim::Sim {
         // floor
         c = w->createBodyCompound();
         id = c->addBox(Vec3(10., 4., 0.05));
-        c->visBody(id)->setColor(color);
-        c->visBody(id)->setTexture("ground.ppm");
+        //c->visBody(id)->setColor(color);
+        c->visBody(id)->setTexture("photo.ppm");
 
         // left and right wall
         id = c->addBox(Vec3(0.05, 4., 1.), SIM_BODY_DEFAULT_VIS, Vec3(-5., 0., .5));
-        c->visBody(id)->setColor(color);
-        c->visBody(id)->setTexture("ground.ppm");
+        c->visBody(id)->setTexture("photo.ppm");
         id = c->addBox(Vec3(0.05, 4., 1.), SIM_BODY_DEFAULT_VIS, Vec3(5., 0., .5));
-        c->visBody(id)->setColor(color);
-        c->visBody(id)->setTexture("ground.ppm");
+        c->visBody(id)->setTexture("photo.ppm");
 
         // other two walls
         id = c->addBox(Vec3(10., .1, 0.4), SIM_BODY_DEFAULT_VIS, Vec3(0., 2., .2));
-        c->visBody(id)->setColor(color);
-        c->visBody(id)->setTexture("ground.ppm");
+        c->visBody(id)->setTexture("photo.ppm");
         id = c->addBox(Vec3(10., .1, 0.4), SIM_BODY_DEFAULT_VIS, Vec3(0., -2., .2));
-        c->visBody(id)->setColor(color);
-        c->visBody(id)->setTexture("ground.ppm");
+        c->visBody(id)->setTexture("photo.ppm");
 
         // pillars
         {
@@ -192,54 +188,38 @@ class S : public sim::Sim {
             osg::Vec4 color(0.6, 0.6, 0.8, 1.);
 
             id = c->addBox(size, SIM_BODY_DEFAULT_VIS, Vec3(-3.5, -1., 1.));
-            c->visBody(id)->setColor(color);
-            c->visBody(id)->setTexture("concrete.ppm");
+            c->visBody(id)->setTexture("photo2.ppm");
             id = c->addBox(size, SIM_BODY_DEFAULT_VIS, Vec3(-2.5, -1., 1.));
-            c->visBody(id)->setColor(color);
-            c->visBody(id)->setTexture("concrete.ppm");
+            c->visBody(id)->setTexture("photo2.ppm");
             id = c->addBox(size, SIM_BODY_DEFAULT_VIS, Vec3(-1.5, -1., 1.));
-            c->visBody(id)->setColor(color);
-            c->visBody(id)->setTexture("concrete.ppm");
+            c->visBody(id)->setTexture("photo2.ppm");
             id = c->addBox(size, SIM_BODY_DEFAULT_VIS, Vec3(-.5, -1., 1.));
-            c->visBody(id)->setColor(color);
-            c->visBody(id)->setTexture("concrete.ppm");
+            c->visBody(id)->setTexture("photo2.ppm");
             id = c->addBox(size, SIM_BODY_DEFAULT_VIS, Vec3(.5, -1., 1.));
-            c->visBody(id)->setColor(color);
-            c->visBody(id)->setTexture("concrete.ppm");
+            c->visBody(id)->setTexture("photo2.ppm");
             id = c->addBox(size, SIM_BODY_DEFAULT_VIS, Vec3(1.5, -1., 1.));
-            c->visBody(id)->setColor(color);
-            c->visBody(id)->setTexture("concrete.ppm");
+            c->visBody(id)->setTexture("photo2.ppm");
             id = c->addBox(size, SIM_BODY_DEFAULT_VIS, Vec3(2.5, -1., 1.));
-            c->visBody(id)->setColor(color);
-            c->visBody(id)->setTexture("concrete.ppm");
+            c->visBody(id)->setTexture("photo2.ppm");
             id = c->addBox(size, SIM_BODY_DEFAULT_VIS, Vec3(3.5, -1., 1.));
-            c->visBody(id)->setColor(color);
-            c->visBody(id)->setTexture("concrete.ppm");
+            c->visBody(id)->setTexture("photo2.ppm");
 
             id = c->addBox(size, SIM_BODY_DEFAULT_VIS, Vec3(-3.5, 1., 1.));
-            c->visBody(id)->setColor(color);
-            c->visBody(id)->setTexture("concrete.ppm");
+            c->visBody(id)->setTexture("photo2.ppm");
             id = c->addBox(size, SIM_BODY_DEFAULT_VIS, Vec3(-2.5, 1., 1.));
-            c->visBody(id)->setColor(color);
-            c->visBody(id)->setTexture("concrete.ppm");
+            c->visBody(id)->setTexture("photo2.ppm");
             id = c->addBox(size, SIM_BODY_DEFAULT_VIS, Vec3(-1.5, 1., 1.));
-            c->visBody(id)->setColor(color);
-            c->visBody(id)->setTexture("concrete.ppm");
+            c->visBody(id)->setTexture("photo2.ppm");
             id = c->addBox(size, SIM_BODY_DEFAULT_VIS, Vec3(-.5, 1., 1.));
-            c->visBody(id)->setColor(color);
-            c->visBody(id)->setTexture("concrete.ppm");
+            c->visBody(id)->setTexture("photo2.ppm");
             id = c->addBox(size, SIM_BODY_DEFAULT_VIS, Vec3(.5, 1., 1.));
-            c->visBody(id)->setColor(color);
-            c->visBody(id)->setTexture("concrete.ppm");
+            c->visBody(id)->setTexture("photo2.ppm");
             id = c->addBox(size, SIM_BODY_DEFAULT_VIS, Vec3(1.5, 1., 1.));
-            c->visBody(id)->setColor(color);
-            c->visBody(id)->setTexture("concrete.ppm");
+            c->visBody(id)->setTexture("photo2.ppm");
             id = c->addBox(size, SIM_BODY_DEFAULT_VIS, Vec3(2.5, 1., 1.));
-            c->visBody(id)->setColor(color);
-            c->visBody(id)->setTexture("concrete.ppm");
+            c->visBody(id)->setTexture("photo2.ppm");
             id = c->addBox(size, SIM_BODY_DEFAULT_VIS, Vec3(3.5, 1., 1.));
-            c->visBody(id)->setColor(color);
-            c->visBody(id)->setTexture("concrete.ppm");
+            c->visBody(id)->setTexture("photo2.ppm");
 
             color.z() -= 0.2;
 
