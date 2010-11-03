@@ -68,7 +68,7 @@ VisWorld::VisWorld()
     _createCoordFrame();
 
     // set up viewer to run in single thread
-    //_viewer->setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
+    _viewer->setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
 }
 
 VisWorld::~VisWorld()

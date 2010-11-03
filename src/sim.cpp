@@ -189,7 +189,10 @@ Sim::Sim(World *world, VisWorld *visworld)
 
     _timer_real.start();
 
-    pthread_mutex_init(&_step_lock, NULL);
+    pthread_mutexattr_t mattr;
+    pthread_mutexattr_init(&mattr);
+    pthread_mutexattr_setprotocol(&mattr, PTHREAD_PRIO_INHERIT);
+    pthread_mutex_init(&_step_lock, &mattr);
 }
 
 Sim::~Sim()
