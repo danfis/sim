@@ -31,12 +31,14 @@ M4 ?= m4
 SYSTEM = $(shell uname)
 
 SYSTEM_CXXFLAGS =
+SYSTEM_CFLAGS =
 SYSTEM_LDFLAGS =
 
 ifeq '$(SYSTEM)' 'FreeBSD'
   AWK ?= gawk
   SED ?= gsed
   SYSTEM_CXXFLAGS = -Wno-long-long
+  SYSTEM_CFLAGS = -Wno-long-long
 else
   AWK ?= awk
   SED ?= sed
@@ -71,6 +73,8 @@ ifneq '$(NOPEDANTIC)' 'yes'
 endif
 
 CXXFLAGS += $(SYSTEM_CXXFLAGS)
+CFLAGS += $(SYSTEM_CFLAGS)
+CFLAGS += --std=gnu99
 LDFLAGS += $(SYSTEM_LDFLAGS)
 
 HAVE_ODE    ?= no
