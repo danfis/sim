@@ -26,14 +26,16 @@
 #include "alloc.h"
 #include "dbg.h"
 
-#define RSIM_BUFSIZE 4096
+//#define RSIM_BUFSIZE 4096
+#define RSIM_BUFSIZE 1
 
 struct _rsim_session_t {
-    pthread_t th;
-    int sock; /*!< Socket for reading and writing data into stream */
-    char buf[RSIM_BUFSIZE];
-    char *bufstart, *bufend;
+    uint16_t id;
 
+    int sock;
+    rsim_msg_reader_t reader;
+
+    pthread_t th;
     sim_list_t list;
 };
 typedef struct _rsim_session_t rsim_session_t;
@@ -119,23 +121,6 @@ int rsimServerStart(rsim_server_t *s, int port)
 
         sess = rsimSessionNew(s, connfd);
         rsimSessionStart(sess);
-
-        /*
-        sprintf(buf, "Conn %02d: ", connfd);
-        write(1, buf, 9);
-        while ((readsize = read(connfd, buf, BUFSIZE)) > 0){
-            write(1, buf, readsize);
-
-            if (buf[readsize - 1] == '\n')
-                break;
-        }
-
-        write(connfd, "Hello client", 12);
-
-        shutdown(connfd, SHUT_RDWR);
-        */
-
-        close(connfd);
     }
 
     close(s->sock);
@@ -154,13 +139,15 @@ static rsim_session_t *rsimSessionNew(rsim_server_t *s, int sock)
     simListAppend(&s->sessions, &sess->list);
 
     sess->sock = sock;
-    sess->bufstart = sess->bufend = 0;
+    rsimMsgReaderInit(&sess->reader, sess->sock);
 
     return sess;
 }
 
 static void rsimSessionDel(rsim_server_t *s, rsim_session_t *sess)
 {
+    pthread_join(sess->th, NULL);
+
     if (sess->sock)
         close(sess->sock);
 
@@ -170,28 +157,40 @@ static void rsimSessionDel(rsim_server_t *s, rsim_session_t *sess)
 
 static void rsimSessionStart(rsim_session_t *sess)
 {
-    int res;
-
-    res = pthread_create(&sess->th, NULL, rsimSessionTh, sess);
-    if (res == 0)
-        pthread_join(sess->th, NULL);
-
+    pthread_create(&sess->th, NULL, rsimSessionTh, sess);
 }
 
 static void *rsimSessionTh(void *_sess)
 {
     rsim_session_t *sess = (rsim_session_t *)_sess;
-    size_t readsize;
+    rsim_msg_t *msg, response;
 
-    readsize = read(sess->sock, sess->buf, RSIM_BUFSIZE);
-    if (readsize <= 0){
+    msg = rsimMsgReaderNext(&sess->reader);
+    if (msg == NULL || msg->type != RSIM_MSG_INIT){
+        if (msg)
+            free(msg);
+        fprintf(stderr, "Invalid initial message.\n");
         return NULL;
     }
 
-    sess->bufstart = sess->buf;
-    sess->bufend   = sess->buf + readsize;
-    write(1, sess->buf, readsize);
-    write(1, "\n", 1);
+    fprintf(stdout, "id: %d, type: %d\n", (int)msg->id, (int)msg->type);
+    fflush(stdout);
+
+    // set up ID according to initial message
+    sess->id = msg->id;
+
+    response.id = msg->id;
+    response.type = RSIM_MSG_INIT;
+    rsimMsgSend(&response, sess->sock);
+
+    fprintf(stdout, "response id: %d, type: %d\n", (int)response.id, (int)response.type);
+    fflush(stdout);
+
+    while ((msg = rsimMsgReaderNext(&sess->reader)) != NULL){
+        fprintf(stdout, "id: %d, type: %d\n", (int)msg->id, (int)msg->type);
+        fflush(stdout);
+        free(msg);
+    }
 
     return NULL;
 }

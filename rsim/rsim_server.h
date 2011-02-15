@@ -24,7 +24,7 @@
 
 #include <netinet/in.h>
 #include <unistd.h>
-#include "msg.h"
+#include "rsim.h"
 #include "list.h"
 
 struct _rsim_server_t {
