@@ -70,6 +70,13 @@ void rsimMsgReaderInit(rsim_msg_reader_t *c, int sock)
 {
     c->sock = sock;
     c->bufstart = c->bufend = 0;
+    c->msg = NULL;
+}
+
+void rsimMsgReaderDestroy(rsim_msg_reader_t *c)
+{
+    if (c->msg)
+        free(c->msg);
 }
 
 
@@ -78,12 +85,11 @@ void rsimMsgReaderInit(rsim_msg_reader_t *c, int sock)
 #define STATE_ID2  2
 #define STATE_END  100
 
-rsim_msg_t *rsimMsgReaderNext(rsim_msg_reader_t *r)
+const rsim_msg_t *rsimMsgReaderNext(rsim_msg_reader_t *r)
 {
     ssize_t readsize;
     uint16_t id;
     char type;
-    rsim_msg_t *msg;
     rsim_msg_init_t *msg_init;
     int state;
 
@@ -128,17 +134,20 @@ rsim_msg_t *rsimMsgReaderNext(rsim_msg_reader_t *r)
     }
     DBG2("");
 
+    if (r->msg)
+        free(r->msg);
+
     if (type == RSIM_MSG_INIT){
         msg_init = SIM_ALLOC(rsim_msg_init_t);
         msg_init->type = type;
         msg_init->id = id;
-        fprintf(stderr, "type: %d, id: %d\n", (int)type, (int)id);
-        return (rsim_msg_t *)msg_init;
+        r->msg = (rsim_msg_t *)msg_init;
     }else{
-        msg = SIM_ALLOC(rsim_msg_t);
-        msg->type = type;
-        return msg;
+        r->msg = SIM_ALLOC(rsim_msg_t);
+        r->msg->type = type;
     }
+
+    return r->msg;
 }
 
 int rsimMsgSend(rsim_msg_t *msg, int sock)
@@ -168,7 +177,7 @@ int rsimMsgSend(rsim_msg_t *msg, int sock)
 int rsimClientConnect(rsim_client_t *c, const char *addr, uint16_t port, uint16_t id)
 {
     int res;
-    rsim_msg_t *response;
+    const rsim_msg_t *response;
 
     c->id = id;
 
@@ -226,17 +235,17 @@ int rsimClientConnect(rsim_client_t *c, const char *addr, uint16_t port, uint16_
     }
 
     DBG("response id: %d, type: %d", (int)((rsim_msg_init_t *)response)->id, (int)response->type);
-    free(response);
 
     return 0;
 }
 
 void rsimClientClose(rsim_client_t *c)
 {
+    rsimMsgReaderDestroy(&c->reader);
     close(c->sock);
 }
 
-rsim_msg_t *rsimClientNextMsg(rsim_client_t *c)
+const rsim_msg_t *rsimClientNextMsg(rsim_client_t *c)
 {
     return rsimMsgReaderNext(&c->reader);
 }

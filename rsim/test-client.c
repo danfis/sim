@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
     rsim_client_t c;
     int ret;
-    rsim_msg_t *msg;
+    const rsim_msg_t *msg;
 
     ret = rsimClientConnect(&c, "127.0.0.1", 9876, 1);
     if (ret != 0){
@@ -17,7 +17,6 @@ int main(int argc, char *argv[])
     rsimMsgSendPing(c.sock);
     msg = rsimClientNextMsg(&c);
     fprintf(stderr, "type: %d\n", (int)msg->type);
-    free(msg);
 
     rsimClientClose(&c);
 

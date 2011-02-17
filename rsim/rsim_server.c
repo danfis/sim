@@ -301,6 +301,8 @@ static void rsimSessionDel(rsim_server_t *s, rsim_session_t *sess)
     if (sess->sock)
         close(sess->sock);
 
+    rsimMsgReaderDestroy(&sess->reader);
+
     simListDel(&sess->list);
     free(sess);
 }
@@ -310,19 +312,28 @@ static void rsimSessionStart(rsim_session_t *sess)
     pthread_create(&sess->th, NULL, rsimSessionTh, sess);
 }
 
+static void __rsimSessionRemove(rsim_session_t *sess)
+{
+    pthread_mutex_lock(&sess->server->lock);
+    if (sess->cb)
+        sess->cb->occupied = 0;
+    simListDel(&sess->list);
+    simListAppend(&sess->server->sessions_del, &sess->list);
+    pthread_mutex_unlock(&sess->server->lock);
+}
+
 static void *rsimSessionTh(void *_sess)
 {
     rsim_session_t *sess = (rsim_session_t *)_sess;
-    rsim_msg_t *msg;
+    const rsim_msg_t *msg;
     rsim_msg_init_t *msg_init;
     rsim_session_cb_t *cb;
 
     DBG2("1");
     msg = rsimMsgReaderNext(&sess->reader);
     if (msg == NULL || msg->type != RSIM_MSG_INIT){
-        if (msg)
-            free(msg);
         fprintf(stderr, "Invalid initial message.\n");
+        __rsimSessionRemove(sess);
         return NULL;
     }
 
@@ -334,11 +345,7 @@ static void *rsimSessionTh(void *_sess)
     cb = rsimServerCB(sess->server, msg_init->id);
     if (!cb || cb->occupied){
         fprintf(stderr, "Callback not registered or already occupied.\n");
-
-        pthread_mutex_lock(&sess->server->lock);
-        simListDel(&sess->list);
-        simListAppend(&sess->server->sessions_del, &sess->list);
-        pthread_mutex_unlock(&sess->server->lock);
+        __rsimSessionRemove(sess);
         return NULL;
     }
 
@@ -350,18 +357,11 @@ static void *rsimSessionTh(void *_sess)
     sess->cb = cb;
     rsimMsgSendInit(sess->sock, sess->id);
 
-    free(msg);
-
     while ((msg = rsimMsgReaderNext(&sess->reader)) != NULL){
         sess->cb->cb(msg, sess->sock, sess->cb->data);
-        free(msg);
     }
 
-    pthread_mutex_lock(&sess->server->lock);
-    sess->cb->occupied = 0;
-    simListDel(&sess->list);
-    simListAppend(&sess->server->sessions_del, &sess->list);
-    pthread_mutex_unlock(&sess->server->lock);
+    __rsimSessionRemove(sess);
 
     return NULL;
 }

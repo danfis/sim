@@ -54,11 +54,13 @@ struct _rsim_msg_reader_t {
     int sock; /*!< Socket for reading and writing data into stream */
     char buf[RSIM_BUFSIZE];
     char *bufstart, *bufend;
+    rsim_msg_t *msg;
 };
 typedef struct _rsim_msg_reader_t rsim_msg_reader_t;
 
 void rsimMsgReaderInit(rsim_msg_reader_t *c, int sock);
-rsim_msg_t *rsimMsgReaderNext(rsim_msg_reader_t *r);
+void rsimMsgReaderDestroy(rsim_msg_reader_t *c);
+const rsim_msg_t *rsimMsgReaderNext(rsim_msg_reader_t *r);
 int rsimMsgSend(rsim_msg_t *msg, int sock);
 
 
@@ -73,7 +75,7 @@ typedef struct _rsim_client_t rsim_client_t;
 
 int rsimClientConnect(rsim_client_t *c, const char *addr, uint16_t port, uint16_t id);
 void rsimClientClose(rsim_client_t *c);
-rsim_msg_t *rsimClientNextMsg(rsim_client_t *c);
+const rsim_msg_t *rsimClientNextMsg(rsim_client_t *c);
 int rsimClientSendMsg(rsim_client_t *c, rsim_msg_t *m);
 
 #endif /* _SIM_RSIM_H_ */
