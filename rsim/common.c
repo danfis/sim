@@ -111,3 +111,47 @@ const rsim_msg_t *rsimMsgReaderNext(rsim_msg_reader_t *r)
     return r->msg;
 }
 
+
+int rsimMsgSendInit(int sock, uint16_t id)
+{
+    rsim_msg_init_t msg;
+    ssize_t size;
+
+    msg.type = RSIM_MSG_INIT;
+    msg.id = htons(id);
+
+    size = write(sock, &msg, sizeof(msg));
+    fprintf(stderr, "size: %d, %d, %d\n", (int)size, (int)sizeof(msg),
+            (int)sizeof(rsim_msg_init_t));
+    if (size == sizeof(msg))
+        return 0;
+    return -1;
+}
+
+int rsimMsgSendPing(int sock)
+{
+    rsim_msg_t msg;
+    ssize_t size;
+
+    msg.type = RSIM_MSG_PING;
+    size = write(sock, &msg, sizeof(msg));
+    if (size == sizeof(msg))
+        return 0;
+    return -1;
+}
+
+int rsimMsgSendPong(int sock)
+{
+    rsim_msg_t msg;
+    ssize_t size;
+
+    msg.type = RSIM_MSG_PONG;
+    size = write(sock, &msg, sizeof(msg));
+    if (size == sizeof(msg))
+        return 0;
+    return -1;
+}
+
+
+
+
