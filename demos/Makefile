@@ -21,7 +21,18 @@
 
 -include ../Makefile.local
 -include ../Makefile.include
+CXXFLAGS += $(OSG_CXXFLAGS)
+CXXFLAGS += $(ODE_CXXFLAGS)
+CXXFLAGS += $(BT_CXXFLAGS)
+CXXFLAGS += $(SDL_CXXFLAGS)
+CXXFLAGS += $(OPENCV_CXXFLAGS)
 CXXFLAGS += -I../src
+
+LDFLAGS += $(OSG_LDFLAGS)
+LDFLAGS += $(ODE_LDFLAGS)
+LDFLAGS += $(BT_LDFLAGS)
+LDFLAGS += $(SDL_LDFLAGS)
+LDFLAGS += $(OPENCV_LDFLAGS)
 
 LIBDEPS += ../src/libsim.a
 LDFLAGS := -L../src -lsim $(LDFLAGS)
