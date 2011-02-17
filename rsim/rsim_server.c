@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "rsim_server.h"
+#include "common.h"
 #include "alloc.h"
 #include "dbg.h"
 

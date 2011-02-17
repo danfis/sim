@@ -1,6 +1,6 @@
 /***
- * sim
- * ---------------------------------
+ * Remote sim
+ * -----------
  * Copyright (c)2011 Daniel Fiser <danfis@danfis.cz>
  *
  *  This file is part of sim.
@@ -24,10 +24,11 @@
 
 #include <stdint.h>
 #include <netinet/in.h>
-#include "compiler.h"
 
-//#define RSIM_BUFSIZE 4096
-#define RSIM_BUFSIZE 1
+#define sim_packed __attribute__ ((packed))
+
+#define RSIM_BUFSIZE 4096
+//#define RSIM_BUFSIZE 1
 
 #define RSIM_MSG_INIT 1
 #define RSIM_MSG_PING 10
@@ -38,44 +39,48 @@ struct _rsim_msg_t {
 } sim_packed;
 typedef struct _rsim_msg_t rsim_msg_t;
 
-struct _rsim_msg_init_t {
-    char type;
-    uint16_t id;
-} sim_packed;
-typedef struct _rsim_msg_init_t rsim_msg_init_t;
-
-
-int rsimMsgSendInit(int sock, uint16_t id);
-int rsimMsgSendPing(int sock);
-int rsimMsgSendPong(int sock);
 
 
 struct _rsim_msg_reader_t {
-    int sock; /*!< Socket for reading and writing data into stream */
+    int sock;
     char buf[RSIM_BUFSIZE];
     char *bufstart, *bufend;
     rsim_msg_t *msg;
 };
 typedef struct _rsim_msg_reader_t rsim_msg_reader_t;
 
-void rsimMsgReaderInit(rsim_msg_reader_t *c, int sock);
-void rsimMsgReaderDestroy(rsim_msg_reader_t *c);
-const rsim_msg_t *rsimMsgReaderNext(rsim_msg_reader_t *r);
-int rsimMsgSend(rsim_msg_t *msg, int sock);
 
-
-struct _rsim_client_t {
+struct _rsim_t {
     uint16_t id;
     struct sockaddr_in addr; /*!< Address of server */
     int sock;
 
     rsim_msg_reader_t reader;
 };
-typedef struct _rsim_client_t rsim_client_t;
+typedef struct _rsim_t rsim_t;
 
-int rsimClientConnect(rsim_client_t *c, const char *addr, uint16_t port, uint16_t id);
-void rsimClientClose(rsim_client_t *c);
-const rsim_msg_t *rsimClientNextMsg(rsim_client_t *c);
-int rsimClientSendMsg(rsim_client_t *c, rsim_msg_t *m);
+/**
+ * Connects client to specified server:port and id of robot.
+ * Returns 0 on success, -1 if server is not reachable or other client is
+ * already registered to specified robot.
+ */
+int rsimConnect(rsim_t *, const char *addr, uint16_t port, uint16_t id);
+
+/**
+ * Close previously established connection to server.
+ */
+void rsimClose(rsim_t *);
+
+/**
+ * Returns next message sent from server.
+ * This is blocking call.
+ */
+const rsim_msg_t *rsimNextMsg(rsim_t *);
+
+
+/**
+ * Sends ping message to server.
+ */
+int rsimSendPing(rsim_t *);
 
 #endif /* _SIM_RSIM_H_ */

@@ -1,5 +1,6 @@
 #include <dbg.h>
 #include "rsim_server.h"
+#include "common.h"
 
 static void cb1(const rsim_msg_t *msg, int sock, void *data);
 
