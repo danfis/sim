@@ -21,15 +21,26 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <pthread.h>
 #include "rsim_server.h"
 #include "alloc.h"
 #include "dbg.h"
 
-//#define RSIM_BUFSIZE 4096
-#define RSIM_BUFSIZE 1
+
+struct _rsim_session_cb_t {
+    uint16_t id;
+    rsim_session_cb cb;
+    void *data;
+    int occupied;
+
+    sim_list_t list;
+};
+typedef struct _rsim_session_cb_t rsim_session_cb_t;
 
 struct _rsim_session_t {
+    rsim_server_t *server;
+    rsim_session_cb_t *cb;
+    void *cbdata;
+
     uint16_t id;
 
     int sock;
@@ -40,11 +51,15 @@ struct _rsim_session_t {
 };
 typedef struct _rsim_session_t rsim_session_t;
 
+static void rsimServerDelDeadSessions(rsim_server_t *s);
+static int rsimServerCBIsOccupied(rsim_server_t *s, uint16_t id);
+static int rsimServerCBIsRegistered(rsim_server_t *s, uint16_t id);
+static rsim_session_cb_t *rsimServerCB(rsim_server_t *s, uint16_t id);
+
 static rsim_session_t *rsimSessionNew(rsim_server_t *s, int sock);
 static void rsimSessionDel(rsim_server_t *s, rsim_session_t *sess);
 static void rsimSessionStart(rsim_session_t *sess);
 static void *rsimSessionTh(void *_sess);
-
 
 rsim_server_t *rsimServerNew(void)
 {
@@ -54,6 +69,9 @@ rsim_server_t *rsimServerNew(void)
     s->sock = -1;
 
     simListInit(&s->sessions);
+    simListInit(&s->sessions_del);
+    simListInit(&s->callbacks);
+    pthread_mutex_init(&s->lock, NULL);
 
     return s;
 }
@@ -63,11 +81,15 @@ void rsimServerDel(rsim_server_t *s)
     sim_list_t *item;
     rsim_session_t *sess;
 
+    pthread_mutex_lock(&s->lock);
     while (!simListEmpty(&s->sessions)){
         item = simListNext(&s->sessions);
         sess = simListEntry(item, rsim_session_t, list);
         rsimSessionDel(s, sess);
     }
+    pthread_mutex_unlock(&s->lock);
+
+    rsimServerDelDeadSessions(s);
 
     if (s->sock > 0)
         close(s->sock);
@@ -120,7 +142,14 @@ int rsimServerStart(rsim_server_t *s, int port)
         DBG("New connection %d", connfd);
 
         sess = rsimSessionNew(s, connfd);
+
+        pthread_mutex_lock(&s->lock);
+        simListAppend(&s->sessions, &sess->list);
+        pthread_mutex_unlock(&s->lock);
+
         rsimSessionStart(sess);
+
+        rsimServerDelDeadSessions(s);
     }
 
     close(s->sock);
@@ -129,6 +158,100 @@ int rsimServerStart(rsim_server_t *s, int port)
     return 0;
 }
 
+int rsimServerRegister(rsim_server_t *s, uint16_t id, rsim_session_cb cb,
+                       void *data)
+{
+    rsim_session_cb_t *cbs;
+
+    if (rsimServerCBIsRegistered(s, id))
+        return -1;
+
+
+    cbs = SIM_ALLOC(rsim_session_cb_t);
+    cbs->id = id;
+    cbs->cb = cb;
+    cbs->data = data;
+    cbs->occupied = 0;
+
+    pthread_mutex_lock(&s->lock);
+    simListAppend(&s->callbacks, &cbs->list);
+    pthread_mutex_unlock(&s->lock);
+
+    return 0;
+}
+
+static int rsimServerCBIsOccupied(rsim_server_t *s, uint16_t id)
+{
+    sim_list_t *item;
+    rsim_session_cb_t *cb;
+    int ret = 0;
+
+    pthread_mutex_lock(&s->lock);
+    simListForEach(&s->callbacks, item){
+        cb = simListEntry(item, rsim_session_cb_t, list);
+        if (cb->id == id && cb->occupied){
+            ret = 1;
+            break;
+        }
+    }
+    pthread_mutex_unlock(&s->lock);
+
+    return ret;
+}
+
+static int rsimServerCBIsRegistered(rsim_server_t *s, uint16_t id)
+{
+    sim_list_t *item;
+    rsim_session_cb_t *cb;
+    int ret = 0;
+
+    pthread_mutex_lock(&s->lock);
+    simListForEach(&s->callbacks, item){
+        cb = simListEntry(item, rsim_session_cb_t, list);
+        if (cb->id == id){
+            ret = 1;
+            break;
+        }
+    }
+    pthread_mutex_unlock(&s->lock);
+
+    return ret;
+}
+
+static rsim_session_cb_t *rsimServerCB(rsim_server_t *s, uint16_t id)
+{
+    sim_list_t *item;
+    rsim_session_cb_t *cb;
+    rsim_session_cb_t *ret = NULL;
+
+    pthread_mutex_lock(&s->lock);
+    simListForEach(&s->callbacks, item){
+        cb = simListEntry(item, rsim_session_cb_t, list);
+        if (cb->id == id){
+            ret = cb;
+            break;
+        }
+    }
+    pthread_mutex_unlock(&s->lock);
+
+    return ret;
+}
+
+static void rsimServerDelDeadSessions(rsim_server_t *s)
+{
+    sim_list_t *item;
+    rsim_session_t *sess;
+
+    pthread_mutex_lock(&s->lock);
+
+    while (!simListEmpty(&s->sessions_del)){
+        item = simListNext(&s->sessions_del);
+        sess = simListEntry(item, rsim_session_t, list);
+        rsimSessionDel(s, sess);
+    }
+
+    pthread_mutex_unlock(&s->lock);
+}
 
 
 static rsim_session_t *rsimSessionNew(rsim_server_t *s, int sock)
@@ -136,7 +259,8 @@ static rsim_session_t *rsimSessionNew(rsim_server_t *s, int sock)
     rsim_session_t *sess;
 
     sess = SIM_ALLOC(rsim_session_t);
-    simListAppend(&s->sessions, &sess->list);
+    sess->server = s;
+    sess->cb = NULL;
 
     sess->sock = sock;
     rsimMsgReaderInit(&sess->reader, sess->sock);
@@ -163,8 +287,11 @@ static void rsimSessionStart(rsim_session_t *sess)
 static void *rsimSessionTh(void *_sess)
 {
     rsim_session_t *sess = (rsim_session_t *)_sess;
-    rsim_msg_t *msg, response;
+    rsim_msg_t *msg;
+    rsim_msg_init_t *msg_init;
+    rsim_session_cb_t *cb;
 
+    DBG2("1");
     msg = rsimMsgReaderNext(&sess->reader);
     if (msg == NULL || msg->type != RSIM_MSG_INIT){
         if (msg)
@@ -173,24 +300,41 @@ static void *rsimSessionTh(void *_sess)
         return NULL;
     }
 
-    fprintf(stdout, "id: %d, type: %d\n", (int)msg->id, (int)msg->type);
+    DBG2("2");
+    msg_init = (rsim_msg_init_t *)msg;
+    fprintf(stdout, "id: %d, type: %d\n", (int)msg_init->id, (int)msg->type);
     fflush(stdout);
 
-    // set up ID according to initial message
-    sess->id = msg->id;
+    cb = rsimServerCB(sess->server, msg_init->id);
+    if (!cb || cb->occupied){
+        fprintf(stderr, "Callback not registered or already occupied.\n");
 
-    response.id = msg->id;
-    response.type = RSIM_MSG_INIT;
-    rsimMsgSend(&response, sess->sock);
+        pthread_mutex_lock(&sess->server->lock);
+        simListDel(&sess->list);
+        simListAppend(&sess->server->sessions_del, &sess->list);
+        pthread_mutex_unlock(&sess->server->lock);
+        return NULL;
+    }
 
-    fprintf(stdout, "response id: %d, type: %d\n", (int)response.id, (int)response.type);
-    fflush(stdout);
+    pthread_mutex_lock(&sess->server->lock);
+    cb->occupied = 1;
+    pthread_mutex_unlock(&sess->server->lock);
+
+    sess->id = msg_init->id;
+    sess->cb = cb;
+    rsimMsgSendInit(sess->sock, sess->id);
 
     while ((msg = rsimMsgReaderNext(&sess->reader)) != NULL){
-        fprintf(stdout, "id: %d, type: %d\n", (int)msg->id, (int)msg->type);
-        fflush(stdout);
+        sess->cb->cb(msg, sess->sock, sess->cb->data);
         free(msg);
     }
 
+    pthread_mutex_lock(&sess->server->lock);
+    sess->cb->occupied = 0;
+    simListDel(&sess->list);
+    simListAppend(&sess->server->sessions_del, &sess->list);
+    pthread_mutex_unlock(&sess->server->lock);
+
     return NULL;
 }
+

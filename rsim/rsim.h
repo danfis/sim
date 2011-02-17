@@ -24,6 +24,7 @@
 
 #include <stdint.h>
 #include <netinet/in.h>
+#include "compiler.h"
 
 //#define RSIM_BUFSIZE 4096
 #define RSIM_BUFSIZE 1
@@ -33,10 +34,20 @@
 #define RSIM_MSG_PONG 11
 
 struct _rsim_msg_t {
-    uint16_t id;
     char type;
-};
+} sim_packed;
 typedef struct _rsim_msg_t rsim_msg_t;
+
+struct _rsim_msg_init_t {
+    char type;
+    uint16_t id;
+} sim_packed;
+typedef struct _rsim_msg_init_t rsim_msg_init_t;
+
+
+int rsimMsgSendInit(int sock, uint16_t id);
+int rsimMsgSendPing(int sock);
+int rsimMsgSendPong(int sock);
 
 
 struct _rsim_msg_reader_t {

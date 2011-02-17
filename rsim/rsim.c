@@ -26,24 +26,71 @@
 #include "alloc.h"
 #include "dbg.h"
 
+int rsimMsgSendInit(int sock, uint16_t id)
+{
+    rsim_msg_init_t msg;
+    ssize_t size;
+
+    msg.type = RSIM_MSG_INIT;
+    msg.id = htons(id);
+
+    size = write(sock, &msg, sizeof(msg));
+    fprintf(stderr, "size: %d, %d, %d\n", (int)size, (int)sizeof(msg),
+            (int)sizeof(rsim_msg_init_t));
+    if (size == sizeof(msg))
+        return 0;
+    return -1;
+}
+
+int rsimMsgSendPing(int sock)
+{
+    rsim_msg_t msg;
+    ssize_t size;
+
+    msg.type = RSIM_MSG_PING;
+    size = write(sock, &msg, sizeof(msg));
+    if (size == sizeof(msg))
+        return 0;
+    return -1;
+}
+
+int rsimMsgSendPong(int sock)
+{
+    rsim_msg_t msg;
+    ssize_t size;
+
+    msg.type = RSIM_MSG_PONG;
+    size = write(sock, &msg, sizeof(msg));
+    if (size == sizeof(msg))
+        return 0;
+    return -1;
+}
+
 void rsimMsgReaderInit(rsim_msg_reader_t *c, int sock)
 {
     c->sock = sock;
     c->bufstart = c->bufend = 0;
 }
 
+
+#define STATE_TYPE 0
+#define STATE_ID1  1
+#define STATE_ID2  2
+#define STATE_END  100
+
 rsim_msg_t *rsimMsgReaderNext(rsim_msg_reader_t *r)
 {
     ssize_t readsize;
     uint16_t id;
     char type;
-    rsim_msg_t *msg = NULL;
-    int state; // 0 - id1, 1 - id2, 2 - type, 100 - end
+    rsim_msg_t *msg;
+    rsim_msg_init_t *msg_init;
+    int state;
 
     DBG("%d %d", (int)r->bufstart, (int)r->bufend);
 
-    state = 0;
-    while (r->bufstart == r->bufend && state != 100){
+    state = STATE_TYPE;
+    while (r->bufstart == r->bufend && state != STATE_END){
         readsize = read(r->sock, r->buf, RSIM_BUFSIZE);
         DBG("readsize: %d", (int)readsize);
         if (readsize < 0){
@@ -56,18 +103,24 @@ rsim_msg_t *rsimMsgReaderNext(rsim_msg_reader_t *r)
         r->bufstart = r->buf;
         r->bufend = r->buf + readsize;
 
-        while (r->bufstart != r->bufend && state != 100){
+        while (r->bufstart != r->bufend && state != STATE_END){
             DBG("state: %d", state);
-            if (state == 0){
+            if (state == STATE_TYPE){
+                type = *r->bufstart;
+
+                if (type == RSIM_MSG_INIT){
+                    state = STATE_ID1;
+                }else{
+                    state = STATE_END;
+                }
+            }else if (state == STATE_ID1){
+                state = 100;
                 ((char *)&id)[0] = *r->bufstart;
-                state = 1;
-            }else if (state == 1){
+                state = STATE_ID2;
+            }else if (state == STATE_ID2){
                 ((char *)&id)[1] = *r->bufstart;
                 id = ntohs(id);
-                state = 2;
-            }else if (state == 2){
-                type = *r->bufstart;
-                state = 100;
+                state = STATE_END;
             }
 
             r->bufstart++;
@@ -75,11 +128,17 @@ rsim_msg_t *rsimMsgReaderNext(rsim_msg_reader_t *r)
     }
     DBG2("");
 
-    msg = SIM_ALLOC(rsim_msg_t);
-    msg->id = id;
-    msg->type = type;
-
-    return msg;
+    if (type == RSIM_MSG_INIT){
+        msg_init = SIM_ALLOC(rsim_msg_init_t);
+        msg_init->type = type;
+        msg_init->id = id;
+        fprintf(stderr, "type: %d, id: %d\n", (int)type, (int)id);
+        return (rsim_msg_t *)msg_init;
+    }else{
+        msg = SIM_ALLOC(rsim_msg_t);
+        msg->type = type;
+        return msg;
+    }
 }
 
 int rsimMsgSend(rsim_msg_t *msg, int sock)
@@ -87,16 +146,18 @@ int rsimMsgSend(rsim_msg_t *msg, int sock)
     ssize_t writesize;
     uint16_t id;
 
-    // write id
-    id = htons(msg->id);
-    writesize = write(sock, &id, sizeof(id));
-    if (writesize != sizeof(id))
-        return -1;
-
     // write type
     writesize = write(sock, &msg->type, 1);
     if (writesize != 1)
         return -1;
+
+    if (msg->type == RSIM_MSG_INIT){
+        // write id
+        id = htons(((rsim_msg_init_t *)msg)->id);
+        writesize = write(sock, &id, sizeof(id));
+        if (writesize != sizeof(id))
+            return -1;
+    }
 
     return 0;
 }
@@ -107,7 +168,7 @@ int rsimMsgSend(rsim_msg_t *msg, int sock)
 int rsimClientConnect(rsim_client_t *c, const char *addr, uint16_t port, uint16_t id)
 {
     int res;
-    rsim_msg_t msg, *response;
+    rsim_msg_t *response;
 
     c->id = id;
 
@@ -141,10 +202,7 @@ int rsimClientConnect(rsim_client_t *c, const char *addr, uint16_t port, uint16_
     rsimMsgReaderInit(&c->reader, c->sock);
 
     // Login to serverj
-    msg.id = c->id;
-    msg.type = RSIM_MSG_INIT;
-    res = rsimClientSendMsg(c, &msg);
-    if (res != 0){
+    if (rsimMsgSendInit(c->sock, c->id) != 0){
         fprintf(stderr, "Unable to send initial message.\n");
         close(c->sock);
         return -1;
@@ -161,13 +219,13 @@ int rsimClientConnect(rsim_client_t *c, const char *addr, uint16_t port, uint16_
         close(c->sock);
         return -1;
     }
-    if (response->id != c->id){
+    if (((rsim_msg_init_t *)response)->id != c->id){
         fprintf(stderr, "Robot with id `%d' is already in use.\n", c->id);
         close(c->sock);
         return -1;
     }
 
-    DBG("response id: %d, type: %d", (int)response->id, (int)response->type);
+    DBG("response id: %d, type: %d", (int)((rsim_msg_init_t *)response)->id, (int)response->type);
     free(response);
 
     return 0;
