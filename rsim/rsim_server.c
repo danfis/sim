@@ -51,6 +51,7 @@ struct _rsim_session_t {
 };
 typedef struct _rsim_session_t rsim_session_t;
 
+static void *rsimServerTh(void *_s);
 static void rsimServerDelDeadSessions(rsim_server_t *s);
 static int rsimServerCBIsOccupied(rsim_server_t *s, uint16_t id);
 static int rsimServerCBIsRegistered(rsim_server_t *s, uint16_t id);
@@ -80,12 +81,22 @@ void rsimServerDel(rsim_server_t *s)
 {
     sim_list_t *item;
     rsim_session_t *sess;
+    rsim_session_cb_t *cb;
+
+    rsimServerStop(s);
 
     pthread_mutex_lock(&s->lock);
     while (!simListEmpty(&s->sessions)){
         item = simListNext(&s->sessions);
         sess = simListEntry(item, rsim_session_t, list);
         rsimSessionDel(s, sess);
+    }
+
+    while (!simListEmpty(&s->callbacks)){
+        item = simListNext(&s->callbacks);
+        cb = simListEntry(item, rsim_session_cb_t, list);
+        simListDel(item);
+        free(cb);
     }
     pthread_mutex_unlock(&s->lock);
 
@@ -99,10 +110,6 @@ void rsimServerDel(rsim_server_t *s)
 
 int rsimServerStart(rsim_server_t *s, int port)
 {
-    size_t addrsize;
-    int connfd;
-    rsim_session_t *sess;
-
     // create tcp socket
     s->sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
@@ -130,28 +137,15 @@ int rsimServerStart(rsim_server_t *s, int port)
         s->sock = -1;
     }
 
-    for(;;){
-        addrsize = sizeof(s->addr);
-        connfd = accept(s->sock, (struct sockaddr *)&s->addr, &addrsize);
+    pthread_create(&s->th, NULL, rsimServerTh, (void *)s);
 
-        if(connfd < 0){
-            perror("error accept failed");
-            continue;
-        }
+    return 0;
+}
 
-        DBG("New connection %d", connfd);
-
-        sess = rsimSessionNew(s, connfd);
-
-        pthread_mutex_lock(&s->lock);
-        simListAppend(&s->sessions, &sess->list);
-        pthread_mutex_unlock(&s->lock);
-
-        rsimSessionStart(sess);
-
-        rsimServerDelDeadSessions(s);
-    }
-
+int rsimServerStop(rsim_server_t *s)
+{
+    pthread_cancel(s->th);
+    pthread_join(s->th, NULL);
     close(s->sock);
     s->sock = -1;
 
@@ -178,6 +172,38 @@ int rsimServerRegister(rsim_server_t *s, uint16_t id, rsim_session_cb cb,
     pthread_mutex_unlock(&s->lock);
 
     return 0;
+}
+
+static void *rsimServerTh(void *_s)
+{
+    rsim_server_t *s = (rsim_server_t *)_s;
+    int connfd;
+    size_t addrsize;
+    rsim_session_t *sess;
+
+    for(;;){
+        addrsize = sizeof(s->addr);
+        connfd = accept(s->sock, (struct sockaddr *)&s->addr, &addrsize);
+
+        if(connfd < 0){
+            perror("error accept failed");
+            continue;
+        }
+
+        DBG("New connection %d", connfd);
+
+        sess = rsimSessionNew(s, connfd);
+
+        pthread_mutex_lock(&s->lock);
+        simListAppend(&s->sessions, &sess->list);
+        pthread_mutex_unlock(&s->lock);
+
+        rsimSessionStart(sess);
+
+        rsimServerDelDeadSessions(s);
+    }
+
+    return NULL;
 }
 
 static int rsimServerCBIsOccupied(rsim_server_t *s, uint16_t id)
@@ -323,6 +349,8 @@ static void *rsimSessionTh(void *_sess)
     sess->id = msg_init->id;
     sess->cb = cb;
     rsimMsgSendInit(sess->sock, sess->id);
+
+    free(msg);
 
     while ((msg = rsimMsgReaderNext(&sess->reader)) != NULL){
         sess->cb->cb(msg, sess->sock, sess->cb->data);

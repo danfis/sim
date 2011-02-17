@@ -34,6 +34,8 @@ struct _rsim_server_t {
     struct sockaddr_in addr; /*!< Address of server */
     int sock;                /*!< Socket for reading tcp connections */
 
+    pthread_t th;
+
     pthread_mutex_t lock;
     sim_list_t sessions;
     sim_list_t sessions_del;
@@ -44,6 +46,7 @@ typedef struct _rsim_server_t rsim_server_t;
 rsim_server_t *rsimServerNew(void);
 void rsimServerDel(rsim_server_t *);
 int rsimServerStart(rsim_server_t *, int port);
+int rsimServerStop(rsim_server_t *s);
 
 int rsimServerRegister(rsim_server_t *s, uint16_t id, rsim_session_cb cb,
                        void *data);

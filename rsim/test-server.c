@@ -10,6 +10,8 @@ int main(int argc, char *argv[])
     s = rsimServerNew();
     rsimServerRegister(s, 1, cb1, NULL);
     rsimServerStart(s, 9876);
+
+    sleep(10);
     rsimServerDel(s);
 
     return 0;
