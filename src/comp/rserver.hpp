@@ -36,18 +36,68 @@ namespace comp {
 class RServer;
 
 class RMessage : public sim::Message {
-    SIM_MESSAGE_INIT2(10, 0)
-
   private:
     uint16_t _id;
     char _type;
 
   public:
-    RMessage(uint16_t id, char type) : Message(Message::PRIO_HIGHEST), _id(id), _type(type) {}
+    RMessage(uint16_t id, char type)
+        : Message(Message::PRIO_HIGHEST), _id(id), _type(type) {}
 
     uint16_t msgID() const { return _id; }
     char msgType() const { return _type; }
+
+    // Note that this must be synchronized with /rsim/rsim.h!!
+    enum {
+        MSG_PING = 1,
+        MSG_PONG = 2
+    };
 };
+
+class RMessageIn : public RMessage {
+    SIM_MESSAGE_INIT2(1, 100)
+  public:
+    RMessageIn(uint16_t id, char type)
+        : RMessage(id, type) {}
+};
+
+class RMessageInPing : public RMessageIn {
+    SIM_MESSAGE_INIT2(1, 101)
+  public:
+    RMessageInPing(uint16_t id)
+        : RMessageIn(id, RMessage::MSG_PING) {}
+};
+
+class RMessageInPong : public RMessageIn {
+    SIM_MESSAGE_INIT2(1, 102)
+  public:
+    RMessageInPong(uint16_t id)
+        : RMessageIn(id, RMessage::MSG_PONG) {}
+};
+
+
+
+class RMessageOut : public RMessage {
+    SIM_MESSAGE_INIT2(1, 0)
+  public:
+    RMessageOut(uint16_t id, char type)
+        : RMessage(id, type) {}
+};
+
+class RMessageOutPing : public RMessageOut {
+    SIM_MESSAGE_INIT2(1, 1)
+  public:
+    RMessageOutPing(uint16_t id)
+        : RMessageOut(id, RMessage::MSG_PING) {}
+};
+
+class RMessageOutPong : public RMessageOut {
+    SIM_MESSAGE_INIT2(1, 2)
+  public:
+    RMessageOutPong(uint16_t id)
+        : RMessageOut(id, RMessage::MSG_PONG) {}
+};
+
 
 class RServerSession {
   protected:
@@ -62,6 +112,9 @@ class RServerSession {
     ~RServerSession();
 
     void run();
+    void cancel();
+
+    void sendMessage(const RMessageOut &msg);
 
   private:
     static void *thread(void *);
@@ -97,6 +150,7 @@ class RServer : public sim::Component {
     virtual void init(Sim *sim);
     virtual void finish();
     virtual void cbPreStep();
+    virtual void processMessage(const sim::Message &msg);
 
     void __addSessionToJoin(RServerSession *sess);
     void __addMessage(RMessage *msg);
@@ -107,6 +161,8 @@ class RServer : public sim::Component {
     void _joinSessions();
 
     void _addSession(int sock);
+
+    void _sendRMessage(const RMessageOut &msg);
 };
 
 } /* namespace comp */

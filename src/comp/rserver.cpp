@@ -45,8 +45,15 @@ void *RServerSession::thread(void *_s)
         if (s->_readType(&type) != 0)
             break;
 
-        s->_server->__addMessage(new RMessage(id, type));
-        DBG("id: " << id << " type: " << type);
+        DBG("id: " << id << " type: " << (int)type);
+
+        if (type == RMessage::MSG_PING){
+            s->_server->__addMessage(new RMessageInPing(id));
+        }else if (type == RMessage::MSG_PONG){
+            s->_server->__addMessage(new RMessageInPong(id));
+        }else{
+            s->_server->__addMessage(new RMessageIn(id, type));
+        }
     }
 
 
@@ -62,7 +69,9 @@ RServerSession::RServerSession(RServer *s, int sock)
 
 RServerSession::~RServerSession()
 {
+    DBG(this);
     pthread_join(_th, NULL);
+    shutdown(_sock, SHUT_RDWR);
     close(_sock);
 }
 
@@ -71,6 +80,24 @@ void RServerSession::run()
     pthread_create(&_th, NULL, thread, (void *)this);
 }
 
+void RServerSession::cancel()
+{
+    DBG(this);
+    pthread_cancel(_th);
+}
+
+void RServerSession::sendMessage(const RMessageOut &msg)
+{
+    uint16_t id;
+    char type;
+
+    id = msg.msgID();
+    id = htons(id);
+    type = msg.msgType();
+
+    write(_sock, (void *)&id, sizeof(uint16_t));
+    write(_sock, (void *)&type, sizeof(char));
+}
 
 int RServerSession::_readByte(char *b)
 {
@@ -119,7 +146,6 @@ RServer::RServer(const char *addr, uint16_t port)
 {
     pthread_mutex_init(&_lock_sess, NULL);
     pthread_mutex_init(&_lock_to_join, NULL);
-    DBG("");
 }
 
 RServer::~RServer()
@@ -146,7 +172,7 @@ void RServer::init(Sim *sim)
     addr.sin_addr.s_addr = INADDR_ANY; // TODO
 
     if(bind(_sock,(struct sockaddr *)&addr, sizeof(addr)) < 0){
-        ERR("RServer: Can't bind address");
+        perror("RServer: ");
         close(_sock);
         _sock = -1;
         return;
@@ -160,14 +186,37 @@ void RServer::init(Sim *sim)
     }
 
     sim->regPreStep(this);
+    sim->regMessage(this, RMessageOut::Type);
+    sim->regMessage(this, RMessageOutPing::Type);
+    sim->regMessage(this, RMessageOutPong::Type);
     _sim = sim;
 }
 
 void RServer::finish()
 {
-    DBG(_sock);
-    if (_sock > 0)
+    std::list<RServerSession *>::iterator it, it_end;
+
+    DBG("");
+
+    pthread_mutex_lock(&_lock_sess);
+    pthread_mutex_lock(&_lock_to_join);
+    it = _sessions.begin();
+    it_end = _sessions.end();
+    for (; it != it_end; ++it){
+        DBG(*it);
+        (*it)->cancel();
+        _sessions_to_join.push_back(*it);
+    }
+    _sessions.clear();
+    pthread_mutex_unlock(&_lock_to_join);
+    pthread_mutex_unlock(&_lock_sess);
+
+    _joinSessions();
+
+    if (_sock > 0){
+        shutdown(_sock, SHUT_RDWR);
         close(_sock);
+    }
 }
 
 void RServer::cbPreStep()
@@ -182,6 +231,17 @@ void RServer::cbPreStep()
     _joinSessions();
 }
 
+void RServer::processMessage(const sim::Message &msg)
+{
+    RMessageOut *omsg;
+
+    if (msg.type() == RMessageOut::Type
+            || msg.type() == RMessageOutPing::Type
+            || msg.type() == RMessageOutPong::Type){
+        omsg = (RMessageOut *)&msg;
+        _sendRMessage((const RMessageOut &)msg);
+    }
+}
 
 void RServer::_newConnections()
 {
@@ -217,7 +277,8 @@ void RServer::_deliverMsgs()
 
     it = _msgs_to_deliver.begin();
     it_end = _msgs_to_deliver.end();
-    for (; it != it_end; ++it_end){
+    for (; it != it_end; ++it){
+        DBG("");
         _sim->sendMessage(*it);
     }
     _msgs_to_deliver.clear();
@@ -233,7 +294,7 @@ void RServer::_joinSessions()
 
     it = _sessions_to_join.begin();
     it_end = _sessions_to_join.end();
-    for (; it != it_end; ++it_end){
+    for (; it != it_end; ++it){
         DBG(*it);
         delete *it;
     }
@@ -262,7 +323,10 @@ void RServer::__addSessionToJoin(RServerSession *sess)
     pthread_mutex_unlock(&_lock_sess);
 
     pthread_mutex_lock(&_lock_to_join);
-    _sessions_to_join.push_back(sess);
+    if (std::find(_sessions_to_join.begin(), _sessions_to_join.end(), sess)
+            == _sessions_to_join.end()){
+        _sessions_to_join.push_back(sess);
+    }
     pthread_mutex_unlock(&_lock_to_join);
 }
 
@@ -273,6 +337,20 @@ void RServer::__addMessage(RMessage *msg)
     pthread_mutex_unlock(&_lock_msgs);
 }
 
+void RServer::_sendRMessage(const RMessageOut &msg)
+{
+    std::list<RServerSession *>::iterator it, it_end;
+
+    pthread_mutex_lock(&_lock_sess);
+
+    it = _sessions.begin();
+    it_end = _sessions.end();
+    for (; it != it_end; ++it){
+        (*it)->sendMessage(msg);
+    }
+
+    pthread_mutex_unlock(&_lock_sess);
+}
 
 }
 }

@@ -26,8 +26,8 @@ LDFLAGS += -L. -lrsim
 
 SUBTARGETS =
 
-TARGETS = librsim.a test-server test-client
-OBJS = rsim_server.o alloc.o rsim.o common.o
+TARGETS = librsim.a test-client
+OBJS = rsim.o
 
 all: $(TARGETS) $(SUBTARGETS)
 

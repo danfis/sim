@@ -39,9 +39,12 @@ class SSSA;
 SSSA *active = 0;
 
 class SSSA : public sim::comp::SSSA {
+    uint16_t _id;
+    sim::Sim *_sim;
+
   public:
-    SSSA(const Vec3 &pos, const Quat &rot = Quat(0., 0., 0., 1.))
-        : sim::comp::SSSA(pos, rot)
+    SSSA(uint16_t id, const Vec3 &pos, const Quat &rot = Quat(0., 0., 0., 1.))
+        : sim::comp::SSSA(pos, rot), _id(id)
     {
     }
 
@@ -49,13 +52,25 @@ class SSSA : public sim::comp::SSSA {
     {
         sim::comp::SSSA::init(sim);
         sim->regMessage(this, sim::MessageKeyPressed::Type);
+        DBG("");
+        sim->regMessage(this, sim::comp::RMessageInPing::Type);
+
+        _sim = sim;
     }
 
     void processMessage(const sim::Message &msg)
     {
+        sim::comp::RMessageIn *rmsg;
+
         if (msg.type() == sim::MessageKeyPressed::Type){
             if (active == this)
                 _keyPressedMsg((const sim::MessageKeyPressed &)msg);
+        }else if (msg.type() == sim::comp::RMessageInPing::Type){
+            rmsg = (sim::comp::RMessageIn *)&msg;
+            if (rmsg->msgID() == _id){
+                _sim->sendMessage(new sim::comp::RMessageOutPong(rmsg->msgID()));
+                DBG("ID: " << rmsg->msgID() << ", type: " << (int)rmsg->msgType());
+            }
         }
     }
 
@@ -132,12 +147,12 @@ class RobotsManager : public sim::Component {
 
         sim->regMessage(this, sim::MessageKeyPressed::Type);
 
-        sim->regMessage(this, sim::comp::RMessage::Type);
+        sim->regMessage(this, sim::comp::RMessageIn::Type);
     }
 
     void processMessage(const sim::Message &msg)
     {
-        sim::comp::RMessage *rmsg;
+        sim::comp::RMessageIn *rmsg;
 
         DBG("type: " << msg.type());
         if (msg.type() == sim::MessageKeyPressed::Type){
@@ -147,8 +162,8 @@ class RobotsManager : public sim::Component {
             }else if (m.key() == 'i'){
                 _activateRobot(active_id - 1);
             }
-        }else if (msg.type() == sim::comp::RMessage::Type){
-            rmsg = (sim::comp::RMessage *)&msg;
+        }else if (msg.type() == sim::comp::RMessageIn::Type){
+            rmsg = (sim::comp::RMessageIn *)&msg;
             DBG("ID: " << rmsg->msgID() << ", type: " << (int)rmsg->msgType());
         }
     }
@@ -279,16 +294,16 @@ class S : public sim::Sim {
     {
         SSSA *rob;
 
-        rob = new SSSA(Vec3(2., 2., .6));
+        rob = new SSSA(10, Vec3(2., 2., .6));
         addComponent(rob);
 
-        rob = new SSSA(Vec3(.746, 2., .6));
+        rob = new SSSA(11, Vec3(.746, 2., .6));
         addComponent(rob);
 
-        rob = new SSSA(Vec3(2., 3.254, .6), Quat(Vec3(0., 0., 1.), M_PI / 2.));
+        rob = new SSSA(12, Vec3(2., 3.254, .6), Quat(Vec3(0., 0., 1.), M_PI / 2.));
         addComponent(rob);
 
-        rob = new SSSA(Vec3(2., 0.746, .6), Quat(Vec3(0., 0., 1.), -M_PI / 2.));
+        rob = new SSSA(13, Vec3(2., 0.746, .6), Quat(Vec3(0., 0., 1.), -M_PI / 2.));
         addComponent(rob);
 
         // and as last add component which will connect all robots

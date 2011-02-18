@@ -1,6 +1,6 @@
 /***
  * sim
- * ---------------------------------
+ * ----
  * Copyright (c)2011 Daniel Fiser <danfis@danfis.cz>
  *
  *  This file is part of sim.
@@ -21,18 +21,19 @@
 
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <arpa/inet.h>
 #include "rsim.h"
-#include "common.h"
-#include "alloc.h"
-#include "dbg.h"
 
-int rsimConnect(rsim_t *c, const char *addr, uint16_t port, uint16_t id)
+static int rsimReadByte(rsim_t *c, char *b);
+static int rsimReadID(rsim_t *c, uint16_t *id);
+static int rsimReadType(rsim_t *c, char *type);
+
+int rsimConnect(rsim_t *c, const char *ipaddr, uint16_t port)
 {
+    struct sockaddr_in addr;
     int res;
-    const rsim_msg_t *response;
-
-    c->id = id;
 
     c->sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (c->sock < 0){
@@ -40,11 +41,11 @@ int rsimConnect(rsim_t *c, const char *addr, uint16_t port, uint16_t id)
         return -1;
     }
 
-    memset(&c->addr, 0, sizeof(c->addr));
+    memset(&addr, 0, sizeof(addr));
 
-    c->addr.sin_family = AF_INET;
-    c->addr.sin_port = htons(port);
-    res = inet_pton(AF_INET, addr, &c->addr.sin_addr);
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    res = inet_pton(AF_INET, ipaddr, &addr.sin_addr);
     if (res < 0){
         perror("error: first parameter is not a valid address family");
         close(c->sock);
@@ -55,55 +56,116 @@ int rsimConnect(rsim_t *c, const char *addr, uint16_t port, uint16_t id)
         return -1;
     }
 
-    if (connect(c->sock, (struct sockaddr *)&c->addr, sizeof(c->addr)) < 0){
+    if (connect(c->sock, (struct sockaddr *)&addr, sizeof(addr)) < 0){
         perror("connect failed");
         close(c->sock);
         return -1;
     }
 
-    rsimMsgReaderInit(&c->reader, c->sock);
-
-    // Login to serverj
-    if (rsimMsgSendInit(c->sock, c->id) != 0){
-        fprintf(stderr, "Unable to send initial message.\n");
-        close(c->sock);
-        return -1;
-    }
-
-    response = rsimMsgReaderNext(&c->reader);
-    if (!response){
-        fprintf(stderr, "Server is not responding.\n");
-        close(c->sock);
-        return -1;
-    }
-    if (response->type != RSIM_MSG_INIT){
-        fprintf(stderr, "Invalid response from server.\n");
-        close(c->sock);
-        return -1;
-    }
-    if (((rsim_msg_init_t *)response)->id != c->id){
-        fprintf(stderr, "Robot with id `%d' is already in use.\n", c->id);
-        close(c->sock);
-        return -1;
-    }
-
-    DBG("response id: %d, type: %d", (int)((rsim_msg_init_t *)response)->id, (int)response->type);
+    c->bufstart = c->bufend = 0;
+    c->msg = NULL;
 
     return 0;
 }
 
 void rsimClose(rsim_t *c)
 {
-    rsimMsgReaderDestroy(&c->reader);
+    if (c->msg)
+        free(c->msg);
     close(c->sock);
+}
+
+int rsimHaveMsg(rsim_t *c)
+{
+    fd_set fds;
+    int ready, maxfd;
+    struct timeval timeout;
+
+    FD_ZERO(&fds);
+    FD_SET(c->sock, &fds);
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 1;
+
+
+    maxfd = c->sock + 1;
+    ready = select(maxfd, &fds, NULL, NULL, &timeout);
+    return ready > 0;
 }
 
 const rsim_msg_t *rsimNextMsg(rsim_t *c)
 {
-    return rsimMsgReaderNext(&c->reader);
+    uint16_t id;
+    char type;
+
+    // first read ID
+    if (rsimReadID(c, &id) != 0)
+        return NULL;
+
+    // then type
+    if (rsimReadType(c, &type) != 0)
+        return NULL;
+
+
+    if (c->msg)
+        free(c->msg);
+    c->msg = (rsim_msg_t *)malloc(sizeof(rsim_msg_t));
+    c->msg->id   = id;
+    c->msg->type = type;
+
+    return c->msg;
 }
 
-int rsimSendPing(rsim_t *r)
+int rsimSendSimple(rsim_t *c, uint16_t id, char type)
 {
-    return rsimMsgSendPing(r->sock);
+    ssize_t size;
+
+    id = htons(id);
+    size = write(c->sock, (void *)&id, sizeof(uint16_t));
+    if (size != sizeof(uint16_t))
+        return -1;
+
+    size = write(c->sock, (void *)&type, sizeof(char));
+    if (size != sizeof(char))
+        return -1;
+
+    return 0;
 }
+
+
+static int rsimReadByte(rsim_t *c, char *b)
+{
+    ssize_t readsize;
+
+    if (c->bufstart == c->bufend){
+        readsize = read(c->sock, c->buf, RSIM_BUFSIZE);
+        if (readsize <= 0)
+            return -1;
+
+        c->bufstart = c->buf;
+        c->bufend = c->buf + readsize;
+    }
+
+    *b = *c->bufstart;
+    c->bufstart++;
+
+    return 0;
+}
+
+static int rsimReadID(rsim_t *c, uint16_t *id)
+{
+    char *cid = (char *)id;
+
+    if (rsimReadByte(c, cid + 0) != 0)
+        return -1;
+    if (rsimReadByte(c, cid + 1) != 0)
+        return -1;
+
+    *id = ntohs(*id);
+    return 0;
+}
+
+static int rsimReadType(rsim_t *c, char *type)
+{
+    return rsimReadByte(c, type);
+}
+

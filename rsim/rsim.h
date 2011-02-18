@@ -25,37 +25,26 @@
 #include <stdint.h>
 #include <netinet/in.h>
 
-#define sim_packed __attribute__ ((packed))
-
 #define RSIM_BUFSIZE 4096
 //#define RSIM_BUFSIZE 1
 
-#define RSIM_MSG_INIT 1
-#define RSIM_MSG_PING 10
-#define RSIM_MSG_PONG 11
+#define RSIM_MSG_PING 1
+#define RSIM_MSG_PONG 2
 
 struct _rsim_msg_t {
+    uint16_t id;
     char type;
-} sim_packed;
+};
 typedef struct _rsim_msg_t rsim_msg_t;
 
 
 
-struct _rsim_msg_reader_t {
+struct _rsim_t {
     int sock;
+
     char buf[RSIM_BUFSIZE];
     char *bufstart, *bufend;
     rsim_msg_t *msg;
-};
-typedef struct _rsim_msg_reader_t rsim_msg_reader_t;
-
-
-struct _rsim_t {
-    uint16_t id;
-    struct sockaddr_in addr; /*!< Address of server */
-    int sock;
-
-    rsim_msg_reader_t reader;
 };
 typedef struct _rsim_t rsim_t;
 
@@ -64,7 +53,7 @@ typedef struct _rsim_t rsim_t;
  * Returns 0 on success, -1 if server is not reachable or other client is
  * already registered to specified robot.
  */
-int rsimConnect(rsim_t *, const char *addr, uint16_t port, uint16_t id);
+int rsimConnect(rsim_t *, const char *addr, uint16_t port);
 
 /**
  * Close previously established connection to server.
@@ -72,15 +61,22 @@ int rsimConnect(rsim_t *, const char *addr, uint16_t port, uint16_t id);
 void rsimClose(rsim_t *);
 
 /**
+ * Returns true if there are some pending data.
+ */
+int rsimHaveMsg(rsim_t *);
+
+/**
  * Returns next message sent from server.
  * This is blocking call.
+ * Returns NULL if connection failed or was closed or some invalid data
+ * were read.
  */
 const rsim_msg_t *rsimNextMsg(rsim_t *);
 
 
 /**
- * Sends ping message to server.
+ * Sends simple message.
  */
-int rsimSendPing(rsim_t *);
+int rsimSendSimple(rsim_t *, uint16_t id, char type);
 
 #endif /* _SIM_RSIM_H_ */
