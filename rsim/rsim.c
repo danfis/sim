@@ -29,6 +29,9 @@
 static int rsimReadByte(rsim_t *c, char *b);
 static int rsimReadID(rsim_t *c, uint16_t *id);
 static int rsimReadType(rsim_t *c, char *type);
+static int rsimReadFloat(rsim_t *c, float *f);
+
+static int rsimWriteFloat(rsim_t *c, float f);
 
 int rsimConnect(rsim_t *c, const char *ipaddr, uint16_t port)
 {
@@ -96,6 +99,13 @@ const rsim_msg_t *rsimNextMsg(rsim_t *c)
 {
     uint16_t id;
     char type;
+    rsim_msg_float3_t *msgf3;
+    rsim_msg_float4_t *msgf4;
+
+    if (c->msg){
+        free(c->msg);
+        c->msg = NULL;
+    }
 
     // first read ID
     if (rsimReadID(c, &id) != 0)
@@ -105,10 +115,36 @@ const rsim_msg_t *rsimNextMsg(rsim_t *c)
     if (rsimReadType(c, &type) != 0)
         return NULL;
 
+    if (type == RSIM_MSG_POS){
+        msgf3 = (rsim_msg_float3_t *)malloc(sizeof(rsim_msg_float3_t));
 
-    if (c->msg)
-        free(c->msg);
-    c->msg = (rsim_msg_t *)malloc(sizeof(rsim_msg_t));
+        if (rsimReadFloat(c, msgf3->f + 0) != 0)
+            return NULL;
+        if (rsimReadFloat(c, msgf3->f + 1) != 0)
+            return NULL;
+        if (rsimReadFloat(c, msgf3->f + 2) != 0)
+            return NULL;
+
+        c->msg = (rsim_msg_t *)msgf3;
+
+    }else if (type == RSIM_MSG_ROT){
+        msgf4 = (rsim_msg_float4_t *)malloc(sizeof(rsim_msg_float4_t));
+
+        if (rsimReadFloat(c, msgf4->f + 0) != 0)
+            return NULL;
+        if (rsimReadFloat(c, msgf4->f + 1) != 0)
+            return NULL;
+        if (rsimReadFloat(c, msgf4->f + 2) != 0)
+            return NULL;
+        if (rsimReadFloat(c, msgf4->f + 3) != 0)
+            return NULL;
+
+        c->msg = (rsim_msg_t *)msgf4;
+
+    }else{
+        c->msg = (rsim_msg_t *)malloc(sizeof(rsim_msg_t));
+    }
+
     c->msg->id   = id;
     c->msg->type = type;
 
@@ -129,6 +165,13 @@ int rsimSendSimple(rsim_t *c, uint16_t id, char type)
         return -1;
 
     return 0;
+}
+
+int rsimSendFloat(rsim_t *c, uint16_t id, char type, float f)
+{
+    if (rsimSendSimple(c, id, type) != 0)
+        return -1;
+    return rsimWriteFloat(c, f);
 }
 
 
@@ -169,3 +212,47 @@ static int rsimReadType(rsim_t *c, char *type)
     return rsimReadByte(c, type);
 }
 
+static int rsimReadFloat(rsim_t *r, float *f)
+{
+    uint32_t i;
+    char *c, *cf;
+
+    c = (char *)&i;
+    if (rsimReadByte(r, c + 0) != 0)
+        return -1;
+    if (rsimReadByte(r, c + 1) != 0)
+        return -1;
+    if (rsimReadByte(r, c + 2) != 0)
+        return -1;
+    if (rsimReadByte(r, c + 3) != 0)
+        return -1;
+
+    i = ntohl(i);
+    cf = (char *)f;
+    cf[0] = c[0];
+    cf[1] = c[1];
+    cf[2] = c[2];
+    cf[3] = c[3];
+
+    return 0;
+}
+
+static int rsimWriteFloat(rsim_t *r, float f)
+{
+    ssize_t size;
+    uint32_t i;
+    char *c, *cf;
+
+    cf = (char *)&f;
+    c  = (char *)&i;
+    c[0] = cf[0];
+    c[1] = cf[1];
+    c[2] = cf[2];
+    c[3] = cf[3];
+    i = htonl(i);
+
+    size = write(r->sock, (void *)&i, 4);
+    if (size != 4)
+        return -1;
+    return 0;
+}

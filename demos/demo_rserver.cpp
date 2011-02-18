@@ -54,23 +54,50 @@ class SSSA : public sim::comp::SSSA {
         sim->regMessage(this, sim::MessageKeyPressed::Type);
         DBG("");
         sim->regMessage(this, sim::comp::RMessageInPing::Type);
+        sim->regMessage(this, sim::comp::RMessageInGetPos::Type);
+        sim->regMessage(this, sim::comp::RMessageInGetRot::Type);
+        sim->regMessage(this, sim::comp::RMessageInSetVelLeft::Type);
+        sim->regMessage(this, sim::comp::RMessageInSetVelRight::Type);
 
         _sim = sim;
     }
 
     void processMessage(const sim::Message &msg)
     {
-        sim::comp::RMessageIn *rmsg;
+        float vel;
+        const sim::comp::RMessageIn *rmsg;
 
-        if (msg.type() == sim::MessageKeyPressed::Type){
+        rmsg = dynamic_cast<const sim::comp::RMessageIn *>(&msg);
+        if (rmsg && rmsg->msgID() == _id){
+            DBG("ID: " << rmsg->msgID() << ", type: " << (int)rmsg->msgType());
+
+            if (rmsg->type() == sim::comp::RMessageInPing::Type){
+                _sim->sendMessage(new sim::comp::RMessageOutPong(rmsg->msgID()));
+
+            }else if (rmsg->type() == sim::comp::RMessageInGetPos::Type){
+                const sim::Vec3 &pos = robot()->pos();
+                DBG("  -- GetPos: " << pos.x() << " " << pos.y() << " " << pos.z());
+                _sim->sendMessage(new sim::comp::RMessageOutPos(_id, pos));
+
+            }else if (rmsg->type() == sim::comp::RMessageInGetRot::Type){
+                const sim::Quat &rot = robot()->rot();
+                DBG("  -- GetRot: " << rot.x() << " " << rot.y() << " " << rot.z() << " " << rot.w());
+                _sim->sendMessage(new sim::comp::RMessageOutRot(_id, rot));
+
+            }else if (rmsg->type() == sim::comp::RMessageInSetVelLeft::Type){
+                vel = ((sim::comp::RMessageInSetVelLeft *)rmsg)->msgVel();
+                DBG("  -- SetVelLeft: " << vel);
+                robot()->setVelLeft(vel);
+
+            }else if (rmsg->type() == sim::comp::RMessageInSetVelRight::Type){
+                vel = ((sim::comp::RMessageInSetVelRight *)rmsg)->msgVel();
+                DBG("  -- SetVelRight: " << vel);
+                robot()->setVelRight(vel);
+            }
+
+        }else if (msg.type() == sim::MessageKeyPressed::Type){
             if (active == this)
                 _keyPressedMsg((const sim::MessageKeyPressed &)msg);
-        }else if (msg.type() == sim::comp::RMessageInPing::Type){
-            rmsg = (sim::comp::RMessageIn *)&msg;
-            if (rmsg->msgID() == _id){
-                _sim->sendMessage(new sim::comp::RMessageOutPong(rmsg->msgID()));
-                DBG("ID: " << rmsg->msgID() << ", type: " << (int)rmsg->msgType());
-            }
         }
     }
 

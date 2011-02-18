@@ -35,6 +35,7 @@ void *RServerSession::thread(void *_s)
     RServerSession *s = (RServerSession *)_s;
     uint16_t id;
     char type;
+    float f;
 
     while (true){
         // first read ID
@@ -49,8 +50,26 @@ void *RServerSession::thread(void *_s)
 
         if (type == RMessage::MSG_PING){
             s->_server->__addMessage(new RMessageInPing(id));
+
         }else if (type == RMessage::MSG_PONG){
             s->_server->__addMessage(new RMessageInPong(id));
+
+        }else if (type == RMessage::MSG_GET_POS){
+            s->_server->__addMessage(new RMessageInGetPos(id));
+
+        }else if (type == RMessage::MSG_GET_ROT){
+            s->_server->__addMessage(new RMessageInGetRot(id));
+
+        }else if (type == RMessage::MSG_SET_VEL_LEFT){
+            if (s->_readFloat(&f) != 0)
+                break;
+            s->_server->__addMessage(new RMessageInSetVelLeft(id, f));
+
+        }else if (type == RMessage::MSG_SET_VEL_RIGHT){
+            if (s->_readFloat(&f) != 0)
+                break;
+            s->_server->__addMessage(new RMessageInSetVelRight(id, f));
+
         }else{
             s->_server->__addMessage(new RMessageIn(id, type));
         }
@@ -88,15 +107,22 @@ void RServerSession::cancel()
 
 void RServerSession::sendMessage(const RMessageOut &msg)
 {
-    uint16_t id;
-    char type;
+    _writeID(msg.msgID());
+    _writeType(msg.msgType());
 
-    id = msg.msgID();
-    id = htons(id);
-    type = msg.msgType();
+    if (msg.type() == RMessageOutPos::Type){
+        const sim::Vec3 &v = ((const RMessageOutPos *)&msg)->pos();
+        _writeFloat(v.x());
+        _writeFloat(v.y());
+        _writeFloat(v.z());
 
-    write(_sock, (void *)&id, sizeof(uint16_t));
-    write(_sock, (void *)&type, sizeof(char));
+    }else if (msg.type() == RMessageOutRot::Type){
+        const sim::Quat &v = ((const RMessageOutRot *)&msg)->rot();
+        _writeFloat(v.x());
+        _writeFloat(v.y());
+        _writeFloat(v.z());
+        _writeFloat(v.w());
+    }
 }
 
 int RServerSession::_readByte(char *b)
@@ -136,6 +162,75 @@ int RServerSession::_readID(uint16_t *id)
 int RServerSession::_readType(char *type)
 {
     return _readByte(type);
+}
+
+int RServerSession::_readFloat(float *f)
+{
+    uint32_t i;
+    char *c, *cf;
+
+    c = (char *)&i;
+    if (_readByte(c + 0) != 0)
+        return -1;
+    if (_readByte(c + 1) != 0)
+        return -1;
+    if (_readByte(c + 2) != 0)
+        return -1;
+    if (_readByte(c + 3) != 0)
+        return -1;
+
+    i = ntohl(i);
+    cf = (char *)f;
+    cf[0] = c[0];
+    cf[1] = c[1];
+    cf[2] = c[2];
+    cf[3] = c[3];
+
+    return 0;
+}
+
+
+int RServerSession::_writeID(uint16_t _id)
+{
+    ssize_t size;
+    uint16_t id;
+
+    id = htons(_id);
+
+    size = write(_sock, (void *)&id, sizeof(uint16_t));
+    if (size != sizeof(uint16_t))
+        return -1;
+    return 0;
+}
+
+int RServerSession::_writeType(char type)
+{
+    ssize_t size;
+
+    size = write(_sock, &type, sizeof(char));
+    if (size != 1)
+        return -1;
+    return 0;
+}
+
+int RServerSession::_writeFloat(float f)
+{
+    ssize_t size;
+    uint32_t i;
+    char *c, *cf;
+
+    cf = (char *)&f;
+    c  = (char *)&i;
+    c[0] = cf[0];
+    c[1] = cf[1];
+    c[2] = cf[2];
+    c[3] = cf[3];
+    i = htonl(i);
+
+    size = write(_sock, (void *)&i, 4);
+    if (size != 4)
+        return -1;
+    return 0;
 }
 
 
@@ -189,6 +284,8 @@ void RServer::init(Sim *sim)
     sim->regMessage(this, RMessageOut::Type);
     sim->regMessage(this, RMessageOutPing::Type);
     sim->regMessage(this, RMessageOutPong::Type);
+    sim->regMessage(this, RMessageOutPos::Type);
+    sim->regMessage(this, RMessageOutRot::Type);
     _sim = sim;
 }
 
@@ -237,7 +334,9 @@ void RServer::processMessage(const sim::Message &msg)
 
     if (msg.type() == RMessageOut::Type
             || msg.type() == RMessageOutPing::Type
-            || msg.type() == RMessageOutPong::Type){
+            || msg.type() == RMessageOutPong::Type
+            || msg.type() == RMessageOutPos::Type
+            || msg.type() == RMessageOutRot::Type){
         omsg = (RMessageOut *)&msg;
         _sendRMessage((const RMessageOut &)msg);
     }

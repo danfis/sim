@@ -25,7 +25,8 @@
 #include <string>
 #include <stdint.h>
 #include <sim/config.hpp>
-#include "sim/component.hpp"
+#include <sim/component.hpp>
+#include <sim/math.hpp>
 
 #define SIM_RSERVER_BUFSIZE 1
 
@@ -49,8 +50,14 @@ class RMessage : public sim::Message {
 
     // Note that this must be synchronized with /rsim/rsim.h!!
     enum {
-        MSG_PING = 1,
-        MSG_PONG = 2
+        MSG_PING          = 1,
+        MSG_PONG          = 2,
+        MSG_GET_POS       = 3,
+        MSG_POS           = 4,
+        MSG_GET_ROT       = 5,
+        MSG_ROT           = 6,
+        MSG_SET_VEL_LEFT  = 7,
+        MSG_SET_VEL_RIGHT = 8
     };
 };
 
@@ -75,6 +82,47 @@ class RMessageInPong : public RMessageIn {
         : RMessageIn(id, RMessage::MSG_PONG) {}
 };
 
+class RMessageInGetPos : public RMessageIn {
+    SIM_MESSAGE_INIT2(1, 103)
+  public:
+    RMessageInGetPos(uint16_t id)
+        : RMessageIn(id, RMessage::MSG_GET_POS) {}
+};
+
+class RMessageInGetRot : public RMessageIn {
+    SIM_MESSAGE_INIT2(1, 104)
+  public:
+    RMessageInGetRot(uint16_t id)
+        : RMessageIn(id, RMessage::MSG_GET_ROT) {}
+};
+
+class RMessageInSetVelLeft : public RMessageIn {
+    SIM_MESSAGE_INIT2(1, 105)
+
+  private:
+    float _vel;
+
+  public:
+    RMessageInSetVelLeft(uint16_t id, float vel)
+        : RMessageIn(id, RMessage::MSG_SET_VEL_LEFT), _vel(vel) {}
+
+    float msgVel() const { return _vel; }
+};
+
+class RMessageInSetVelRight : public RMessageIn {
+    SIM_MESSAGE_INIT2(1, 106)
+
+  private:
+    float _vel;
+
+  public:
+    RMessageInSetVelRight(uint16_t id, float vel)
+        : RMessageIn(id, RMessage::MSG_SET_VEL_RIGHT), _vel(vel) {}
+
+    float msgVel() const { return _vel; }
+};
+
+
 
 
 class RMessageOut : public RMessage {
@@ -97,6 +145,34 @@ class RMessageOutPong : public RMessageOut {
     RMessageOutPong(uint16_t id)
         : RMessageOut(id, RMessage::MSG_PONG) {}
 };
+
+class RMessageOutPos : public RMessageOut {
+    SIM_MESSAGE_INIT2(1, 3)
+
+  private:
+    sim::Vec3 _v;
+
+  public:
+    RMessageOutPos(uint16_t id, const sim::Vec3 &v)
+        : RMessageOut(id, RMessage::MSG_POS), _v(v) {}
+
+    const sim::Vec3 &pos() const { return _v; }
+};
+
+class RMessageOutRot : public RMessageOut {
+    SIM_MESSAGE_INIT2(1, 4)
+
+  private:
+    sim::Quat _q;
+
+  public:
+    RMessageOutRot(uint16_t id, const sim::Quat &q)
+        : RMessageOut(id, RMessage::MSG_ROT), _q(q) {}
+
+    const sim::Quat &rot() const { return _q; }
+};
+
+
 
 
 class RServerSession {
@@ -122,6 +198,11 @@ class RServerSession {
     int _readByte(char *c);
     int _readID(uint16_t *id);
     int _readType(char *type);
+    int _readFloat(float *f);
+
+    int _writeID(uint16_t id);
+    int _writeType(char type);
+    int _writeFloat(float f);
 };
 
 class RServer : public sim::Component {

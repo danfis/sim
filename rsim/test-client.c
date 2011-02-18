@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "rsim.h"
 
 int main(int argc, char *argv[])
@@ -7,6 +8,8 @@ int main(int argc, char *argv[])
     rsim_t c;
     int ret;
     const rsim_msg_t *msg;
+    const rsim_msg_float3_t *msgf3;
+    const rsim_msg_float4_t *msgf4;
 
     ret = rsimConnect(&c, "127.0.0.1", 9876);
     if (ret != 0){
@@ -29,6 +32,35 @@ int main(int argc, char *argv[])
     if (msg){
         fprintf(stderr, "id: %d, type: %d\n", (int)msg->id, (int)msg->type);
     }
+
+    rsimSendFloat(&c, 10, RSIM_MSG_SET_VEL_LEFT, 1.234);
+    rsimSendFloat(&c, 10, RSIM_MSG_SET_VEL_RIGHT, 10.111);
+
+    rsimSendSimple(&c, 10, RSIM_MSG_GET_POS);
+    rsimSendSimple(&c, 10, RSIM_MSG_GET_ROT);
+    msg = rsimNextMsg(&c);
+    if (msg && msg->type == RSIM_MSG_POS){
+        msgf3 = (rsim_msg_float3_t *)msg;
+        fprintf(stderr, "POS: id: %d, type: %d, %g %g %g\n",
+                (int)msg->id, (int)msg->type,
+                msgf3->f[0], msgf3->f[1], msgf3->f[2]);
+    }
+
+    msg = rsimNextMsg(&c);
+    if (msg && msg->type == RSIM_MSG_ROT){
+        msgf4 = (rsim_msg_float4_t *)msg;
+        fprintf(stderr, "POS: id: %d, type: %d, %g %g %g %g\n",
+                (int)msg->id, (int)msg->type,
+                msgf4->f[0], msgf4->f[1], msgf4->f[2], msgf4->f[3]);
+    }
+
+    sleep(1);
+    rsimSendSimple(&c, 10, RSIM_MSG_GET_POS);
+    rsimSendSimple(&c, 10, RSIM_MSG_GET_ROT);
+
+    sleep(1);
+    rsimSendSimple(&c, 10, RSIM_MSG_GET_POS);
+    rsimSendSimple(&c, 10, RSIM_MSG_GET_ROT);
 
 
     rsimClose(&c);

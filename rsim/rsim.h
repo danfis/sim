@@ -28,14 +28,50 @@
 #define RSIM_BUFSIZE 4096
 //#define RSIM_BUFSIZE 1
 
-#define RSIM_MSG_PING 1
-#define RSIM_MSG_PONG 2
+#define RSIM_MSG_PING          1
+#define RSIM_MSG_PONG          2
+#define RSIM_MSG_GET_POS       3
+#define RSIM_MSG_POS           4
+#define RSIM_MSG_GET_ROT       5
+#define RSIM_MSG_ROT           6
+#define RSIM_MSG_SET_VEL_LEFT  7
+#define RSIM_MSG_SET_VEL_RIGHT 8
 
 struct _rsim_msg_t {
     uint16_t id;
     char type;
 };
 typedef struct _rsim_msg_t rsim_msg_t;
+
+/**
+ * Message with one additional float.
+ */
+struct _rsim_msg_float_t {
+    uint16_t id;
+    char type;
+    float f;
+};
+typedef struct _rsim_msg_float_t rsim_msg_float_t;
+
+/**
+ * Message with three floats.
+ */
+struct _rsim_msg_float3_t {
+    uint16_t id;
+    char type;
+    float f[3];
+};
+typedef struct _rsim_msg_float3_t rsim_msg_float3_t;
+
+/**
+ * Message with four floats.
+ */
+struct _rsim_msg_float4_t {
+    uint16_t id;
+    char type;
+    float f[4];
+};
+typedef struct _rsim_msg_float4_t rsim_msg_float4_t;
 
 
 
@@ -78,5 +114,10 @@ const rsim_msg_t *rsimNextMsg(rsim_t *);
  * Sends simple message.
  */
 int rsimSendSimple(rsim_t *, uint16_t id, char type);
+
+/**
+ * Sends message with one additional float.
+ */
+int rsimSendFloat(rsim_t *, uint16_t id, char type, float f);
 
 #endif /* _SIM_RSIM_H_ */
