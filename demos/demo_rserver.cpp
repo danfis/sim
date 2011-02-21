@@ -26,6 +26,7 @@
 #include <sim/comp/sssa.hpp>
 #include <sim/comp/rserver.hpp>
 #include <sim/msg.hpp>
+#include <sim/sensor/rangefinder.hpp>
 
 using sim::Vec3;
 using sim::Quat;
@@ -41,11 +42,20 @@ SSSA *active = 0;
 class SSSA : public sim::comp::SSSA {
     uint16_t _id;
     sim::Sim *_sim;
+    sim::sensor::RangeFinder *_rf;
+    bool _rf_added;
 
   public:
     SSSA(uint16_t id, const Vec3 &pos, const Quat &rot = Quat(0., 0., 0., 1.))
-        : sim::comp::SSSA(pos, rot), _id(id)
+        : sim::comp::SSSA(pos, rot), _id(id), _rf(NULL), _rf_added(false)
     {
+        _rf = new sim::sensor::RangeFinder(50, 10, M_PI);
+    }
+
+    ~SSSA()
+    {
+        if (_rf && !_rf_added)
+            delete _rf;
     }
 
     void init(sim::Sim *sim)
@@ -58,6 +68,14 @@ class SSSA : public sim::comp::SSSA {
         sim->regMessage(this, sim::comp::RMessageInGetRot::Type);
         sim->regMessage(this, sim::comp::RMessageInSetVelLeft::Type);
         sim->regMessage(this, sim::comp::RMessageInSetVelRight::Type);
+        sim->regMessage(this, sim::comp::RMessageInGetRF::Type);
+
+        if (_id == 10){
+            _rf->attachToBody(robot()->chasis(), sim::Vec3(0.55, 0, -0.5));
+            _rf->enableVis();
+            sim->addComponent(_rf);
+            _rf_added = true;
+        }
 
         _sim = sim;
     }
@@ -93,6 +111,14 @@ class SSSA : public sim::comp::SSSA {
                 vel = ((sim::comp::RMessageInSetVelRight *)rmsg)->msgVel();
                 DBG("  -- SetVelRight: " << vel);
                 robot()->setVelRight(vel);
+
+            }else if (rmsg->type() == sim::comp::RMessageInGetRF::Type){
+                size_t i;
+                DBG("  -- GetRF: " << _rf->numBeams());
+                for (i = 0; i < _rf->numBeams(); i++){
+                    DBG("    >> " << _rf->distance(i));
+                }
+                _sim->sendMessage(new sim::comp::RMessageOutRF(_id, *_rf));
             }
 
         }else if (msg.type() == sim::MessageKeyPressed::Type){

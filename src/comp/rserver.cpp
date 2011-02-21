@@ -30,6 +30,19 @@
 namespace sim {
 namespace comp {
 
+RMessageOutRF::RMessageOutRF(uint16_t id, const sim::sensor::RangeFinder &rf)
+    : RMessageOut(id, RMessage::MSG_RF), _dist(rf.numBeams())
+{
+    size_t i, len;
+    const Scalar *dist = rf.distance();
+    len = rf.numBeams();
+
+    DBG("");
+    for (i = 0; i < len; i++){
+        _dist[i] = dist[i];
+    }
+}
+
 void *RServerSession::thread(void *_s)
 {
     RServerSession *s = (RServerSession *)_s;
@@ -69,6 +82,9 @@ void *RServerSession::thread(void *_s)
             if (s->_readFloat(&f) != 0)
                 break;
             s->_server->__addMessage(new RMessageInSetVelRight(id, f));
+
+        }else if (type == RMessage::MSG_GET_RF){
+            s->_server->__addMessage(new RMessageInGetRF(id));
 
         }else{
             s->_server->__addMessage(new RMessageIn(id, type));
@@ -110,6 +126,7 @@ void RServerSession::sendMessage(const RMessageOut &msg)
     _writeID(msg.msgID());
     _writeType(msg.msgType());
 
+    DBG(msg.msgID() << " " << msg.msgType());
     if (msg.type() == RMessageOutPos::Type){
         const sim::Vec3 &v = ((const RMessageOutPos *)&msg)->pos();
         _writeFloat(v.x());
@@ -122,6 +139,17 @@ void RServerSession::sendMessage(const RMessageOut &msg)
         _writeFloat(v.y());
         _writeFloat(v.z());
         _writeFloat(v.w());
+
+    }else if (msg.type() == RMessageOutRF::Type){
+        DBG("");
+        size_t i, len;
+        const std::vector<Scalar> &dist = ((const RMessageOutRF *)&msg)->distance();
+
+        len = dist.size();
+        _writeUInt16(len);
+        for (i = 0; i < len; i++){
+            _writeFloat(dist[i]);
+        }
     }
 }
 
@@ -192,12 +220,17 @@ int RServerSession::_readFloat(float *f)
 
 int RServerSession::_writeID(uint16_t _id)
 {
+    return _writeUInt16(_id);
+}
+
+int RServerSession::_writeUInt16(uint16_t _i)
+{
     ssize_t size;
-    uint16_t id;
+    uint16_t i;
 
-    id = htons(_id);
+    i = htons(_i);
 
-    size = write(_sock, (void *)&id, sizeof(uint16_t));
+    size = write(_sock, (void *)&i, sizeof(uint16_t));
     if (size != sizeof(uint16_t))
         return -1;
     return 0;
@@ -286,6 +319,7 @@ void RServer::init(Sim *sim)
     sim->regMessage(this, RMessageOutPong::Type);
     sim->regMessage(this, RMessageOutPos::Type);
     sim->regMessage(this, RMessageOutRot::Type);
+    sim->regMessage(this, RMessageOutRF::Type);
     _sim = sim;
 }
 
@@ -336,7 +370,8 @@ void RServer::processMessage(const sim::Message &msg)
             || msg.type() == RMessageOutPing::Type
             || msg.type() == RMessageOutPong::Type
             || msg.type() == RMessageOutPos::Type
-            || msg.type() == RMessageOutRot::Type){
+            || msg.type() == RMessageOutRot::Type
+            || msg.type() == RMessageOutRF::Type){
         omsg = (RMessageOut *)&msg;
         _sendRMessage((const RMessageOut &)msg);
     }

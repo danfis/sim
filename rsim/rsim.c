@@ -29,6 +29,7 @@
 static int rsimReadByte(rsim_t *c, char *b);
 static int rsimReadID(rsim_t *c, uint16_t *id);
 static int rsimReadType(rsim_t *c, char *type);
+static int rsimReadUInt16(rsim_t *c, uint16_t *i);
 static int rsimReadFloat(rsim_t *c, float *f);
 
 static int rsimWriteFloat(rsim_t *c, float f);
@@ -97,10 +98,12 @@ int rsimHaveMsg(rsim_t *c)
 
 const rsim_msg_t *rsimNextMsg(rsim_t *c)
 {
-    uint16_t id;
+    uint16_t id, len;
     char type;
+    size_t i;
     rsim_msg_float3_t *msgf3;
     rsim_msg_float4_t *msgf4;
+    rsim_msg_floats_t *msgfs;
 
     if (c->msg){
         free(c->msg);
@@ -110,10 +113,13 @@ const rsim_msg_t *rsimNextMsg(rsim_t *c)
     // first read ID
     if (rsimReadID(c, &id) != 0)
         return NULL;
+    fprintf(stderr, "id: %d\n", (int)id);
 
     // then type
     if (rsimReadType(c, &type) != 0)
         return NULL;
+
+    fprintf(stderr, "type: %d\n", (int)type);
 
     if (type == RSIM_MSG_POS){
         msgf3 = (rsim_msg_float3_t *)malloc(sizeof(rsim_msg_float3_t));
@@ -140,6 +146,24 @@ const rsim_msg_t *rsimNextMsg(rsim_t *c)
             return NULL;
 
         c->msg = (rsim_msg_t *)msgf4;
+
+    }else if (type == RSIM_MSG_RF){
+        if (rsimReadUInt16(c, &len) != 0)
+            return NULL;
+
+        msgfs = (rsim_msg_floats_t *)malloc(sizeof(rsim_msg_floats_t)
+                                              + sizeof(float) * len);
+        msgfs->flen = len;
+        fprintf(stderr, "flen: %d\n", (int)len);
+        msgfs->f = (float *)(((char *)msgfs) + sizeof(rsim_msg_floats_t));
+        for (i = 0; i < msgfs->flen; i++){
+            if (rsimReadFloat(c, msgfs->f + i) != 0){
+                free(msgfs);
+                return NULL;
+            }
+        }
+
+        c->msg = (rsim_msg_t *)msgfs;
 
     }else{
         c->msg = (rsim_msg_t *)malloc(sizeof(rsim_msg_t));
@@ -195,6 +219,11 @@ static int rsimReadByte(rsim_t *c, char *b)
 }
 
 static int rsimReadID(rsim_t *c, uint16_t *id)
+{
+    return rsimReadUInt16(c, id);
+}
+
+static int rsimReadUInt16(rsim_t *c, uint16_t *id)
 {
     char *cid = (char *)id;
 

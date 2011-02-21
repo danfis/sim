@@ -7,9 +7,11 @@ int main(int argc, char *argv[])
 {
     rsim_t c;
     int ret;
+    size_t i;
     const rsim_msg_t *msg;
     const rsim_msg_float3_t *msgf3;
     const rsim_msg_float4_t *msgf4;
+    const rsim_msg_floats_t *msgfs;
 
     ret = rsimConnect(&c, "127.0.0.1", 9876);
     if (ret != 0){
@@ -54,13 +56,19 @@ int main(int argc, char *argv[])
                 msgf4->f[0], msgf4->f[1], msgf4->f[2], msgf4->f[3]);
     }
 
-    sleep(1);
-    rsimSendSimple(&c, 10, RSIM_MSG_GET_POS);
-    rsimSendSimple(&c, 10, RSIM_MSG_GET_ROT);
+    rsimSendSimple(&c, 10, RSIM_MSG_GET_RF);
+    msg = rsimNextMsg(&c);
+    if (msg && msg->type == RSIM_MSG_RF){
+        msgfs = (rsim_msg_floats_t *)msg;
 
-    sleep(1);
-    rsimSendSimple(&c, 10, RSIM_MSG_GET_POS);
-    rsimSendSimple(&c, 10, RSIM_MSG_GET_ROT);
+        fprintf(stderr, "RF: id: %d, type: %d, dist: ", (int)msgfs->id, (int)msgfs->type);
+        for (i = 0; i < msgfs->flen; i++){
+            fprintf(stderr, " %g", msgfs->f[i]);
+        }
+        fprintf(stderr, "\n");
+    }else{
+        fprintf(stderr, "Wrong answer to GET_RF\n");
+    }
 
 
     rsimClose(&c);

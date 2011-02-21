@@ -36,6 +36,8 @@
 #define RSIM_MSG_ROT           6
 #define RSIM_MSG_SET_VEL_LEFT  7
 #define RSIM_MSG_SET_VEL_RIGHT 8
+#define RSIM_MSG_GET_RF        9
+#define RSIM_MSG_RF            10
 
 struct _rsim_msg_t {
     uint16_t id;
@@ -72,6 +74,17 @@ struct _rsim_msg_float4_t {
     float f[4];
 };
 typedef struct _rsim_msg_float4_t rsim_msg_float4_t;
+
+/**
+ * Message with any number of floats.
+ */
+struct _rsim_msg_floats_t {
+    uint16_t id;
+    char type;
+    size_t flen;
+    float *f;
+};
+typedef struct _rsim_msg_floats_t rsim_msg_floats_t;
 
 
 

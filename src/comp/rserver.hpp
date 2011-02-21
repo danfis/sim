@@ -24,9 +24,11 @@
 
 #include <string>
 #include <stdint.h>
+#include <vector>
 #include <sim/config.hpp>
 #include <sim/component.hpp>
 #include <sim/math.hpp>
+#include <sim/sensor/rangefinder.hpp>
 
 #define SIM_RSERVER_BUFSIZE 1
 
@@ -57,7 +59,9 @@ class RMessage : public sim::Message {
         MSG_GET_ROT       = 5,
         MSG_ROT           = 6,
         MSG_SET_VEL_LEFT  = 7,
-        MSG_SET_VEL_RIGHT = 8
+        MSG_SET_VEL_RIGHT = 8,
+        MSG_GET_RF        = 9,
+        MSG_RF            = 10
     };
 };
 
@@ -122,6 +126,13 @@ class RMessageInSetVelRight : public RMessageIn {
     float msgVel() const { return _vel; }
 };
 
+class RMessageInGetRF : public RMessageIn {
+    SIM_MESSAGE_INIT2(1, 107)
+  public:
+    RMessageInGetRF(uint16_t id)
+        : RMessageIn(id, RMessage::MSG_GET_RF) {}
+};
+
 
 
 
@@ -172,6 +183,15 @@ class RMessageOutRot : public RMessageOut {
     const sim::Quat &rot() const { return _q; }
 };
 
+class RMessageOutRF : public RMessageOut {
+    SIM_MESSAGE_INIT2(1, 5)
+    std::vector<Scalar> _dist;
+
+  public:
+    RMessageOutRF(uint16_t id, const sim::sensor::RangeFinder &rf);
+    const std::vector<Scalar> &distance() const { return _dist; }
+};
+
 
 
 
@@ -202,6 +222,7 @@ class RServerSession {
 
     int _writeID(uint16_t id);
     int _writeType(char type);
+    int _writeUInt16(uint16_t i);
     int _writeFloat(float f);
 };
 
