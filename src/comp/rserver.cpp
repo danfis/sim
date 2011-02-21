@@ -127,20 +127,20 @@ void RServerSession::sendMessage(const RMessageOut &msg)
     _writeType(msg.msgType());
 
     DBG(msg.msgID() << " " << msg.msgType());
-    if (msg.type() == RMessageOutPos::Type){
+    if (msg.msgType() == RMessage::MSG_POS){
         const sim::Vec3 &v = ((const RMessageOutPos *)&msg)->pos();
         _writeFloat(v.x());
         _writeFloat(v.y());
         _writeFloat(v.z());
 
-    }else if (msg.type() == RMessageOutRot::Type){
+    }else if (msg.msgType() == RMessage::MSG_ROT){
         const sim::Quat &v = ((const RMessageOutRot *)&msg)->rot();
         _writeFloat(v.x());
         _writeFloat(v.y());
         _writeFloat(v.z());
         _writeFloat(v.w());
 
-    }else if (msg.type() == RMessageOutRF::Type){
+    }else if (msg.msgType() == RMessage::MSG_RF){
         DBG("");
         size_t i, len;
         const std::vector<Scalar> &dist = ((const RMessageOutRF *)&msg)->distance();
@@ -315,11 +315,6 @@ void RServer::init(Sim *sim)
 
     sim->regPreStep(this);
     sim->regMessage(this, RMessageOut::Type);
-    sim->regMessage(this, RMessageOutPing::Type);
-    sim->regMessage(this, RMessageOutPong::Type);
-    sim->regMessage(this, RMessageOutPos::Type);
-    sim->regMessage(this, RMessageOutRot::Type);
-    sim->regMessage(this, RMessageOutRF::Type);
     _sim = sim;
 }
 
@@ -366,12 +361,7 @@ void RServer::processMessage(const sim::Message &msg)
 {
     RMessageOut *omsg;
 
-    if (msg.type() == RMessageOut::Type
-            || msg.type() == RMessageOutPing::Type
-            || msg.type() == RMessageOutPong::Type
-            || msg.type() == RMessageOutPos::Type
-            || msg.type() == RMessageOutRot::Type
-            || msg.type() == RMessageOutRF::Type){
+    if (msg.type() == RMessageOut::Type){
         omsg = (RMessageOut *)&msg;
         _sendRMessage((const RMessageOut &)msg);
     }

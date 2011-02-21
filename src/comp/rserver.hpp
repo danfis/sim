@@ -144,22 +144,18 @@ class RMessageOut : public RMessage {
 };
 
 class RMessageOutPing : public RMessageOut {
-    SIM_MESSAGE_INIT2(1, 1)
   public:
     RMessageOutPing(uint16_t id)
         : RMessageOut(id, RMessage::MSG_PING) {}
 };
 
 class RMessageOutPong : public RMessageOut {
-    SIM_MESSAGE_INIT2(1, 2)
   public:
     RMessageOutPong(uint16_t id)
         : RMessageOut(id, RMessage::MSG_PONG) {}
 };
 
 class RMessageOutPos : public RMessageOut {
-    SIM_MESSAGE_INIT2(1, 3)
-
   private:
     sim::Vec3 _v;
 
@@ -171,8 +167,6 @@ class RMessageOutPos : public RMessageOut {
 };
 
 class RMessageOutRot : public RMessageOut {
-    SIM_MESSAGE_INIT2(1, 4)
-
   private:
     sim::Quat _q;
 
@@ -184,7 +178,6 @@ class RMessageOutRot : public RMessageOut {
 };
 
 class RMessageOutRF : public RMessageOut {
-    SIM_MESSAGE_INIT2(1, 5)
     std::vector<Scalar> _dist;
 
   public:
