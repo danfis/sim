@@ -104,7 +104,7 @@ void RangeFinder::cbPreStep()
 
             _data.detected[i] = true;
             _data.point[i] = inter.getWorldIntersectPoint();
-            _data.local[i] = inter.getLocalIntersectPoint();
+            _data.local[i] = inter.getWorldIntersectPoint() - is->getStart();
             _data.dist[i] = _data.local[i].length();
 
             //std::cerr << _data.detected[i] << ":" << _data.dist[i] << " ";
@@ -112,7 +112,7 @@ void RangeFinder::cbPreStep()
             _data.detected[i] = false;
             _data.dist[i] = _max_range;
             _data.point[i] = is->getEnd();
-            _data.local[i].set(0., 0., 0.); // TODO: This must be computed
+            _data.local[i] = is->getEnd() - is->getStart();
         }
 
         // clear list of intersections
