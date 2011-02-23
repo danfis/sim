@@ -38,6 +38,8 @@
 #define RSIM_MSG_SET_VEL_RIGHT 8
 #define RSIM_MSG_GET_RF        9
 #define RSIM_MSG_RF            10
+#define RSIM_MSG_GET_IMG       11
+#define RSIM_MSG_IMG           12
 
 struct _rsim_msg_t {
     uint16_t id;
@@ -85,6 +87,17 @@ struct _rsim_msg_floats_t {
     float *f;
 };
 typedef struct _rsim_msg_floats_t rsim_msg_floats_t;
+
+/**
+ * Message with image width * height, in .data are stored triplets rgb.
+ */
+struct _rsim_msg_img_t {
+    uint16_t id;
+    char type;
+    size_t width, height;
+    unsigned char *data;
+};
+typedef struct _rsim_msg_img_t rsim_msg_img_t;
 
 
 

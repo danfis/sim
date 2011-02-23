@@ -44,18 +44,24 @@ class SSSA : public sim::comp::SSSA {
     sim::Sim *_sim;
     sim::sensor::RangeFinder *_rf;
     bool _rf_added;
+    sim::sensor::Camera *_cam;
+    bool _cam_added;
 
   public:
     SSSA(uint16_t id, const Vec3 &pos, const Quat &rot = Quat(0., 0., 0., 1.))
-        : sim::comp::SSSA(pos, rot), _id(id), _rf(NULL), _rf_added(false)
+        : sim::comp::SSSA(pos, rot), _id(id), _rf(NULL), _rf_added(false),
+                                     _cam(NULL), _cam_added(false)
     {
         _rf = new sim::sensor::RangeFinder(50, 10, M_PI);
+        _cam = new sim::sensor::Camera();
     }
 
     ~SSSA()
     {
         if (_rf && !_rf_added)
             delete _rf;
+        if (_cam && !_cam_added)
+            delete _cam;
     }
 
     void init(sim::Sim *sim)
@@ -69,12 +75,20 @@ class SSSA : public sim::comp::SSSA {
         sim->regMessage(this, sim::comp::RMessageInSetVelLeft::Type);
         sim->regMessage(this, sim::comp::RMessageInSetVelRight::Type);
         sim->regMessage(this, sim::comp::RMessageInGetRF::Type);
+        sim->regMessage(this, sim::comp::RMessageInGetImg::Type);
 
         if (_id == 10){
-            _rf->attachToBody(robot()->chasis(), sim::Vec3(0.55, 0, -0.5));
+            _rf->attachToBody(robot()->chasis(), sim::Vec3(0.55, 0, -0.3));
             _rf->enableVis();
             sim->addComponent(_rf);
             _rf_added = true;
+
+            _cam->setWidthHeight(640, 480);
+            _cam->attachToBody(robot()->chasis(), sim::Vec3(0.6, 0, 0.));
+            _cam->enableView();
+            _cam->visBodyEnable();
+            sim->addComponent(_cam);
+            _cam_added = true;
         }
 
         _sim = sim;
@@ -119,6 +133,9 @@ class SSSA : public sim::comp::SSSA {
                     DBG("    >> " << _rf->distance(i));
                 }
                 _sim->sendMessage(new sim::comp::RMessageOutRF(_id, *_rf));
+
+            }else if (rmsg->type() == sim::comp::RMessageInGetImg::Type){
+                _sim->sendMessage(new sim::comp::RMessageOutImg(_id, *_cam));
             }
 
         }else if (msg.type() == sim::MessageKeyPressed::Type){

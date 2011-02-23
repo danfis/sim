@@ -26,6 +26,7 @@
 #include "comp/rserver.hpp"
 #include "msg.hpp"
 #include "sim.hpp"
+#include <osgDB/WriteFile>
 
 namespace sim {
 namespace comp {
@@ -42,6 +43,40 @@ RMessageOutRF::RMessageOutRF(uint16_t id, const sim::sensor::RangeFinder &rf)
         _dist[i] = dist[i];
     }
 }
+
+RMessageOutImg::RMessageOutImg(uint16_t id, const sim::sensor::Camera &cam)
+    : RMessageOut(id, RMessage::MSG_IMG), _data(NULL)
+{
+    const osg::Image *img;
+    osg::Vec4 rgb;
+    size_t i, j, k, w, h;
+
+    img = cam.image();
+
+    w = img->s();
+    h = img->t();
+
+    _width  = w;
+    _height = h;
+    _data   = new unsigned char[3 * w * h];
+
+    k = 0;
+    for (j = 0; j < h; j++){
+        for (i = 0; i < w; i++){
+            rgb = img->getColor(i, j);
+            _data[k++] = (unsigned char)(rgb.b() * 255);
+            _data[k++] = (unsigned char)(rgb.g() * 255);
+            _data[k++] = (unsigned char)(rgb.r() * 255);
+        }
+    }
+}
+
+RMessageOutImg::~RMessageOutImg()
+{
+    if (_data)
+        delete [] _data;
+}
+
 
 void *RServerSession::thread(void *_s)
 {
@@ -85,6 +120,9 @@ void *RServerSession::thread(void *_s)
 
         }else if (type == RMessage::MSG_GET_RF){
             s->_server->__addMessage(new RMessageInGetRF(id));
+
+        }else if (type == RMessage::MSG_GET_IMG){
+            s->_server->__addMessage(new RMessageInGetImg(id));
 
         }else{
             s->_server->__addMessage(new RMessageIn(id, type));
@@ -149,6 +187,22 @@ void RServerSession::sendMessage(const RMessageOut &msg)
         _writeUInt16(len);
         for (i = 0; i < len; i++){
             _writeFloat(dist[i]);
+        }
+
+    }else if (msg.msgType() == RMessage::MSG_IMG){
+        size_t i, len;
+        size_t width = ((const RMessageOutImg *)&msg)->width();
+        size_t height = ((const RMessageOutImg *)&msg)->height();
+        const unsigned char *data = ((const RMessageOutImg *)&msg)->data();
+
+        DBG("Sending MSG_IMG " << width << "x" << height);
+
+        _writeUInt16(width);
+        _writeUInt16(height);
+
+        len = width * height * 3;
+        for (i = 0; i < len; i++){
+            _writeByte(data[i]);
         }
     }
 }
@@ -237,6 +291,11 @@ int RServerSession::_writeUInt16(uint16_t _i)
 }
 
 int RServerSession::_writeType(char type)
+{
+    return _writeByte(type);
+}
+
+int RServerSession::_writeByte(char type)
 {
     ssize_t size;
 

@@ -98,12 +98,13 @@ int rsimHaveMsg(rsim_t *c)
 
 const rsim_msg_t *rsimNextMsg(rsim_t *c)
 {
-    uint16_t id, len;
+    uint16_t id, len, width, height;
     char type;
-    size_t i;
+    size_t i, slen;
     rsim_msg_float3_t *msgf3;
     rsim_msg_float4_t *msgf4;
     rsim_msg_floats_t *msgfs;
+    rsim_msg_img_t *msgimg;
 
     if (c->msg){
         free(c->msg);
@@ -165,6 +166,27 @@ const rsim_msg_t *rsimNextMsg(rsim_t *c)
 
         c->msg = (rsim_msg_t *)msgfs;
 
+    }else if (type == RSIM_MSG_IMG){
+        if (rsimReadUInt16(c, &width) != 0)
+            return NULL;
+        if (rsimReadUInt16(c, &height) != 0)
+            return NULL;
+
+        msgimg = (rsim_msg_img_t *)malloc(sizeof(rsim_msg_img_t)
+                                            + sizeof(char) * 3 * width * height);
+        msgimg->width = width;
+        msgimg->height = height;
+        msgimg->data = (unsigned char *)(((char *)msgimg) + sizeof(rsim_msg_img_t));
+
+        slen = 3 * height * width;
+        for (i = 0; i < slen; i++){
+            if (rsimReadByte(c, (char *)(msgimg->data + i)) != 0){
+                free(msgimg);
+                return NULL;
+            }
+        }
+
+        c->msg = (rsim_msg_t *)msgimg;
     }else{
         c->msg = (rsim_msg_t *)malloc(sizeof(rsim_msg_t));
     }

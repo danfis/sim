@@ -29,8 +29,9 @@
 #include <sim/component.hpp>
 #include <sim/math.hpp>
 #include <sim/sensor/rangefinder.hpp>
+#include <sim/sensor/camera.hpp>
 
-#define SIM_RSERVER_BUFSIZE 1
+#define SIM_RSERVER_BUFSIZE 4096
 
 namespace sim {
 
@@ -61,7 +62,9 @@ class RMessage : public sim::Message {
         MSG_SET_VEL_LEFT  = 7,
         MSG_SET_VEL_RIGHT = 8,
         MSG_GET_RF        = 9,
-        MSG_RF            = 10
+        MSG_RF            = 10,
+        MSG_GET_IMG       = 11,
+        MSG_IMG           = 12
     };
 };
 
@@ -133,6 +136,12 @@ class RMessageInGetRF : public RMessageIn {
         : RMessageIn(id, RMessage::MSG_GET_RF) {}
 };
 
+class RMessageInGetImg : public RMessageIn {
+    SIM_MESSAGE_INIT2(1, 108)
+  public:
+    RMessageInGetImg(uint16_t id)
+        : RMessageIn(id, RMessage::MSG_GET_IMG) {}
+};
 
 
 
@@ -185,6 +194,19 @@ class RMessageOutRF : public RMessageOut {
     const std::vector<Scalar> &distance() const { return _dist; }
 };
 
+class RMessageOutImg : public RMessageOut {
+    uint16_t _width, _height;
+    unsigned char *_data;
+
+  public:
+    RMessageOutImg(uint16_t id, const sim::sensor::Camera &cam);
+    ~RMessageOutImg();
+
+    uint16_t width() const { return _width; }
+    uint16_t height() const { return _height; }
+    const unsigned char *data() const { return _data; }
+};
+
 
 
 
@@ -215,6 +237,7 @@ class RServerSession {
 
     int _writeID(uint16_t id);
     int _writeType(char type);
+    int _writeByte(char b);
     int _writeUInt16(uint16_t i);
     int _writeFloat(float f);
 };
