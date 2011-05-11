@@ -176,16 +176,18 @@ void SimComponentMessageRegistry::deliverAssignedMessages(Component *c,
 }
 
 
-Sim::Sim(World *world, VisWorld *visworld)
-    : _world(world), _visworld(visworld),
+Sim::Sim(World *world, VisWorld *visworld, bool enable_vis_world)
+    : _world(world), _visworld(visworld), _enable_vis_world(enable_vis_world),
       _in_cb(false),
       _time_step(0, 20000000), _time_substeps(10),
       _vis_time_step(0, 50000000),
       _simulate(true), _simulate_real(true), _terminate(false),
       _time_limit_enabled(false)
 {
-    if (!_visworld)
-        _visworld = new VisWorld();
+    if (enable_vis_world){
+        if (!_visworld)
+            _visworld = new VisWorld();
+    }
 
     _timer_real.start();
 
@@ -296,7 +298,7 @@ void Sim::_stepWorld()
 
 void Sim::_stepVisWorld()
 {
-    if (!_visworld)
+    if (!_enable_vis_world || !_visworld)
         return;
 
     pthread_mutex_lock(&_step_lock);
@@ -352,13 +354,15 @@ void *Sim::_visWorldStepsThread(void *_sim)
 void Sim::_runStepThreads()
 {
     pthread_create(&_th_step_world, NULL, _worldStepsThread, this);
-    pthread_create(&_th_step_visworld, NULL, _visWorldStepsThread, this);
+    if (_enable_vis_world && _visworld)
+        pthread_create(&_th_step_visworld, NULL, _visWorldStepsThread, this);
 }
 
 void Sim::_joinStepThreads()
 {
     pthread_join(_th_step_world, NULL);
-    pthread_join(_th_step_visworld, NULL);
+    if (_enable_vis_world && _visworld)
+        pthread_join(_th_step_visworld, NULL);
 }
 
 bool Sim::done()
@@ -387,7 +391,8 @@ bool Sim::done()
 void Sim::step()
 {
     _stepWorld();
-    _stepVisWorld();
+    if (_enable_vis_world && _visworld)
+        _stepVisWorld();
 }
 
 void Sim::finish()

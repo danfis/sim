@@ -106,6 +106,7 @@ class Sim {
     pthread_mutex_t _step_lock; //!< Sync lock for World/VisWorld steps
     pthread_t _th_step_world; //!< Thread for World's steps
     pthread_t _th_step_visworld; //!< Thread for VisWorld's steps
+    bool _enable_vis_world;
 
     std::list<Component *> _cs; //!< List of all components
     std::list<Component *> _cs_uninit; //!< List of uninitialized components
@@ -148,7 +149,7 @@ class Sim {
     typedef std::list<Component *>::const_iterator const_cit_t;
 
   public:
-    Sim(World *world = 0, VisWorld *visworld = 0);
+    Sim(World *world = 0, VisWorld *visworld = 0, bool enable_vis_world = true);
     virtual ~Sim();
 
     World *world() { return _world; }
