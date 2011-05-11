@@ -55,7 +55,7 @@ ifeq '$(HAVE_ODE)' 'yes'
   endif
 endif
 
-DEMO_SSSA_LIGHT_OBJS+=sssa_light.cpp
+DEMO_SSSA_LIGHT_OBJS+= demo_sssa_light.cpp sssa_light.cpp
 
 all: $(TARGETS)
 
@@ -87,7 +87,7 @@ demo_chameleon: demo_chameleon.cpp $(LIBDEPS)
 demo_sssa: demo_sssa.cpp $(LIBDEPS)
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
-demo_sssa_light: demo_sssa_light.cpp $(LIBDEPS)
+demo_sssa_light: $(DEMO_SSSA_LIGHT_OBJS) $(LIBDEPS)
 	$(CXX) $(CXXFLAGS) -o $@ $(DEMO_SSSA_LIGHT_OBJS) $< $(LDFLAGS)
 
 demo_sssa_gen: demo_sssa_gen.cpp $(LIBDEPS)
