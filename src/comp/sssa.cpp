@@ -26,7 +26,13 @@ namespace comp {
 
 SSSA::SSSA(const Vec3 &pos, const Quat &rot)
     : sim::Component(),
-      _sim(0), _robot(0), _pos(pos), _rot(rot)
+      _sim(0), _robot(0), _with_wheels(true), _pos(pos), _rot(rot)
+{
+}
+
+SSSA::SSSA(bool with_wheels, const Vec3 &pos, const Quat &rot)
+    : sim::Component(),
+      _sim(0), _robot(0), _with_wheels(with_wheels), _pos(pos), _rot(rot)
 {
 }
 
@@ -40,7 +46,7 @@ void SSSA::init(sim::Sim *sim)
 {
     _sim = sim;
 
-    _robot = new sim::robot::SSSA(_sim->world(), _pos, _rot);
+    _robot = new sim::robot::SSSA(_sim->world(), _with_wheels, _pos, _rot);
     _robot->activate();
 }
 

@@ -37,15 +37,38 @@ namespace sim {
 
 namespace robot {
 
-SSSA::SSSA(sim::World *w, const Vec3 &pos,
-           const Quat &rot, const osg::Vec4 &color)
-    : _world(w), _pos(pos), _rot(rot), _color(color),
-      _chasis(0),
-      _ball_conn(0), _ball_joint(0)
+void SSSA::_init()
 {
     for (size_t i = 0; i < 3; i++){
         _sock_conn[i] = 0;
     }
+    if (_with_wheels){
+        _wleft.on = true;
+        _wright.on = true;
+    }else{
+        _wleft.on = false;
+        _wright.on = false;
+    }
+}
+
+SSSA::SSSA(sim::World *w, const Vec3 &pos,
+           const Quat &rot, const osg::Vec4 &color)
+    : _world(w), _pos(pos), _rot(rot), _color(color),
+      _chasis(0),
+      _ball_conn(0), _ball_joint(0),
+      _with_wheels(true)
+{
+    _init();
+}
+
+SSSA::SSSA(sim::World *w, bool with_wheels, const Vec3 &pos,
+           const Quat &rot, const osg::Vec4 &color)
+    : _world(w), _pos(pos), _rot(rot), _color(color),
+      _chasis(0),
+      _ball_conn(0), _ball_joint(0),
+      _with_wheels(with_wheels)
+{
+    _init();
 }
 
 SSSA::~SSSA()
@@ -129,9 +152,11 @@ void SSSA::addVelArm(sim::Scalar d)
 
 void SSSA::setVelLeft(sim::Scalar v)
 {
-    _wleft.vel = v;
-    for (size_t i = 0; i < 6; i++)
-        _wleft.joint[i]->setParamVel(_wleft.vel);
+    if (_wleft.on){
+        _wleft.vel = v;
+        for (size_t i = 0; i < 6; i++)
+            _wleft.joint[i]->setParamVel(_wleft.vel);
+    }
 }
 
 void SSSA::addVelLeft(sim::Scalar d)
@@ -141,9 +166,11 @@ void SSSA::addVelLeft(sim::Scalar d)
 
 void SSSA::setVelRight(sim::Scalar v)
 {
-    _wright.vel = v;
-    for (size_t i = 0; i < 6; i++)
-        _wright.joint[i]->setParamVel(_wright.vel);
+    if (_wright.on){
+        _wright.vel = v;
+        for (size_t i = 0; i < 6; i++)
+            _wright.joint[i]->setParamVel(_wright.vel);
+    }
 }
 
 void SSSA::addVelRight(sim::Scalar d)
@@ -298,17 +325,22 @@ void SSSA::activate()
 {
     _createChasis(_color);
     _createArm(osg::Vec4(0.3, 0.2, 0.7, 1.));
-    _createWheels();
+    if (_wleft.on && _wright.on)
+        _createWheels();
 
     _chasis->activate();
     _arm.body->activate();
     _arm.joint->activate();
 
     for (size_t i = 0; i < 6; i++){
-        _wleft.body[i]->activate();
-        _wleft.joint[i]->activate();
-        _wright.body[i]->activate();
-        _wright.joint[i]->activate();
+        if (_wleft.on){
+            _wleft.body[i]->activate();
+            _wleft.joint[i]->activate();
+        }
+        if (_wright.on){
+            _wright.body[i]->activate();
+            _wright.joint[i]->activate();
+        }
     }
 
     fixArm();
