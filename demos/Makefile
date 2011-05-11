@@ -45,7 +45,6 @@ ifeq '$(HAVE_ODE)' 'yes'
   TARGETS += demo_intersection
   TARGETS += demo_chameleon
   TARGETS += demo_sssa
-  TARGETS += demo_sssa_light
   TARGETS += demo_sssa_gen
   TARGETS += demo_movement_tunning
   TARGETS += demo_pso
@@ -54,8 +53,6 @@ ifeq '$(HAVE_ODE)' 'yes'
     TARGETS += demo_surfnav
   endif
 endif
-
-DEMO_SSSA_LIGHT_OBJS+= demo_sssa_light.cpp sssa_light.cpp
 
 all: $(TARGETS)
 
@@ -86,9 +83,6 @@ demo_chameleon: demo_chameleon.cpp $(LIBDEPS)
 
 demo_sssa: demo_sssa.cpp $(LIBDEPS)
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
-
-demo_sssa_light: $(DEMO_SSSA_LIGHT_OBJS) $(LIBDEPS)
-	$(CXX) $(CXXFLAGS) -o $@ $(DEMO_SSSA_LIGHT_OBJS) $< $(LDFLAGS)
 
 demo_sssa_gen: demo_sssa_gen.cpp $(LIBDEPS)
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
