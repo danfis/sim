@@ -44,6 +44,7 @@ class SSSA {
     };
 
     struct belt_t {
+        bool on;
         sim::Body *body[6];
         sim::Joint *joint[6];
         Scalar vel;
@@ -74,8 +75,14 @@ class SSSA {
 
     sim::robot::SSSA *_sock_conn[3]; //!< Robots connected to sockets
 
+    bool _with_wheels;
   public:
-    SSSA(sim::World *w, const sim::Vec3 &pos = sim::Vec3(0., 0., 0.08),
+    SSSA(sim::World *w,
+         const sim::Vec3 &pos = sim::Vec3(0., 0., 0.08),
+         const sim::Quat &rot = sim::Quat(0., 0., 0., 1.),
+         const osg::Vec4 &chasis_color = osg::Vec4(0., 0.1, 0.7, 0.6));
+    SSSA(sim::World *w, bool with_wheels = true,
+         const sim::Vec3 &pos = sim::Vec3(0., 0., 0.08),
          const sim::Quat &rot = sim::Quat(0., 0., 0., 1.),
          const osg::Vec4 &chasis_color = osg::Vec4(0., 0.1, 0.7, 0.6));
     ~SSSA();
@@ -94,6 +101,8 @@ class SSSA {
     const Quat &rot() const { return _chasis->rot(); }
 
     size_t numSockets() const { return 3; }
+
+    bool hasWheels() const { return _with_wheels; }
 
     /**
      * Returns angle of arm is rotated about - range is -pi/2..pi/2.
@@ -180,6 +189,7 @@ class SSSA {
     void activate();
 
   protected:
+    void _init();
     void _createChasis(const osg::Vec4 &color);
     void _createArm(const osg::Vec4 &color);
     void _createArmJoint();
