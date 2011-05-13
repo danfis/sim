@@ -37,7 +37,7 @@ using sim::comp::SSSA;
 
 bool use_ode = true;
 bool use_gui = true;
-
+bool use_wheels = true;
 
 class CEdge {
     public:
@@ -222,18 +222,14 @@ class S : public sim::Sim {
         vector<sim::robot::SSSA *> robots;
 
         for(int i=0;i<(int)positions.size();i++) {
-        cerr << "A*";
+//            sim::comp::SSSA *sssacomp = new sim::comp::SSSA(use_wheels, positions[i],rotations[i]);
+//            robots.push_back(sssacomp->robot());
             robots.push_back(new sim::robot::SSSA(world(),positions[i],rotations[i])); 
-        cerr << "B*";
             robots.back()->activate();
-        cerr << "C*";
 //            robots.back()->setVelLeft(0.8);
 //            robots.back()->setVelRight(0.8);
         }
         
-//        char name[2000];
-//        sprintf(name,"%s.position",_prefix);
-
 //        sim::comp::SimpleLogger *sl = new sim::comp::SimpleLogger(robots[0]->chasis(),name);
 //        addComponent(sl);
 
@@ -242,27 +238,19 @@ class S : public sim::Sim {
             edges.push_back(CEdge(i,i+1));
         }        
 
-        cerr << "1*";
         // connect them
         for(int i=0;i<(int)edges.size();i++) {
-            cerr << "2*";
             DBG("r"<< edges[i].from << "->r"<< edges[i].to << " = " << 
                     robots[edges[i].from]->canConnectTo(*(robots[edges[i].to])));
-            cerr << "3*";
             robots[edges[i].from]->connectTo(*(robots[edges[i].to]));
-            cerr << "4*";
-
             robots[edges[i].from]->setVelArm(0);
-            cerr << "5*";
         }
 
-        cerr << "end\n";
-
-//        sim::comp::SnakeBody *sbc = new sim::comp::SnakeBody(robots);
-  //      addComponent(sbc);
-
-        SinController *sinc = new SinController(robots[0],1,2,0);
-        addComponent(sinc);
+        for(int i=0;i<(int)robots.size();i++) {
+            const double r = 0.3*rand()/RAND_MAX; 
+            SinController *sinc = new SinController(robots[i],0.8+r,1,i*M_PI/4/robots.size());
+            addComponent(sinc);
+        }
     }
 
 

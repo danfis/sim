@@ -33,6 +33,16 @@ using namespace std;
 
 bool use_ode = true;
 
+class CEdge {
+    public:
+        int from,to;
+        CEdge(const int f, const int t):from(f),to(t){}
+};
+
+
+
+
+
 class SSSA;
 
 SSSA *active = 0;

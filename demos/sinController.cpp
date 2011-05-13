@@ -15,11 +15,26 @@ SinController::~SinController() {
 }
 
 void SinController::init(sim::Sim *sim) {
+    _sim = sim;
     sim->regPreStep(this);
 }
 
 void SinController::cbPreStep() {
-    std::cerr << "ahoj\n";
+    sim::Time t = _sim->timeReal();
+    const double ts = t.inSF();
+
+    double arg = ts*_freq + _phase;
+    if (arg > 2*M_PI) {
+        arg = arg - (2*M_PI*floor(arg/(2*M_PI)));
+    } 
+    if (arg < -2*M_PI) {
+        arg = -arg;
+        arg = arg - (2*M_PI*floor(arg/(2*M_PI)));
+        arg = -arg;
+    }
+    const double newAngle = _amplitude*sin(arg);
+    _robot->setVelArm(newAngle);
+
 }
 #endif
 
