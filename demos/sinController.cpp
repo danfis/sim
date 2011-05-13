@@ -6,8 +6,8 @@
 #include <iostream>
 
 
-SinController::SinController(sim::robot::SSSA *robot, const double frequency, const double amplitude, const double phase):
-    _robot(robot),_freq(frequency),_amplitude(amplitude),_phase(phase) {
+SinController::SinController(sim::robot::SSSA *robot, const double frequency, const double amplitude, const double phase, const int name):
+    _robot(robot),_freq(frequency),_amplitude(amplitude),_phase(phase),_name(name) {
 
 }
 
@@ -35,6 +35,7 @@ void SinController::cbPreStep() {
     const double newAngle = _amplitude*sin(arg);
     _robot->setVelArm(newAngle);
 
+    std::cout << "Robot" << _name << " " << _robot->pos()[0] << " " << _robot->pos()[1] << " " << _robot->pos()[2] << "\n";
 }
 #endif
 

@@ -105,7 +105,7 @@ class S : public sim::Sim {
             initBullet();
         }
 
-        setTimeStep(Time::fromMs(10));
+        setTimeStep(Time::fromMs(5));
         setTimeSubSteps(2);
 
         if (!use_gui) {
@@ -173,9 +173,6 @@ class S : public sim::Sim {
         c->visBody(id)->setColor(color);
         c->visBody(id)->setTexture("wood.ppm");
 
-//        id = c->addCube(.2, SIM_BODY_DEFAULT_VIS, Vec3(0.5, 0.5, .1));
- //       c->visBody(id)->setColor(0., .1, .8, 1.);
- //       c->visBody(id)->setTexture("wood.ppm");
         c->activate();
     }
 
@@ -201,7 +198,8 @@ class S : public sim::Sim {
 
 
     void createRobot_snake_sssa() {
-        const double widthX = 1.254;
+
+        const double widthX = 1.254; // these constants define dimensions of SSSA robots
         const double widthY = 1.254;
         const double widthZ = 1.254;
         const double iwidthZ = widthZ/2+0.01;
@@ -221,18 +219,14 @@ class S : public sim::Sim {
         }
         vector<sim::robot::SSSA *> robots;
 
+        // first we create the robots
         for(int i=0;i<(int)positions.size();i++) {
-//            sim::comp::SSSA *sssacomp = new sim::comp::SSSA(use_wheels, positions[i],rotations[i]);
-//            robots.push_back(sssacomp->robot());
-            robots.push_back(new sim::robot::SSSA(world(),positions[i],rotations[i])); 
+            robots.push_back(new sim::robot::SSSA(world(),use_wheels,positions[i],rotations[i])); 
             robots.back()->activate();
-//            robots.back()->setVelLeft(0.8);
-//            robots.back()->setVelRight(0.8);
         }
         
-//        sim::comp::SimpleLogger *sl = new sim::comp::SimpleLogger(robots[0]->chasis(),name);
-//        addComponent(sl);
-
+        // we define which robots should be connected. This way seems to be quite complicated, but
+        // for more complex robots is useful..
         vector<CEdge> edges;
         for(int i=0;i<numOfRobots-1;i++) {
             edges.push_back(CEdge(i,i+1));
@@ -246,15 +240,14 @@ class S : public sim::Sim {
             robots[edges[i].from]->setVelArm(0);
         }
 
-        for(int i=0;i<(int)robots.size();i++) {
+        // and we create the components, which will controll the robots.
+        // see sinController.hpp for details.
+        for(int i=1;i<(int)robots.size();i++) {
             const double r = 0.3*rand()/RAND_MAX; 
-            SinController *sinc = new SinController(robots[i],0.8+r,1,i*M_PI/4/robots.size());
+            SinController *sinc = new SinController(robots[i],0.8+r,1,i*M_PI/4/robots.size(),i);
             addComponent(sinc);
         }
     }
-
-
-
 
 
 };
@@ -268,6 +261,8 @@ int main(int argc, char *argv[])
             use_ode = false;
         }else if (strcmp(argv[i], "--nogui") == 0){
             use_gui = false;
+        }else if (strcmp(argv[i], "--nowheels") == 0){
+            use_wheels = false;
         }
     }
 
