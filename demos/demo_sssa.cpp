@@ -186,7 +186,7 @@ class RobotsManager : public sim::Component {
 class S : public sim::Sim {
   public:
     S()
-        : Sim()
+        : Sim(0,0,false)
     {
         if (use_ode){
             initODE();
@@ -197,7 +197,7 @@ class S : public sim::Sim {
         setTimeStep(Time::fromMs(10));
         setTimeSubSteps(2);
 
-        pauseSimulation();
+//        pauseSimulation();
 
         createArena();
         createRobot();
