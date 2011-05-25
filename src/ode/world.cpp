@@ -76,6 +76,14 @@ void __collision (void *data, dGeomID o1, dGeomID o2)
             // apply geom (pair of geoms)
             contact[i].geom = geoms[i];
 
+            if (b1->collInfo().friction > 0.f || b2->collInfo().friction > 0.f){
+                contact[i].surface.mu = 0.f;
+                if (b1->collInfo().friction > 0.f)
+                    contact[i].surface.mu += b1->collInfo().friction;
+                if (b2->collInfo().friction > 0.f)
+                    contact[i].surface.mu += b2->collInfo().friction;
+            }
+
             // create joint
             joint = dJointCreateContact(world->_world, world->_coll_contacts, &contact[i]);
             dJointAttach(joint, dGeomGetBody(contact[i].geom.g1),

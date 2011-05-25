@@ -44,7 +44,12 @@ struct BodyCollisionInfo {
      */
     unsigned long dont_collide_id;
 
-    BodyCollisionInfo() : dont_collide_id(0) {}
+    /**
+     * If >0 it is used for friction setting of contact joint
+     */
+    float friction;
+
+    BodyCollisionInfo() : dont_collide_id(0), friction(-1.) {}
 };
 
 /**
@@ -114,6 +119,8 @@ class Body {
     const BodyCollisionInfo &collInfo() { return _collision_info; }
     void collSetDontCollideId(unsigned long id)
         { _collision_info.dont_collide_id = id; }
+    void collSetFriction(float fr)
+        { _collision_info.friction = fr; }
     /* \} */
 
 

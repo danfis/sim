@@ -384,7 +384,7 @@ void SSSA::_createArm(const osg::Vec4 &color)
     b->visBody(id)->setColor(color);
 
     // TODO: find out bounding box of end of arm
-    b->setMassBox(Vec3(0.14, 0.5, 0.5), 1.);
+    b->setMassBox(Vec3(0.14, 0.5, 0.5), 0.2);
 
     b->setPos(_pos - (_rot * offset));
     b->setRot(_rot );
