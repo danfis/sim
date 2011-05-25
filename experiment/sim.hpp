@@ -20,6 +20,8 @@ class Sim : public sim::Sim {
   public:
     Sim();
 
+    virtual void init();
+
   protected:
     void createArena();
     void createRobots();
