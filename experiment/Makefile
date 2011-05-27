@@ -29,6 +29,10 @@ ifeq '$(HAVE_ODE)' 'yes'
   LIBDEPS += ../src/ode/libsim-ode.a
   LDFLAGS := -L../src/ode -lsim-ode $(LDFLAGS)
 endif
+ifeq '$(HAVE_BT)' 'yes'
+  LIBDEPS += ../src/bullet/libsim-bullet.a
+  LDFLAGS := -L../src/bullet -lsim-bullet $(LDFLAGS)
+endif
 
 TARGETS = exp
 OBJS = exp.o robot.o arena.o sim.o

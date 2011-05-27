@@ -149,7 +149,7 @@ void JointHinge2::paramLimitLoHi(double *lo, double *hi) const
 
 JointHinge::JointHinge(World *w, Body *oA, Body *oB, const Vec3 &anchor, const Vec3 &axis)
     : Joint(w, oA, oB),
-      _anchor(anchor), _axis(-axis),
+      _anchor(anchor), _axis(axis),
       _vel(0.), _fmax(0.)
 {
     _lim[0] = -10000;

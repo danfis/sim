@@ -1,16 +1,18 @@
 #include "sim.hpp"
 #include "arena.hpp"
 
+#define ODE 1
+
 Sim::Sim()
     : sim::Sim(), _arena(0)
 {
+#if ODE == 1
     DBG("Using ODE");
-
     sim::ode::World *w = new sim::ode::World();
 
     setWorld(w);
 
-    w->setCFM(0.0001);
+    w->setCFM(.0001);
     w->setERP(0.8);
     w->setStepType(sim::ode::World::STEP_TYPE_QUICK);
     w->setAutoDisable(0.01, 0.01, 5, 0.);
@@ -18,8 +20,13 @@ Sim::Sim()
     w->setContactApprox1(true);
     w->setContactApprox2(true);
     w->setContactBounce(0.1, 0.1);
+#else
+    DBG("Using Bullet");
+    sim::bullet::World *w = new sim::bullet::World();
+    setWorld(w);
+#endif
 
-    setTimeStep(sim::Time::fromMs(20));
+    setTimeStep(sim::Time::fromMs(5));
     setTimeSubSteps(2);
 
     //pauseSimulation();
@@ -65,15 +72,11 @@ void Sim::init()
 
     sim::Sim::init();
 
-    it = _robots.begin();
-    it2 = ++_robots.begin();
-
     it = it2 = _robots.begin();
     it_end = _robots.end();
     for (; it != it_end; ++it){
         it2 = it;
         for (++it2; it2 != it_end; ++it2){
-            DBG("");
             if (!(*it)->robot()->connectTo(*(*it2)->robot())){
                 (*it2)->robot()->connectTo(*(*it)->robot());
             }
