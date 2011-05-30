@@ -239,7 +239,7 @@ int SSSA::canConnectTo(const sim::robot::SSSA &robot) const
 
     // obtain position and direction of this robot's ball
     ballSetup(&ball_pos, &ball_dir, &ball_up);
-    DBG("ball setup: " << DBGV(ball_pos) << ", " << DBGV(ball_dir));
+    //DBG("ball setup: " << DBGV(ball_pos) << ", " << DBGV(ball_dir));
 
     for (size_t i = 0; i < 3; i++){
         // check if socket isn't already connected
@@ -248,11 +248,11 @@ int SSSA::canConnectTo(const sim::robot::SSSA &robot) const
 
         // obtain pos and dir of robot's socket
         robot.socketSetup(i, &pos, &dir, &up);
-        DBG("sock " << i << ": " << DBGV(pos) << ", " << DBGV(dir));
+        //DBG("sock " << i << ": " << DBGV(pos) << ", " << DBGV(dir));
 
         // compute distance between ball and socket
         dist = (ball_pos - pos).length();
-        DBG("  dist: " << dist);
+        //DBG("  dist: " << dist);
         if (dist > max_dist)
             continue;
 
@@ -262,7 +262,7 @@ int SSSA::canConnectTo(const sim::robot::SSSA &robot) const
         // socket's dir reversed
         dir = -dir;
         rot_diff = (dir - ball_dir).length();
-        DBG("  rot_diff: " << rot_diff);
+        //DBG("  rot_diff: " << rot_diff);
         if (rot_diff > max_angle)
             continue;
         // the code above really isn't computation of angle but dir and

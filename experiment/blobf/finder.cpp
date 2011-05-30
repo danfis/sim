@@ -14,9 +14,22 @@ static rgb_t imageRGB(osg::Image *img, int r, int c)
     osg::Vec4 color;
 
     color = img->getColor(r, c);
-    rgb.r = color.r();
-    rgb.g = color.g();
-    rgb.b = color.b();
+
+    rgb.r = 255 * color.r();
+    rgb.g = 255 * color.g();
+    rgb.b = 255 * color.b();
+    if (color.r() > 0.1){
+    //fprintf(stderr, "[%d, %d]: %f %f %f %f\n", r, c, color.r(), color.g(), color.b(),
+    //        color.a());
+    }
+    /*
+    if (color.r() > 0.1){
+        fprintf(stdout, "r, c: %d %d\n", r, c);
+        fprintf(stdout, "rgb: %d %d %d\n", (int)rgb.r, (int)rgb.g, (int)rgb.b);
+        fprintf(stdout, "rgb: %f %f %f\n", color.r(), color.g(), color.b());
+        fflush(stdout);
+    }
+    */
 
     return rgb;
 }
@@ -77,6 +90,25 @@ static float evaluatePixel2(finder_t *f, rgb_t rgb)
     result = sqrtf(result);
 
     return (result > f->tolerance ? 0 : 1);
+}
+
+static float evaluatePixel3(finder_t *f, rgb_t rgb)
+{
+    float result = 0;
+	unsigned int h;
+	unsigned char s,v;
+
+	rgbToHsv(rgb.r, rgb.g, rgb.b, &h, &s, &v);
+	if (v > 10 && s > 10){
+		result = result + pow((int)h-(int)f->learnedHue,2);
+		result = result + pow((int)s-(int)f->learnedSaturation,2)/4;
+		result = result + pow((int)v-(int)f->learnedValue,2)/16;
+	}else{
+		return 0;
+	}
+	result = sqrtf(result);
+	if (result > f->tolerance) result = 0; else result = 1;
+	return result;
 }
 
 static inline int evaluatePixelFast(finder_t *f, rgb_t rgb)
@@ -164,7 +196,7 @@ void finderAddPixel(finder_t *f, rgb_t rgb)
                 c.r = r;
                 c.g = g;
                 c.b = b;
-                if (evaluatePixel2(f, c) > 0){
+                if (evaluatePixel3(f, c) > 0){
                     i = ((c.r/COLOR_STEP)*COLOR_PRECISION+c.g/COLOR_STEP)*COLOR_PRECISION+c.b/COLOR_STEP;
                     f->color[i] = 1;
                 }
@@ -185,10 +217,15 @@ static inline void finderMarkAreas(finder_t *f, osg::Image *img)
     w = img->s();
     h = img->t();
     k = 0;
-    for (i = 0; i < w; i++){
-        for (j = 0; j < h; j++){
-            rgb = imageRGB(img, i, j);
+    //fprintf(stdout, "---\n");
+    for (i = 0; i < h; i++){
+        for (j = 0; j < w; j++){
+            rgb = imageRGB(img, j, i);
             eval = -evaluatePixelFast(f, rgb);
+            if (eval != 0){
+                //fprintf(stderr, "rgb: %d %d %d - %d\n", (int)rgb.r, (int)rgb.g, (int)rgb.b, eval);
+            }
+            //fprintf(stdout, "eval: %d\n", eval);
             finderBufferSet(f, k, eval);
             k++;
         }
@@ -298,8 +335,8 @@ static inline void finderLocateNewSegment(finder_t *f, osg::Image *img, size_t p
     // compute center of located segment
     curseg->x /= curseg->size;
     curseg->y /= curseg->size;
-    fprintf(stderr, "curseg: x: %d, y: %d, size: %d\n",
-            curseg->x, curseg->y, curseg->size);
+    //fprintf(stderr, "curseg: x: %d, y: %d, size: %d\n",
+    //        curseg->x, curseg->y, curseg->size);
 }
 
 segment_t finderFindSegment(finder_t *f, osg::Image *img)
@@ -312,10 +349,10 @@ segment_t finderFindSegment(finder_t *f, osg::Image *img)
     result.y = 0;
     result.size = 0;
 
+    f->segment_len = 0;
 
     finderMarkAreas(f, img);
     finderZeroBorders(f, img);
-
 
     // search for segment
     len = img->s() * img->t();

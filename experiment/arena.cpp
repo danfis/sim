@@ -12,6 +12,8 @@ PowerSource::PowerSource(sim::Sim *sim, const Vec3 &pos, const Quat &rot)
     _body = sim->world()->createBodyCompound();
     id = _body->addBox(Vec3(.5, .5, .5));
     _body->visBody(id)->setColor(color);
+    color = _body->visBody(id)->color();
+    DBG(color.r() << " " << color.g() << " " << color.b());
 
     _body->setPos(pos);
     _body->setRot(rot);

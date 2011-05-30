@@ -11,6 +11,8 @@
 #include <fermat/vec3.h>
 #include <fermat/mat3.h>
 
+#include "finder.hpp"
+
 #define K1 0.1, 0,   0, \
            0,   0.1, 0, \
            0,   0,   0.1
@@ -43,6 +45,8 @@ using sim::Quat;
 
 class Robot : public sim::comp::SSSA {
     sim::sensor::Camera *_cam;
+
+    blobf::finder_t *_finder;
 
     int _counter;
     fer_vec3_t _s, _h, _a;

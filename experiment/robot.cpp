@@ -3,6 +3,21 @@
 Robot::Robot(const Vec3 &pos, const Quat &rot, bool use_cam)
         : sim::comp::SSSA(pos, rot), _cam(0)
 {
+    blobf::rgb_t rgb;
+
+    _finder = blobf::finderNew(WIDTH, HEIGHT);
+    /*
+    rgb.r = 255 * 0.7;
+    rgb.g = 255 * 0.7;
+    rgb.b = 255 * 0.1;
+    blobf::finderAddPixel(_finder, rgb);
+    */
+    rgb.r = 255;
+    rgb.g = 255;
+    rgb.b = 49;
+    blobf::finderAddPixel(_finder, rgb);
+
+
     if (use_cam){
         _cam = new sim::sensor::Camera();
     }
@@ -30,14 +45,15 @@ void Robot::init(sim::Sim *sim)
 
     if (_cam){
         _cam->attachToBody(_robot->arm(),
-                           Vec3(-0.07, 0., 0.4),
+                           //Vec3(-0.07, 0., 0.4),
+                           Vec3(-0.07, 0., 0.),
                            Quat(Vec3(0, 0, 1), M_PI));
-        _cam->setWidthHeight(320, 240);
+        _cam->setWidthHeight(WIDTH, HEIGHT);
         _cam->setBgColor(0., 0., 0., 1.);
 
         _cam->visBodyEnable(true);
-        //_cam->enableView(true);
-        //_cam->enableDump("a");
+        _cam->enableView(true);
+        //_cam->enableDump("a/");
 
         sim->addComponent(_cam);
     }
@@ -92,9 +108,11 @@ void Robot::cbPreStep()
     _gatherInput();
 }
 
+//#include <osgDB/WriteFile>
 void Robot::_gatherInput()
 {
     osg::Image *img;
+    blobf::segment_t seg;
 
     _counter++;
 
@@ -108,6 +126,18 @@ void Robot::_gatherInput()
         return;
     }
 
-    DBG("");
+
     img = _cam->image();
+    seg = blobf::finderFindSegment(_finder, img);
+    seg.y = HEIGHT - seg.y;
+    //DBG((long)this << ":: seg.x: " << seg.x << ", .y: " << seg.y << ", .size: " << seg.size);
+    /*
+    {
+        static int ___c = 0;
+        char fn[100];
+        sprintf(fn, "a/%06d.png", ___c++);
+        osgDB::writeImageFile(*img, fn);
+        DBG(fn);
+    }
+    */
 }
