@@ -2,14 +2,16 @@
 #define _FINDER_H_
 
 #include <stddef.h>
-#include "arr.h"
-#include "stack.h"
+#include "arr.hpp"
+#include "stack.hpp"
 #include <sim/sensor/camera.hpp>
 
 #define MAX_SEGMENTS 10
 #define COLOR_PRECISION 32
 #define COLOR_STEP 8
 #define BLOCK_SIZE 4096
+
+namespace blobf {
 
 struct _segment_t {
     int x, y, size;
@@ -57,5 +59,7 @@ static inline int finderBufferGet(finder_t *f, unsigned int pos)
 {
     return f->buffer[pos];
 }
+
+} /* namespace blobf */
 
 #endif /* _FINDER_H_ */

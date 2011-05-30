@@ -13,6 +13,8 @@
 //#define ARR_BLOCK_SIZE 262144
 //#define ARR_BLOCK_SIZE 111
 
+namespace blobf {
+
 struct _arr_t {
     void **mem;
     size_t mem_size;
@@ -237,4 +239,7 @@ static inline void __arrItNext(arr_it_t *it, size_t typesize)
         it->val = it->arr->mem[it->curblock];
     }
 }
+
+} /* namespace blobf */
+
 #endif /* __ARR_H__ */

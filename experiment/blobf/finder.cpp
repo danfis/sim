@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "finder.h"
+#include "finder.hpp"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
+
+namespace blobf {
 
 static rgb_t imageRGB(osg::Image *img, int r, int c)
 {
@@ -346,3 +348,6 @@ segment_t finderFindSegment(finder_t *f, osg::Image *img)
     */
     return result;
 }
+
+} /* namespace blobf */
+

@@ -2,7 +2,9 @@
 #define __STACK_H__
 
 #include <string.h>
-#include "arr.h"
+#include "arr.hpp"
+
+namespace blobf {
 
 struct _stack_block_t {
     void *mem;
@@ -156,5 +158,7 @@ static inline void __stackPush(stack_t *stack, size_t typesize, void *val)
 
     //memcpy(stack->top, val, typesize);
 }
+
+} /* namespace blobf */
 
 #endif /* __STACK_H__ */
