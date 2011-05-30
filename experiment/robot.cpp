@@ -6,6 +6,19 @@ Robot::Robot(const Vec3 &pos, const Quat &rot, bool use_cam)
     if (use_cam){
         _cam = new sim::sensor::Camera();
     }
+
+    _counter = 0;
+    ferVec3Set(&_s, INIT_S);
+    ferVec3Set(&_h, INIT_H);
+    ferVec3Set(&_a, 0, 0, 0);
+
+    ferMat3Set(&_K1, K1);
+    ferMat3Set(&_K2, K2);
+    ferMat3Set(&_K3, K3);
+    ferMat3Set(&_K4, K4);
+    ferMat3Set(&_K5, K5);
+    ferMat3Set(&_K6, K6);
+    ferMat3Set(&_A, A);
 }
 
 
@@ -13,16 +26,18 @@ void Robot::init(sim::Sim *sim)
 {
     sim::comp::SSSA::init(sim);
     sim->regMessage(this, sim::MessageKeyPressed::Type);
+    sim->regPreStep(this);
 
     if (_cam){
         _cam->attachToBody(_robot->arm(),
                            Vec3(-0.07, 0., 0.4),
                            Quat(Vec3(0, 0, 1), M_PI));
-        _cam->setWidthHeight(640, 480);
+        _cam->setWidthHeight(320, 240);
         _cam->setBgColor(0., 0., 0., 1.);
 
         _cam->visBodyEnable(true);
-        _cam->enableView(true);
+        //_cam->enableView(true);
+        //_cam->enableDump("a");
 
         sim->addComponent(_cam);
     }
@@ -67,4 +82,32 @@ void Robot::_keyPressedMsg(const sim::MessageKeyPressed &msg)
         _robot->reachArmAngle(-M_PI / 4.);
     }
     DBG("Velocity: " << _robot->velLeft() << " " << _robot->velRight() << " " << _robot->velArm());
+}
+
+void Robot::cbPreStep()
+{
+    if (_cam){
+    }
+
+    _gatherInput();
+}
+
+void Robot::_gatherInput()
+{
+    osg::Image *img;
+
+    _counter++;
+
+    if (_counter < FPS)
+        return;
+
+    _counter = 0;
+
+    if (!_cam || !_cam->image()->valid()){
+        ferVec3Set(&_s, 0, 0, 0);
+        return;
+    }
+
+    DBG("");
+    img = _cam->image();
 }

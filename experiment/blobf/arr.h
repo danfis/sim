@@ -175,7 +175,7 @@ static inline arr_t *__arrNew(size_t typesize, size_t nmemb)
     void *mem;
     mem = malloc(__arrRequiredStructSize(typesize, nmemb));
     __arrInit(mem, typesize, nmemb);
-    return mem;
+    return (arr_t *)mem;
 }
 
 static inline void arrDestroy(arr_t *arr)

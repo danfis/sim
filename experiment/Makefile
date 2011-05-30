@@ -34,21 +34,34 @@ ifeq '$(HAVE_BT)' 'yes'
   LDFLAGS := -L../src/bullet -lsim-bullet $(LDFLAGS)
 endif
 
+# Fermat
+CXXFLAGS += -I../../fermat
+LDFLAGS += -L../../fermat -lfermat
+
+CXXFLAGS += -Iblobf
+LDFLAGS += -Lblobf -lblobf
+
 TARGETS = exp
 OBJS = exp.o robot.o arena.o sim.o
 
 all: $(TARGETS)
 
-exp: $(OBJS)
+exp: $(OBJS) blobf/libblobf.a
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LDFLAGS)
+
+blobf/libblobf.a:
+	$(MAKE) -C blobf
 
 %.o: %.cpp %.hpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
+%.o: %.c
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 clean:
 	rm -f *.o *~ *.a
 	rm -f $(TARGETS)
+	$(MAKE) -C blobf clean
 
 .PHONY: all clean help

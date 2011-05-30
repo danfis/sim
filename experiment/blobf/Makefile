@@ -1,20 +1,26 @@
-CFLAGS += -I.
+-include ../../Makefile.include
+
+CXXFLAGS += -I. -I../../src
 LDFLAGS = -lm -lrt
 
-TARGETS = blobf
-OBJS = blobf.o camera.o image.o finder.o
+TARGETS = libblobf.a
+OBJS = finder.o
 
 all: $(TARGETS)
 
+libblobf.a: $(OBJS)
+	ar cr $@ $(OBJS)
+	ranlib $@
+
 pagesize: pagesize.c
-	$(CC) $(CFLAGS) -o $@ $<
+	$(CXX) $(CXXFLAGS) -o $@ $<
 blobf: $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LDFLAGS)
 
 %.o: %.c %.h
-	$(CC) $(CFLAGS) $(DEFS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ $<
 %.o: %.c
-	$(CC) $(CFLAGS) $(DEFS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ $<
 
 clean:
 	rm -f $(OBJS)

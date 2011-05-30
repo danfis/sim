@@ -2,10 +2,22 @@
 #include <stdlib.h>
 #include <math.h>
 #include "finder.h"
-#include "stopwatch.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
+
+static rgb_t imageRGB(osg::Image *img, int r, int c)
+{
+    rgb_t rgb;
+    osg::Vec4 color;
+
+    color = img->getColor(r, c);
+    rgb.r = color.r();
+    rgb.g = color.g();
+    rgb.b = color.b();
+
+    return rgb;
+}
 
 //prevod RGB -> HSV, prevzato z www
 static void rgbToHsv(unsigned char r, unsigned char  g, unsigned char b,
@@ -77,11 +89,6 @@ finder_t *finderNew(unsigned int width, unsigned int height)
     finder_t *f;
     size_t memsize, size;
     size_t colorsize, segmentsize;
-#ifndef USE_ARRAY
-    size_t arrsize;
-#else /* USE_ARRAY */
-    int res;
-#endif /* USE_ARRAY */
     size_t i;
 
     // required blocks for buffer
@@ -91,24 +98,15 @@ finder_t *finderNew(unsigned int width, unsigned int height)
     colorsize = sizeof(unsigned char) *
                 COLOR_PRECISION * COLOR_PRECISION * COLOR_PRECISION;
     segmentsize = sizeof(segment_t) * MAX_SEGMENTS;
-#ifndef USE_ARRAY
-    arrsize = arrRequiredStructSize(int, size);
-#endif /* USE_ARRAY */
 
     memsize  = sizeof(finder_t);
     memsize += colorsize;
     memsize += segmentsize;
-#ifndef USE_ARRAY
-    memsize += arrsize;
-#endif /* USE_ARRAY */
 
     // alloc finder_t
     f = (finder_t *)malloc(memsize);
     f->color   = (unsigned char *)((char *)f) + sizeof(finder_t);
     f->segment = (segment_t *)(((char *)f->color) + colorsize);
-#ifndef USE_ARRAY
-    f->buffer   = (arr_t *)(((char *)f->segment) + segmentsize);
-#endif /* USE_ARRAY */
 
     f->segment_len = 0;
 
@@ -119,32 +117,12 @@ finder_t *finderNew(unsigned int width, unsigned int height)
 
     // init arrays
     stackInit(&f->stack, int);
-#ifdef USE_ARRAY
-    f->bigalloc = 0;
 
-    res = bigallocChunkAcquire(1, (void **)&f->buffer, &memsize);
-    if (res == 0){
-        if (memsize < size * sizeof(int)){
-            fprintf(stderr, "Bigalloc's chunk 1 is not big enough.\n");
-            fprintf(stderr, "    Chunk's size: %ld, required: %ld\n",
-                    (long)memsize, (long)(size * sizeof(int)));
-            bigallocChunkRelease(1);
-            f->buffer = NULL;
-        }else{
-            f->bigalloc = 1;
-        }
+    f->buffer = (int *)malloc(sizeof(int) * size);
+    if (!f->buffer){
+        fprintf(stderr, "Can't allocate enough memory for buffer!\n");
+        exit(-1);
     }
-
-    if (!f->bigalloc){
-        f->buffer = (int *)malloc(sizeof(int) * size);
-        if (!f->buffer){
-            fprintf(stderr, "Can't allocate enough memory for buffer!\n");
-            exit(-1);
-        }
-    }
-#else /* USE_ARRAY */
-    arrInit(f->buffer, int, size);
-#endif /* USE_ARRAY */
 
     for (i = 0; i < colorsize; i++){
         f->color[i] = 0;
@@ -156,15 +134,8 @@ finder_t *finderNew(unsigned int width, unsigned int height)
 void finderDel(finder_t *f)
 {
     stackDestroy(&f->stack);
-#ifdef USE_ARRAY
-    if (f->bigalloc){
-        bigallocChunkRelease(1);
-    }else{
-        free(f->buffer);
-    }
-#else /* USE_ARRAY */
-    arrDestroy(f->buffer);
-#endif /* USE_ARRAY */
+
+    free(f->buffer);
 
     free(f);
 }
@@ -203,37 +174,23 @@ void finderAddPixel(finder_t *f, rgb_t rgb)
             f->learnedHue, f->learnedSaturation, f->learnedValue);
 }
 
-static inline void finderMarkAreas(finder_t *f, image_t *img)
+static inline void finderMarkAreas(finder_t *f, osg::Image *img)
 {
     int eval;
-    size_t i, len;
+    size_t i, j, k, w, h;
     rgb_t rgb;
 
-#ifndef USE_ARRAY
-    arr_it_t bufit, imgit;
-
-    arrItInit(&bufit, f->buffer);
-    arrItInit(&imgit, img->arr);
-
-    len = img->width * img->height;
-    for (i = 0; i < len; i++){
-        rgb = arrItGet(&imgit, rgb_t);
-        eval = -evaluatePixelFast(f, rgb);
-        arrItSet(&bufit, int, eval);
-
-        arrItNext(&bufit, int);
-        arrItNext(&imgit, rgb_t);
+    w = img->s();
+    h = img->t();
+    k = 0;
+    for (i = 0; i < w; i++){
+        for (j = 0; j < h; j++){
+            rgb = imageRGB(img, i, j);
+            eval = -evaluatePixelFast(f, rgb);
+            finderBufferSet(f, k, eval);
+            k++;
+        }
     }
-
-#else /* USE_ARRAY */
-
-    len = img->width * img->height;
-    for (i = 0; i < len; i++){
-        rgb = imageGetSeq(img, i);
-        eval = -evaluatePixelFast(f, rgb);
-        finderBufferSet(f, i, eval);
-    }
-#endif /* USE_ARRAY */
 
 #if 0
     {
@@ -270,24 +227,24 @@ static inline void finderMarkAreas(finder_t *f, image_t *img)
 #endif
 }
 
-static inline void finderZeroBorders(finder_t *f, image_t *img)
+static inline void finderZeroBorders(finder_t *f, osg::Image *img)
 {
     size_t i;
 
-    for (i = 0; i < img->width; i++){
+    for (i = 0; i < (size_t)img->s(); i++){
         finderBufferSet(f, i, 0);
         finderBufferSet(f, i + f->width * (f->height - 1), 0);
     }
-    for (i = 0; i < img->height; i++){
+    for (i = 0; i < (size_t)img->t(); i++){
         finderBufferSet(f, i * f->width, 0);
         finderBufferSet(f, i * f->width + f->width - 1, 0);
     }
 }
 
 
-static inline void finderLocateNewSegment(finder_t *f, image_t *img, size_t p)
+static inline void finderLocateNewSegment(finder_t *f, osg::Image *img, size_t p)
 {
-    int expand[4] = { img->width, -img->width, 1, -1 };
+    int expand[4] = { img->s(), -img->s(), 1, -1 };
     segment_t *curseg; // current segment
     size_t j;
     int pos = p, pos2;
@@ -301,8 +258,8 @@ static inline void finderLocateNewSegment(finder_t *f, image_t *img, size_t p)
 
     // set up segment
     curseg->size = 1;
-    curseg->x = pos % img->width;
-    curseg->y = pos / img->width;
+    curseg->x = pos % img->s();
+    curseg->y = pos / img->s();
 
     // mark position in buffer with segment id
     finderBufferSet(f, pos, f->segment_len);
@@ -324,8 +281,8 @@ static inline void finderLocateNewSegment(finder_t *f, image_t *img, size_t p)
                 stackPush(&f->stack, int, pos2);
 
                 // add coordinates to segment
-                curseg->x += pos2 % img->width;
-                curseg->y += pos2 / img->width;
+                curseg->x += pos2 % img->s();
+                curseg->y += pos2 / img->s();
 
                 // increase segment size
                 curseg->size++;
@@ -343,38 +300,23 @@ static inline void finderLocateNewSegment(finder_t *f, image_t *img, size_t p)
             curseg->x, curseg->y, curseg->size);
 }
 
-segment_t finderFindSegment(finder_t *f, image_t *img)
+segment_t finderFindSegment(finder_t *f, osg::Image *img)
 {
     segment_t result; // result - stores biggest segment
     int eval;
     size_t i, len;
-    stopwatch_t timer;
 
     result.x = 0;
     result.y = 0;
     result.size = 0;
 
 
-    stopwatchStart(&timer);
-
     finderMarkAreas(f, img);
-
-    stopwatchStop(&timer);
-    fprintf(stderr, "    -- T1 time: %ld us\n", stopwatchElapsedUs(&timer));
-
-
-    stopwatchStart(&timer);
-
     finderZeroBorders(f, img);
 
-    stopwatchStop(&timer);
-    fprintf(stderr, "    -- T2 time: %ld us\n", stopwatchElapsedUs(&timer));
-
-
-    stopwatchStart(&timer);
 
     // search for segment
-    len = img->width * img->height;
+    len = img->s() * img->t();
     for (i = 0; i < len && f->segment_len < MAX_SEGMENTS; i++){
         eval = finderBufferGet(f, i);
 
@@ -387,8 +329,6 @@ segment_t finderFindSegment(finder_t *f, image_t *img)
             }
         }
     }
-    stopwatchStop(&timer);
-    fprintf(stderr, "    -- T3 time: %ld us\n", stopwatchElapsedUs(&timer));
 
 
     /*
@@ -405,5 +345,4 @@ segment_t finderFindSegment(finder_t *f, image_t *img)
     fprintf(stdout,"T5:%i\n",timer.getTime());timer.reset();timer.start();
     */
     return result;
-
 }
