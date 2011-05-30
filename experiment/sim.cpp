@@ -29,7 +29,7 @@ Sim::Sim()
     setTimeStep(sim::Time::fromMs(5));
     setTimeSubSteps(2);
 
-    //pauseSimulation();
+    pauseSimulation();
 
     createArena();
     createRobots();
@@ -45,6 +45,7 @@ void Sim::createRobots()
 {
     Robot *rob;
 
+    /*
     rob = new Robot(Vec3(-7., 0., .6), Quat(0, 0, 0, 1), true);
     addComponent(rob);
     _robots.push_back(rob);
@@ -62,6 +63,13 @@ void Sim::createRobots()
     _robots.push_back(rob);
 
     rob = new Robot(Vec3(-1.984, 0., .6));
+    addComponent(rob);
+    _robots.push_back(rob);
+    */
+
+    //rob = new Robot(Vec3(-7., 0., .6), Quat(0, 0, 0, 1), true);
+    rob = new Robot(Vec3(-7., 0., .6), Quat(Vec3(0, 0, 1), M_PI_4 / 4.), true);
+    //rob = new Robot(Vec3(8., 10., .6), Quat(Vec3(0, 0, -1), M_PI_2 + M_PI_4 / 4.), true);
     addComponent(rob);
     _robots.push_back(rob);
 }

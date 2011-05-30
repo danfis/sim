@@ -186,7 +186,7 @@ class RobotsManager : public sim::Component {
 class S : public sim::Sim {
   public:
     S()
-        : Sim(0,0,false)
+        : Sim(0,0,true)
     {
         if (use_ode){
             initODE();

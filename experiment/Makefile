@@ -34,9 +34,9 @@ ifeq '$(HAVE_BT)' 'yes'
   LDFLAGS := -L../src/bullet -lsim-bullet $(LDFLAGS)
 endif
 
-# Fermat
-CXXFLAGS += -I../../fermat
-LDFLAGS += -L../../fermat -lfermat
+# GSL
+CXXFLAGS += $(shell pkg-config gsl --cflags)
+LDFLAGS += $(shell pkg-config gsl --libs)
 
 CXXFLAGS += -Iblobf
 LDFLAGS += -Lblobf -lblobf

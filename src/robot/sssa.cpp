@@ -56,7 +56,8 @@ SSSA::SSSA(sim::World *w, const Vec3 &pos,
     : _world(w), _pos(pos), _rot(rot), _color(color),
       _chasis(0),
       _ball_conn(0), _ball_joint(0),
-      _with_wheels(true)
+      _with_wheels(true),
+      _data(0)
 {
     _init();
 }
@@ -66,7 +67,8 @@ SSSA::SSSA(sim::World *w, bool with_wheels, const Vec3 &pos,
     : _world(w), _pos(pos), _rot(rot), _color(color),
       _chasis(0),
       _ball_conn(0), _ball_joint(0),
-      _with_wheels(with_wheels)
+      _with_wheels(with_wheels),
+      _data(0)
 {
     _init();
 }

@@ -76,6 +76,8 @@ class SSSA {
     sim::robot::SSSA *_sock_conn[3]; //!< Robots connected to sockets
 
     bool _with_wheels;
+
+    void *_data;
   public:
     SSSA(sim::World *w,
          const sim::Vec3 &pos = sim::Vec3(0., 0., 0.08),
@@ -86,6 +88,10 @@ class SSSA {
          const sim::Quat &rot = sim::Quat(0., 0., 0., 1.),
          const osg::Vec4 &chasis_color = osg::Vec4(0., 0.1, 0.7, 0.6));
     ~SSSA();
+
+    void *data() { return _data; }
+    const void *data() const { return _data; }
+    void setData(void *d) { _data = d; }
 
     const sim::Body *chasis() const { return _chasis; }
     sim::Body *chasis() { return _chasis; }
