@@ -15,6 +15,8 @@
 
 #include "finder.hpp"
 
+class Sim;
+
 #define K1 0.001, 0.,   0., 0., \
            0.,   0.001, 0., 0., \
            0.,   0.,   0., 0., \
@@ -25,10 +27,10 @@
            0.,   0.,   0., 0., \
            0.,   0.,   0., 0.
 
-#define K3 0.001, 0.,   0., 0., \
-           0.,   0.001, 0., 0., \
-           0.,   0.,   0.1, 0., \
-           0.,   0.,   0., 0.1
+#define K3 -0.01, 0.,   0., 0., \
+           0.,   -0.01, 0., 0., \
+           0.,   0.,   -0.1, 0., \
+           0.,   0.,   0., -0.1
 
 #define K4 K3
 #define K5 K3
@@ -42,7 +44,7 @@
 
 #define FPS 10
 
-#define WAIT_FOR_ROBOT_TRESHOLD 500
+#define WAIT_FOR_ROBOT_TRESHOLD 1000
 
 #define WIDTH 320
 #define HEIGHT 240
@@ -55,6 +57,7 @@ using sim::Quat;
 void setMatrix(gsl_matrix *m, ...);
 
 class Robot : public sim::comp::SSSA {
+    Sim *_sim;
     sim::sensor::Camera *_cam;
 
     blobf::finder_t *_finder;
@@ -79,6 +82,7 @@ class Robot : public sim::comp::SSSA {
     void cbPreStep();
 
     const gsl_vector *hormone() const { return _h; }
+    int waitForRobot() const { return _wait_for_robot; }
 
   protected:
     void _keyPressedMsg(const sim::MessageKeyPressed &msg);

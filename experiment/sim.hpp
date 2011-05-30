@@ -6,6 +6,7 @@
 #include <sim/sensor/camera.hpp>
 #include <sim/comp/sssa.hpp>
 #include <sim/msg.hpp>
+#include <sim/comp/povray_full.hpp>
 
 #include "arena.hpp"
 #include "robot.hpp"
@@ -15,12 +16,16 @@ using sim::Quat;
 
 class Sim : public sim::Sim {
     Arena *_arena;
+    sim::comp::PovrayFull *_povray;
     std::list<Robot *> _robots;
 
   public:
     Sim();
 
     virtual void init();
+
+    void waitForRobot(Robot *r);
+    void connectRobots();
 
   protected:
     void createArena();

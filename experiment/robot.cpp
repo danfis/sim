@@ -1,4 +1,5 @@
 #include "robot.hpp"
+#include "sim.hpp"
 
 void setMatrix(gsl_matrix *m, ...)
 {
@@ -20,7 +21,7 @@ void setMatrix(gsl_matrix *m, ...)
 
 
 Robot::Robot(const Vec3 &pos, const Quat &rot, bool use_cam)
-        : sim::comp::SSSA(pos, rot), _cam(0), _finder(0), _last_pos(pos)
+        : sim::comp::SSSA(pos, rot), _sim(0), _cam(0), _finder(0), _last_pos(pos)
 {
     blobf::rgb_t rgb;
 
@@ -86,6 +87,9 @@ Robot::~Robot()
 void Robot::init(sim::Sim *sim)
 {
     sim::comp::SSSA::init(sim);
+
+    _sim = (Sim *)sim;
+
     sim->regMessage(this, sim::MessageKeyPressed::Type);
     sim->regPreStep(this);
 
@@ -97,8 +101,8 @@ void Robot::init(sim::Sim *sim)
         _cam->setWidthHeight(WIDTH, HEIGHT);
         _cam->setBgColor(0., 0., 0., 1.);
 
-        _cam->visBodyEnable(true);
-        //_cam->enableView(true);
+        //_cam->visBodyEnable(true);
+        _cam->enableView(true);
         //_cam->enableDump("a/");
 
         sim->addComponent(_cam);
@@ -108,6 +112,8 @@ void Robot::init(sim::Sim *sim)
     //_robot->setVelRight(1.);
 
     _robot->setData(this);
+
+    _sim->connectRobots();
 }
 
 void Robot::processMessage(const sim::Message &msg)
@@ -121,7 +127,24 @@ void Robot::_keyPressedMsg(const sim::MessageKeyPressed &msg)
 {
     int key = msg.key();
 
-    DBG("Component: " << this << " - key pressed: " << msg.key());
+    //DBG("Component: " << this << " - key pressed: " << msg.key());
+
+    if (key == 's'){
+        fprintf(stderr, ":: %lx (wfr: %d) ::        \n", (long)this, _wait_for_robot);
+        DBG("Velocity: " << _robot->velLeft() << " " << _robot->velRight() << " " << _robot->velArm());
+        DBG("_s: " << gsl_vector_get(_s, 0) << " "
+                   << gsl_vector_get(_s, 1) << " "
+                   << gsl_vector_get(_s, 2) << " "
+                   << gsl_vector_get(_s, 3));
+        DBG("_h: " << gsl_vector_get(_h, 0) << " "
+                   << gsl_vector_get(_h, 1) << " "
+                   << gsl_vector_get(_h, 2) << " "
+                   << gsl_vector_get(_h, 3));
+        DBG("_a: " << gsl_vector_get(_a, 0) << " "
+                   << gsl_vector_get(_a, 1) << " "
+                   << gsl_vector_get(_a, 2) << " "
+                   << gsl_vector_get(_a, 3));
+    }
 
     if (key == 'h'){
         _robot->addVelLeft(0.1);
@@ -145,17 +168,34 @@ void Robot::_keyPressedMsg(const sim::MessageKeyPressed &msg)
     }else if (key == 'b'){
         _robot->reachArmAngle(-M_PI / 4.);
     }
-    DBG("Velocity: " << _robot->velLeft() << " " << _robot->velRight() << " " << _robot->velArm());
+    //DBG("Velocity: " << _robot->velLeft() << " " << _robot->velRight() << " " << _robot->velArm());
 }
 
 void Robot::cbPreStep()
 {
+    int call_sim;
+
     _counter++;
 
     if (_counter == FPS){
+        //fprintf(stderr, ":: %lx (wfr: %d) ::        \n", (long)this, _wait_for_robot);
         _gatherInput();
         _updateHormone();
         _updateActions();
+
+        if (gsl_vector_get(_h, 3) > WAIT_FOR_ROBOT_TRESHOLD){
+            call_sim = (_wait_for_robot == 0);
+            _wait_for_robot = 1;
+            if (call_sim)
+                _sim->waitForRobot(this);
+        }else{
+            call_sim = (_wait_for_robot == 1);
+            _wait_for_robot = 0;
+            if (call_sim)
+                _sim->waitForRobot(this);
+        }
+        //DBG("wfr: " << _wait_for_robot);
+
         _counter = 0;
     }
 }
@@ -190,10 +230,12 @@ void Robot::_gatherInput()
 
     _last_pos = _robot->pos();
 
+    /*
     DBG("_s: " << gsl_vector_get(_s, 0) << " "
                << gsl_vector_get(_s, 1) << " "
                << gsl_vector_get(_s, 2) << " "
                << gsl_vector_get(_s, 3));
+    */
     //DBG((long)this << ":: seg.x: " << seg.x << ", .y: " << seg.y << ", .size: " << seg.size);
     /*
     {
@@ -208,12 +250,15 @@ void Robot::_gatherInput()
 
 void Robot::_updateHormone()
 {
-    gsl_vector *v;
+    gsl_vector *v, *w, *h_1;
     //fer_vec3_t a, b, h;
     sim::robot::SSSA *robot;
     Robot *comp;
 
     v = gsl_vector_alloc(4);
+    w = gsl_vector_alloc(4);
+    h_1 = gsl_vector_alloc(4);
+    gsl_vector_memcpy(h_1, _h);
 
     // input
     gsl_blas_dgemv(CblasNoTrans, 1., _K1, _s, 0., v);
@@ -227,7 +272,9 @@ void Robot::_updateHormone()
     robot = _robot->connectedRobot();
     if (robot){
         comp = (Robot *)robot->data();
-        gsl_blas_dgemv(CblasNoTrans, 1., _K3, comp->hormone(), 0., v);
+        gsl_vector_memcpy(w, h_1);
+        gsl_vector_sub(w, comp->hormone());
+        gsl_blas_dgemv(CblasNoTrans, 1., _K3, w, 0., v);
         gsl_vector_add(_h, v);
     }
 
@@ -235,7 +282,9 @@ void Robot::_updateHormone()
     robot = _robot->connectedRobotSocket(0);
     if (robot){
         comp = (Robot *)robot->data();
-        gsl_blas_dgemv(CblasNoTrans, 1., _K4, comp->hormone(), 0., v);
+        gsl_vector_memcpy(w, h_1);
+        gsl_vector_sub(w, comp->hormone());
+        gsl_blas_dgemv(CblasNoTrans, 1., _K4, w, 0., v);
         gsl_vector_add(_h, v);
     }
 
@@ -243,7 +292,9 @@ void Robot::_updateHormone()
     robot = _robot->connectedRobotSocket(1);
     if (robot){
         comp = (Robot *)robot->data();
-        gsl_blas_dgemv(CblasNoTrans, 1., _K5, comp->hormone(), 0., v);
+        gsl_vector_memcpy(w, h_1);
+        gsl_vector_sub(w, comp->hormone());
+        gsl_blas_dgemv(CblasNoTrans, 1., _K5, w, 0., v);
         gsl_vector_add(_h, v);
     }
 
@@ -251,16 +302,22 @@ void Robot::_updateHormone()
     robot = _robot->connectedRobotSocket(2);
     if (robot){
         comp = (Robot *)robot->data();
-        gsl_blas_dgemv(CblasNoTrans, 1., _K6, comp->hormone(), 0., v);
+        gsl_vector_memcpy(w, h_1);
+        gsl_vector_sub(w, comp->hormone());
+        gsl_blas_dgemv(CblasNoTrans, 1., _K6, w, 0., v);
         gsl_vector_add(_h, v);
     }
 
     gsl_vector_free(v);
+    gsl_vector_free(w);
+    gsl_vector_free(h_1);
 
+    /*
     DBG("_h: " << gsl_vector_get(_h, 0) << " "
                << gsl_vector_get(_h, 1) << " "
                << gsl_vector_get(_h, 2) << " "
                << gsl_vector_get(_h, 3));
+    */
 }
 
 void Robot::_updateActions()
@@ -276,15 +333,28 @@ void Robot::_updateActions()
 
         _robot->setVelLeft(VEL_OFFSET + gsl_vector_get(_a, 0));
         _robot->setVelRight(VEL_OFFSET + -gsl_vector_get(_a, 0));
-        _robot->setVelArm(gsl_vector_get(_a, 1));
+
+        if (_robot->connectedRobot()){
+            if (fabs(_robot->armAngle()) < M_PI_4){
+                _robot->setVelArm(30 * gsl_vector_get(_a, 1));
+            }else{
+                _robot->setVelArm(0);
+            }
+            //DBG("arm angle: " << _robot->armAngle());
+        }else{
+            if (fabs(_robot->armAngle()) < M_PI_4 / 4.){
+                _robot->setVelArm(gsl_vector_get(_a, 1));
+            }else{
+                _robot->setVelArm(0);
+            }
+        }
     }
 
 
+    /*
     DBG("_a: " << gsl_vector_get(_a, 0) << " "
                << gsl_vector_get(_a, 1) << " "
                << gsl_vector_get(_a, 2) << " "
                << gsl_vector_get(_a, 3));
-    if (gsl_vector_get(_a, 3) > WAIT_FOR_ROBOT_TRESHOLD){
-        _wait_for_robot = 1;
-    }
+    */
 }
