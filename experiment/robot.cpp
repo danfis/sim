@@ -333,21 +333,15 @@ void Robot::_updateActions()
 
         _robot->setVelLeft(VEL_OFFSET + gsl_vector_get(_a, 0));
         _robot->setVelRight(VEL_OFFSET + -gsl_vector_get(_a, 0));
+        _robot->setVelArm(gsl_vector_get(_a, 1));
 
+        /*
         if (_robot->connectedRobot()){
-            if (fabs(_robot->armAngle()) < M_PI_4){
-                _robot->setVelArm(30 * gsl_vector_get(_a, 1));
-            }else{
-                _robot->setVelArm(0);
-            }
-            //DBG("arm angle: " << _robot->armAngle());
+            _robot->setVelArm(30 * gsl_vector_get(_a, 1));
         }else{
-            if (fabs(_robot->armAngle()) < M_PI_4 / 4.){
-                _robot->setVelArm(gsl_vector_get(_a, 1));
-            }else{
-                _robot->setVelArm(0);
-            }
+            _robot->setVelArm(gsl_vector_get(_a, 1));
         }
+        */
     }
 
 

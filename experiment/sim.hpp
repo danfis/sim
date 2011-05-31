@@ -30,6 +30,8 @@ class Sim : public sim::Sim {
   protected:
     void createArena();
     void createRobots();
+
+    Robot *_emergeRobot(Robot *r);
 };
 
 

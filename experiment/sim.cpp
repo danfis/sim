@@ -107,26 +107,48 @@ void Sim::connectRobots()
 
 void Sim::waitForRobot(Robot *r)
 {
+    if (r->waitForRobot()){
+        _emergeRobot(r);
+    }
+}
+
+Robot *Sim::_emergeRobot(Robot *r)
+{
     Robot *rob;
     Vec3 pos;
     Quat rot;
     Vec3 tr(1, 0, 0);
 
-    if (r->waitForRobot()){
-        if (r->robot()->isSocketConnected(1))
-            return;
+    if (!r)
+        return NULL;
 
-        pos = r->robot()->pos();
-        rot = r->robot()->rot();
-        tr = tr * 1.254;
-        tr = rot * tr;
-        pos = pos + tr;
+    if (r->robot()->isSocketConnected(1))
+        return NULL;
 
-        //DBG("pos: " << pos.x() << " " << pos.y() << " " << pos.z());
-        //DBG("rot: " << rot.x() << " " << rot.y() << " " << rot.z() << " " << rot.w());
+    pos = r->robot()->pos();
+    rot = r->robot()->rot();
+    tr = tr * 1.254;
+    tr = rot * tr;
+    pos = pos + tr;
 
-        rob = new Robot(pos, rot, false);
-        addComponent(rob);
-        _robots.push_back(rob);
-    }
+    //DBG("pos: " << pos.x() << " " << pos.y() << " " << pos.z());
+    //DBG("rot: " << rot.x() << " " << rot.y() << " " << rot.z() << " " << rot.w());
+
+    rob = new Robot(pos, rot, false);
+    addComponent(rob);
+    _robots.push_back(rob);
+
+    /*
+    pos = pos + tr;
+    rob = new Robot(pos, rot, false);
+    addComponent(rob);
+    _robots.push_back(rob);
+
+    pos = pos + tr;
+    rob = new Robot(pos, rot, false);
+    addComponent(rob);
+    _robots.push_back(rob);
+    */
+
+    return rob;
 }
