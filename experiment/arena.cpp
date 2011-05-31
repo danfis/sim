@@ -1,19 +1,95 @@
+#include <osg/Geometry>
+#include <osg/Array>
+#include <osgUtil/SmoothingVisitor>
 #include "arena.hpp"
 
 #define ICE_LEN 6.
 #define ICE_ANGLE (M_PI / 720)
 
+static const Vec3 ps_coords[] = {
+    Vec3(.5, -.5, .5),
+    Vec3(-.5, -.5, .5),
+    Vec3(-.5, -.5, -.5),
+    Vec3(.5, -.5, -.5),
+    Vec3(.5, .5, .5),
+    Vec3(-.5, .5, .5),
+    Vec3(-.5, .5, -.5),
+    Vec3(.5, .5, -.5)
+};
+static const unsigned int ps_ids[] = {
+    0, 1, 2, 3,
+    4, 5, 6, 7,
+    0, 1, 5, 4,
+    2, 3, 7, 6,
+    0, 3, 7, 4,
+    1, 2, 6, 5
+};
+
+class PowerSourceVis : public sim::VisBody {
+  public:
+    PowerSourceVis()
+        : VisBody()
+    {
+        size_t i;
+        osg::ref_ptr<osg::Geode> g = new osg::Geode;
+        osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;
+        osg::ref_ptr<osg::DrawElementsUInt> faces;
+
+        for (i = 0; i < 8; i++){
+            vert->push_back(ps_coords[i].toOsg());
+        }
+
+        osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
+        geom->setVertexArray(vert);
+        faces = new osg::DrawElementsUInt(osg::PrimitiveSet::QUADS, 0);
+        faces->push_back(ps_ids[0]);
+        faces->push_back(ps_ids[1]);
+        faces->push_back(ps_ids[2]);
+        faces->push_back(ps_ids[3]);
+        geom->addPrimitiveSet(faces);
+        osgUtil::SmoothingVisitor::smooth(*geom.get());
+        {
+            osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
+            color->push_back(osg::Vec4(0.7, 0.7, 0.1, 1.));
+            geom->setColorArray(color);
+            geom->setColorBinding(osg::Geometry::BIND_OVERALL);
+        }
+        g->addDrawable(geom);
+
+
+        geom = new osg::Geometry;
+        geom->setVertexArray(vert);
+
+        for (i = 4; i < 24; i += 4){
+            faces = new osg::DrawElementsUInt(osg::PrimitiveSet::QUADS, 0);
+            faces->push_back(ps_ids[i]);
+            faces->push_back(ps_ids[i + 1]);
+            faces->push_back(ps_ids[i + 2]);
+            faces->push_back(ps_ids[i + 3]);
+            geom->addPrimitiveSet(faces);
+        }
+
+        osgUtil::SmoothingVisitor::smooth(*geom.get());
+        {
+            osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
+            color->push_back(osg::Vec4(0.7, 0.1, 0.1, 1.));
+            geom->setColorArray(color);
+            geom->setColorBinding(osg::Geometry::BIND_OVERALL);
+        }
+
+        g->addDrawable(geom);
+        _setNode(g);
+    }
+};
+
 PowerSource::PowerSource(sim::Sim *sim, const Vec3 &pos, const Quat &rot)
     : sim::Component()
 {
-    osg::Vec4 color(0.7, 0.7, 0.1, 1.);
-    int id;
+    PowerSourceVis *vis;
 
+    vis = new PowerSourceVis();
     _body = sim->world()->createBodyCompound();
-    id = _body->addBox(Vec3(.5, .5, .5));
-    _body->visBody(id)->setColor(color);
-    color = _body->visBody(id)->color();
-    DBG(color.r() << " " << color.g() << " " << color.b());
+    _body->addBox(Vec3(.5, .5, .5), vis);
 
     _body->setPos(pos);
     _body->setRot(rot);
@@ -77,27 +153,27 @@ void Arena::init(sim::Sim *sim)
 {
     PowerSource *ps;
 
-    ps = new PowerSource(sim, Vec3(0, -14.7, .7));
-    _pw_sources.push_back(ps);
-
     ps = new PowerSource(sim, Vec3(0, 14.7, .7));
     _pw_sources.push_back(ps);
 
-    ps = new PowerSource(sim, Vec3(14.7, 0, .7));
+    ps = new PowerSource(sim, Vec3(0, -14.7, .7), Quat(Vec3(0, 0, 1), M_PI));
     _pw_sources.push_back(ps);
 
-    ps = new PowerSource(sim, Vec3(-14.7, 0, .7));
+    ps = new PowerSource(sim, Vec3(14.7, 0, .7), Quat(Vec3(0, 0, 1), -M_PI_2));
     _pw_sources.push_back(ps);
 
-    ps = new PowerSource(sim, Vec3(10, -14.7, 1.4));
+    ps = new PowerSource(sim, Vec3(-14.7, 0, .7), Quat(Vec3(0, 0, 1), M_PI_2));
     _pw_sources.push_back(ps);
 
     ps = new PowerSource(sim, Vec3(10, 14.7, 1.4));
     _pw_sources.push_back(ps);
 
-    ps = new PowerSource(sim, Vec3(14.7, 10, 1.4));
+    ps = new PowerSource(sim, Vec3(10, -14.7, 1.4), Quat(Vec3(0, 0, 1), M_PI));
     _pw_sources.push_back(ps);
 
-    ps = new PowerSource(sim, Vec3(-14.7, 10, 1.4));
+    ps = new PowerSource(sim, Vec3(14.7, 10, 1.4), Quat(Vec3(0, 0, 1), -M_PI_2));
+    _pw_sources.push_back(ps);
+
+    ps = new PowerSource(sim, Vec3(-14.7, 10, 1.4), Quat(Vec3(0, 0, 1), M_PI_2));
     _pw_sources.push_back(ps);
 }
