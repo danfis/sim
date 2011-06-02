@@ -9,8 +9,8 @@ void setMatrix(gsl_matrix *m, ...)
 
     va_start(ap, m);
 
-    for (i = 0; i < 4; i++){
-        for (j = 0; j < 4; j++){
+    for (i = 0; i < 7; i++){
+        for (j = 0; j < 7; j++){
             val = va_arg(ap, double);
             gsl_matrix_set(m, i, j, val);
         }
@@ -21,7 +21,8 @@ void setMatrix(gsl_matrix *m, ...)
 
 
 Robot::Robot(const Vec3 &pos, const Quat &rot, bool use_cam)
-        : sim::comp::SSSA(pos, rot), _sim(0), _cam(0), _finder(0), _last_pos(pos)
+        : sim::comp::SSSA(pos, rot), _sim(0), _cam(0),
+          _finder(0), _finder2(0), _last_pos(pos)
 {
     blobf::rgb_t rgb;
 
@@ -39,23 +40,29 @@ Robot::Robot(const Vec3 &pos, const Quat &rot, bool use_cam)
         rgb.g = 255;
         rgb.b = 49;
         blobf::finderAddPixel(_finder, rgb);
+
+        _finder2 = blobf::finderNew(WIDTH, HEIGHT);
+        rgb.r = 225;
+        rgb.g = 35;
+        rgb.b = 35;
+        blobf::finderAddPixel(_finder2, rgb);
     }
 
-    _s = gsl_vector_alloc(4);
-    _h = gsl_vector_alloc(4);
-    _a = gsl_vector_alloc(4);
+    _s = gsl_vector_alloc(7);
+    _h = gsl_vector_alloc(7);
+    _a = gsl_vector_alloc(7);
 
     gsl_vector_set_zero(_s);
     gsl_vector_set_zero(_h);
     gsl_vector_set_zero(_a);
 
-    _K1 = gsl_matrix_alloc(4, 4);
-    _K2 = gsl_matrix_alloc(4, 4);
-    _K3 = gsl_matrix_alloc(4, 4);
-    _K4 = gsl_matrix_alloc(4, 4);
-    _K5 = gsl_matrix_alloc(4, 4);
-    _K6 = gsl_matrix_alloc(4, 4);
-    _A  = gsl_matrix_alloc(4, 4);
+    _K1 = gsl_matrix_alloc(7, 7);
+    _K2 = gsl_matrix_alloc(7, 7);
+    _K3 = gsl_matrix_alloc(7, 7);
+    _K4 = gsl_matrix_alloc(7, 7);
+    _K5 = gsl_matrix_alloc(7, 7);
+    _K6 = gsl_matrix_alloc(7, 7);
+    _A  = gsl_matrix_alloc(7, 7);
 
     setMatrix(_K1, K1);
     setMatrix(_K2, K2);
@@ -82,6 +89,11 @@ Robot::~Robot()
     gsl_matrix_free(_K5);
     gsl_matrix_free(_K6);
     gsl_matrix_free(_A);
+
+    if (_finder)
+        blobf::finderDel(_finder);
+    if (_finder2)
+        blobf::finderDel(_finder2);
 }
 
 void Robot::init(sim::Sim *sim)
@@ -103,7 +115,7 @@ void Robot::init(sim::Sim *sim)
 
         //_cam->visBodyEnable(true);
         _cam->enableView(true);
-        //_cam->enableDump("a/");
+        //_cam->enableDump("cam/");
 
         sim->addComponent(_cam);
     }
@@ -135,15 +147,24 @@ void Robot::_keyPressedMsg(const sim::MessageKeyPressed &msg)
         DBG("_s: " << gsl_vector_get(_s, 0) << " "
                    << gsl_vector_get(_s, 1) << " "
                    << gsl_vector_get(_s, 2) << " "
-                   << gsl_vector_get(_s, 3));
+                   << gsl_vector_get(_s, 3) << " "
+                   << gsl_vector_get(_s, 4) << " "
+                   << gsl_vector_get(_s, 5) << " "
+                   << gsl_vector_get(_s, 6));
         DBG("_h: " << gsl_vector_get(_h, 0) << " "
                    << gsl_vector_get(_h, 1) << " "
                    << gsl_vector_get(_h, 2) << " "
-                   << gsl_vector_get(_h, 3));
+                   << gsl_vector_get(_h, 3) << " "
+                   << gsl_vector_get(_h, 4) << " "
+                   << gsl_vector_get(_h, 5) << " "
+                   << gsl_vector_get(_h, 6));
         DBG("_a: " << gsl_vector_get(_a, 0) << " "
                    << gsl_vector_get(_a, 1) << " "
                    << gsl_vector_get(_a, 2) << " "
-                   << gsl_vector_get(_a, 3));
+                   << gsl_vector_get(_a, 3) << " "
+                   << gsl_vector_get(_a, 4) << " "
+                   << gsl_vector_get(_a, 5) << " "
+                   << gsl_vector_get(_a, 6));
     }
 
     if (key == 'h'){
@@ -183,7 +204,7 @@ void Robot::cbPreStep()
         _updateHormone();
         _updateActions();
 
-        if (gsl_vector_get(_h, 3) > WAIT_FOR_ROBOT_TRESHOLD){
+        if (gsl_vector_get(_h, 6) > WAIT_FOR_ROBOT_TRESHOLD){
             call_sim = (_wait_for_robot == 0);
             _wait_for_robot = 1;
             if (call_sim)
@@ -204,7 +225,7 @@ void Robot::cbPreStep()
 void Robot::_gatherInput()
 {
     osg::Image *img;
-    blobf::segment_t seg;
+    blobf::segment_t seg, seg2;
 
     if (!_cam || !_cam->image()->valid()){
         gsl_vector_set_zero(_s);
@@ -215,17 +236,42 @@ void Robot::_gatherInput()
         gsl_vector_set_zero(_s);
     }else{
         img = _cam->image();
+
         seg = blobf::finderFindSegment(_finder, img);
-        seg.y = HEIGHT - seg.y;
 
         if (seg.size > 0){
-            gsl_vector_set(_s, 0, seg.x - (WIDTH / 2.));
-            gsl_vector_set(_s, 1, seg.y - (HEIGHT / 2.));
+            gsl_vector_set(_s, 0, (seg.x - (WIDTH / 2.)) * seg.size);
+            gsl_vector_set(_s, 1, ((HEIGHT / 2.) - seg.y) * seg.size);
             gsl_vector_set(_s, 2, seg.size);
-            gsl_vector_set(_s, 3, (_last_pos - _robot->pos()).length());
         }else{
-            gsl_vector_set_zero(_s);
+            gsl_vector_set(_s, 0, 0);
+            gsl_vector_set(_s, 1, 0);
+            gsl_vector_set(_s, 2, 0);
         }
+
+        seg2 = blobf::finderFindSegment(_finder2, img);
+        seg2.y = HEIGHT - seg2.y;
+
+        if (seg2.size > 0){
+            if (seg2.x >= seg.x){
+                gsl_vector_set(_s, 3, (seg2.x - WIDTH) * seg2.size);
+            }else{
+                gsl_vector_set(_s, 3, (WIDTH - seg2.x) * seg2.size);
+            }
+
+            if (seg2.y >= seg.y){
+                gsl_vector_set(_s, 4, (HEIGHT - seg2.y) * seg2.size);
+            }else{
+                gsl_vector_set(_s, 4, (seg2.y - HEIGHT) * seg2.size);
+            }
+        }else{
+            gsl_vector_set(_s, 3, 0);
+            gsl_vector_set(_s, 4, 0);
+            gsl_vector_set(_s, 5, 0);
+        }
+
+
+        gsl_vector_set(_s, 6, (_last_pos - _robot->pos()).length());
     }
 
     _last_pos = _robot->pos();
@@ -255,9 +301,9 @@ void Robot::_updateHormone()
     sim::robot::SSSA *robot;
     Robot *comp;
 
-    v = gsl_vector_alloc(4);
-    w = gsl_vector_alloc(4);
-    h_1 = gsl_vector_alloc(4);
+    v = gsl_vector_alloc(7);
+    w = gsl_vector_alloc(7);
+    h_1 = gsl_vector_alloc(7);
     gsl_vector_memcpy(h_1, _h);
 
     // input

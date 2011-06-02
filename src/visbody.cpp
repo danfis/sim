@@ -35,11 +35,13 @@
 
 namespace sim {
 
-static void povCoords(std::ostream &os, const osg::Vec3 &vec) {
+void VisBody::povCoords(std::ostream &os, const osg::Vec3 &vec) const
+{
     os << " <" << vec[0] << "," << vec[1] << "," << vec[2] << "> ";
 }
 
-static void povTransformation(std::ostream &ofs, const osg::Vec3 &position, const osg::Quat &rotation) {
+void VisBody::povTransformation(std::ostream &ofs, const osg::Vec3 &position, const osg::Quat &rotation) const
+{
     osg::Matrixd mt;
     mt.makeIdentity();
     mt.makeTranslate(position);
@@ -57,7 +59,8 @@ static void povTransformation(std::ostream &ofs, const osg::Vec3 &position, cons
     ofs << m(3,0) << "," << m(3,1) <<","<<m(3,2) <<">\n";
 }
 
-static void povColor(std::ostream &os, const osg::Vec4 &color) {
+void VisBody::povColor(std::ostream &os, const osg::Vec4 &color) const
+{
     //ofs << "color rgb <" << color[0]<<","<<color[1]<<","<<color[2]<<"> ";
     os << "color rgbf <" << color[0]<<","<<color[1]<<","<<color[2]<<"," << (1-color[3]) << "> ";
 }

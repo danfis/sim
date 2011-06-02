@@ -174,6 +174,11 @@ class VisBody {
     static unsigned long _getUniqueID();
     static unsigned long _last_id;
 
+    void povCoords(std::ostream &os, const osg::Vec3 &vec) const;
+    void povTransformation(std::ostream &ofs, const osg::Vec3 &position,
+                           const osg::Quat &rotation) const;
+    void povColor(std::ostream &os, const osg::Vec4 &color) const;
+
   public:
     static unsigned long lastId() { return _last_id; }
 };

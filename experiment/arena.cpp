@@ -80,6 +80,84 @@ class PowerSourceVis : public sim::VisBody {
         g->addDrawable(geom);
         _setNode(g);
     }
+
+    void toPovrayObject(std::ostream &os) const
+    {
+        int i;
+
+        os << "#declare object_" << id() << "_1 = object {" << std::endl;
+
+        os << "mesh {" << std::endl;
+        os << "triangle {" << std::endl;
+        os << "<" << ps_coords[ps_ids[0]].x() << ","
+                  << ps_coords[ps_ids[0]].y() << ","
+                  << ps_coords[ps_ids[0]].z() << ">, ";
+        os << "<" << ps_coords[ps_ids[1]].x() << ","
+                  << ps_coords[ps_ids[1]].y() << ","
+                  << ps_coords[ps_ids[1]].z() << ">, ";
+        os << "<" << ps_coords[ps_ids[2]].x() << ","
+                  << ps_coords[ps_ids[2]].y() << ","
+                  << ps_coords[ps_ids[2]].z() << ">}" << std::endl;
+        os << "triangle {" << std::endl;
+        os << "<" << ps_coords[ps_ids[2]].x() << ","
+                  << ps_coords[ps_ids[2]].y() << ","
+                  << ps_coords[ps_ids[2]].z() << ">, ";
+        os << "<" << ps_coords[ps_ids[3]].x() << ","
+                  << ps_coords[ps_ids[3]].y() << ","
+                  << ps_coords[ps_ids[3]].z() << ">, ";
+        os << "<" << ps_coords[ps_ids[0]].x() << ","
+                  << ps_coords[ps_ids[0]].y() << ","
+                  << ps_coords[ps_ids[0]].z() << ">}" << std::endl;
+        os << "}" << std::endl; // mesh
+
+        os << "pigment {";
+        povColor(os, osg::Vec4(0.7, 0.7, 0.1, 1.));
+        os << "}\n";
+
+        os << "}" << std::endl; // object
+
+        os << "#declare object_" << id() << "_2 = object {" << std::endl;
+        os << "mesh {" << std::endl;
+        for (i = 4; i < 24; i += 4){
+            os << "triangle {" << std::endl;
+            os << "<" << ps_coords[ps_ids[i + 0]].x() << ","
+                      << ps_coords[ps_ids[i + 0]].y() << ","
+                      << ps_coords[ps_ids[i + 0]].z() << ">, ";
+            os << "<" << ps_coords[ps_ids[i + 1]].x() << ","
+                      << ps_coords[ps_ids[i + 1]].y() << ","
+                      << ps_coords[ps_ids[i + 1]].z() << ">, ";
+            os << "<" << ps_coords[ps_ids[i + 2]].x() << ","
+                      << ps_coords[ps_ids[i + 2]].y() << ","
+                      << ps_coords[ps_ids[i + 2]].z() << ">}" << std::endl;
+            os << "triangle {" << std::endl;
+            os << "<" << ps_coords[ps_ids[i + 2]].x() << ","
+                      << ps_coords[ps_ids[i + 2]].y() << ","
+                      << ps_coords[ps_ids[i + 2]].z() << ">, ";
+            os << "<" << ps_coords[ps_ids[i + 3]].x() << ","
+                      << ps_coords[ps_ids[i + 3]].y() << ","
+                      << ps_coords[ps_ids[i + 3]].z() << ">, ";
+            os << "<" << ps_coords[ps_ids[i + 0]].x() << ","
+                      << ps_coords[ps_ids[i + 0]].y() << ","
+                      << ps_coords[ps_ids[i + 0]].z() << ">}" << std::endl;
+        }
+        os << "}" << std::endl; // mesh
+
+        os << "pigment {";
+        povColor(os, osg::Vec4(0.7, 0.1, 0.1, 1.));
+        os << "}\n";
+
+        os << "}" << std::endl; // object
+    }
+
+    void toPovrayTr(std::ostream &os) const
+    {
+        os << "object { object_" << id() << "_1" << std::endl;
+        povTransformation(os, pos(), rot());
+        os << "}" << std::endl; // object
+        os << "object { object_" << id() << "_2" << std::endl;
+        povTransformation(os, pos(), rot());
+        os << "}" << std::endl; // object
+    }
 };
 
 PowerSource::PowerSource(sim::Sim *sim, const Vec3 &pos, const Quat &rot)
@@ -165,8 +243,8 @@ void Arena::init(sim::Sim *sim)
     ps = new PowerSource(sim, Vec3(-14.7, 0, .7), Quat(Vec3(0, 0, 1), M_PI_2));
     _pw_sources.push_back(ps);
 
-    ps = new PowerSource(sim, Vec3(10, 14.7, 1.4));
-    _pw_sources.push_back(ps);
+    //ps = new PowerSource(sim, Vec3(10, 14.7, 1.4));
+    //_pw_sources.push_back(ps);
 
     ps = new PowerSource(sim, Vec3(10, -14.7, 1.4), Quat(Vec3(0, 0, 1), M_PI));
     _pw_sources.push_back(ps);
