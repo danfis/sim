@@ -76,7 +76,9 @@ void Sim::createRobots()
     //rob = new Robot(Vec3(8., 10., .6), Quat(Vec3(0, 0, -1), M_PI_2 + M_PI_4 / 4.), true);
     //rob = new Robot(Vec3(-7., 2., .6), Quat(Vec3(0, 0, 1), M_PI_4 / 4.), true);
     //rob = new Robot(Vec3(-5., 4., .6), Quat(Vec3(0, 0, 1), -M_PI_2 - M_PI_4 / 4.), true);
-    rob = new Robot(Vec3(5., 5., .6), Quat(Vec3(0, 0, 1), M_PI_4 + M_PI), true);
+    //rob = new Robot(Vec3(5., 5., .6), Quat(Vec3(0, 0, 1), M_PI_4 + M_PI), true);
+    rob = new Robot(Vec3(-3., 0., .6), Quat(Vec3(0, 0, 1), 0*M_PI/4 ), true);
+    //rob = new Robot(Vec3(5., 5., 0.6), Quat(Vec3(0, 0, 1), 3*M_PI/4 ), true);
     addComponent(rob);
     _robots.push_back(rob);
 }

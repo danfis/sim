@@ -4,7 +4,7 @@
 #include "arena.hpp"
 
 #define ICE_LEN 6.
-#define ICE_ANGLE (M_PI / 720)
+#define ICE_ANGLE (M_PI / 100)
 
 static const Vec3 ps_coords[] = {
     Vec3(.5, -.5, .5),

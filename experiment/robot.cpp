@@ -205,6 +205,7 @@ void Robot::cbPreStep()
         _updateActions();
 
         if (gsl_vector_get(_h, 6) > WAIT_FOR_ROBOT_TRESHOLD){
+		_robot->setChasisColor(osg::Vec4(1,1,1,1));
             call_sim = (_wait_for_robot == 0);
             _wait_for_robot = 1;
             if (call_sim)
@@ -240,8 +241,8 @@ void Robot::_gatherInput()
         seg = blobf::finderFindSegment(_finder, img);
 
         if (seg.size > 0){
-            gsl_vector_set(_s, 0, (seg.x - (WIDTH / 2.)) * seg.size);
-            gsl_vector_set(_s, 1, ((HEIGHT / 2.) - seg.y) * seg.size);
+            gsl_vector_set(_s, 0, (seg.x - (WIDTH / 2.)) );
+            gsl_vector_set(_s, 1, ((HEIGHT / 2.) - seg.y));
             gsl_vector_set(_s, 2, seg.size);
         }else{
             gsl_vector_set(_s, 0, 0);
@@ -253,16 +254,15 @@ void Robot::_gatherInput()
         seg2.y = HEIGHT - seg2.y;
 
         if (seg2.size > 0){
-            if (seg2.x >= seg.x){
-                gsl_vector_set(_s, 3, (seg2.x - WIDTH) * seg2.size);
-            }else{
-                gsl_vector_set(_s, 3, (WIDTH - seg2.x) * seg2.size);
+            if (seg2.x >= seg.x+10){
+                gsl_vector_set(_s, 3, (seg2.x-WIDTH));
+            }else if (seg2.x <= seg.x-10){
+                gsl_vector_set(_s, 3, (seg2.x-0));
             }
-
             if (seg2.y >= seg.y){
-                gsl_vector_set(_s, 4, (HEIGHT - seg2.y) * seg2.size);
-            }else{
-                gsl_vector_set(_s, 4, (seg2.y - HEIGHT) * seg2.size);
+                gsl_vector_set(_s, 4, (HEIGHT - seg2.y));
+            }else if (seg2.y <= seg.y){
+                gsl_vector_set(_s, 4, (seg2.y - HEIGHT));
             }
         }else{
             gsl_vector_set(_s, 3, 0);
@@ -270,6 +270,8 @@ void Robot::_gatherInput()
             gsl_vector_set(_s, 5, 0);
         }
 
+//	gsl_vector_set(_s, 0,gsl_vector_get(_s,0)*1*seg.size*(seg.size+4*seg2.size));
+//	gsl_vector_set(_s, 3,gsl_vector_get(_s,3)*4*seg2.size*(seg.size+4*seg2.size));
 
         gsl_vector_set(_s, 6, (_last_pos - _robot->pos()).length());
     }
