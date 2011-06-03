@@ -126,6 +126,8 @@ void Robot::init(sim::Sim *sim)
     _robot->setData(this);
 
     _sim->connectRobots();
+
+    _decolorize();
 }
 
 void Robot::processMessage(const sim::Message &msg)
@@ -205,16 +207,17 @@ void Robot::cbPreStep()
         _updateActions();
 
         if (gsl_vector_get(_h, 6) > WAIT_FOR_ROBOT_TRESHOLD){
-		_robot->setChasisColor(osg::Vec4(1,1,1,1));
-            call_sim = (_wait_for_robot == 0);
+            //call_sim = (_wait_for_robot == 0);
             _wait_for_robot = 1;
-            if (call_sim)
-                _sim->waitForRobot(this);
+            _colorize();
+            //if (call_sim)
+            //    _sim->waitForRobot(this);
         }else{
-            call_sim = (_wait_for_robot == 1);
+            //call_sim = (_wait_for_robot == 1);
             _wait_for_robot = 0;
-            if (call_sim)
-                _sim->waitForRobot(this);
+            _decolorize();
+            //if (call_sim)
+            //    _sim->waitForRobot(this);
         }
         //DBG("wfr: " << _wait_for_robot);
 
@@ -258,11 +261,16 @@ void Robot::_gatherInput()
                 gsl_vector_set(_s, 3, (seg2.x-WIDTH));
             }else if (seg2.x <= seg.x-10){
                 gsl_vector_set(_s, 3, (seg2.x-0));
+            }else{
+                gsl_vector_set(_s, 3, 0);
             }
+
             if (seg2.y >= seg.y){
                 gsl_vector_set(_s, 4, (HEIGHT - seg2.y));
             }else if (seg2.y <= seg.y){
                 gsl_vector_set(_s, 4, (seg2.y - HEIGHT));
+            }else{
+                gsl_vector_set(_s, 4, 0.);
             }
         }else{
             gsl_vector_set(_s, 3, 0);
@@ -370,7 +378,7 @@ void Robot::_updateHormone()
 
 void Robot::_updateActions()
 {
-    if (_wait_for_robot){
+    if (_wait_for_robot || !_cam){
         gsl_vector_set_zero(_a);
 
         _robot->setVelLeft(0);
@@ -399,4 +407,15 @@ void Robot::_updateActions()
                << gsl_vector_get(_a, 2) << " "
                << gsl_vector_get(_a, 3));
     */
+}
+
+void Robot::_colorize()
+{
+    _robot->setChasisColor2(osg::Vec4(0.7, 0.1, 0.1, 1.), 1);
+    _robot->setChasisColor2(osg::Vec4(0.7, 0.7, 0.1, 1.), 2);
+}
+
+void Robot::_decolorize()
+{
+    _robot->setChasisColor(osg::Vec4(0., 0.1, 0.7, 0.6));
 }

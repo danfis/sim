@@ -98,6 +98,15 @@ void SSSA::setChasisColor(const osg::Vec4 &color)
     }
 }
 
+void SSSA::setChasisColor2(const osg::Vec4 &color, int id)
+{
+    VisBody *b;
+
+    b = chasis()->visBody(id);
+    if (b)
+        b->setColor(color);
+}
+
 Scalar SSSA::armAngle() const
 {
     return _arm.joint->angle();
@@ -352,14 +361,18 @@ void SSSA::activate()
 void SSSA::_createChasis(const osg::Vec4 &color)
 {
     sim::Body *b;
-    int id;
+    int id1, id2;
 
     b = _world->createBodyCompound();
-    id = b->addTriMesh(sssa_body_verts, sssa_body_verts_len,
-                       sssa_body_ids, sssa_body_ids_len);
-    b->visBody(id)->setColor(color);
+    id1 = b->addTriMesh(sssa_body1_verts, sssa_body1_verts_len,
+                        sssa_body1_ids, sssa_body1_ids_len);
+    b->visBody(id1)->setColor(color);
 
-    const osg::BoundingSphere &bound = b->visBody(id)->node()->getBound();
+    id2 = b->addTriMesh(sssa_body2_verts, sssa_body2_verts_len,
+                        sssa_body2_ids, sssa_body2_ids_len);
+    b->visBody(id2)->setColor(color);
+
+    const osg::BoundingSphere &bound = b->visBody(id1)->node()->getBound();
     // TODO: find mass of chasis
     b->setMassCube(bound.radius() * 2., 1.);
 

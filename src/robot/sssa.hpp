@@ -102,6 +102,7 @@ class SSSA {
 
     osg::Vec4 chasisColor() const;
     void setChasisColor(const osg::Vec4 &color);
+    void setChasisColor2(const osg::Vec4 &color, int id);
 
     const Vec3 &pos() const { return _chasis->pos(); }
     const Quat &rot() const { return _chasis->rot(); }

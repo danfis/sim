@@ -18,7 +18,7 @@
 class Sim;
 
 #define K1 1.E-4, 0.,    0.,    1.E-4, 0.,    0.,     0., \
-           0.,    0.E-5, 0.,    0.,    0.E-5, 0.,     0., \
+           0.,    1.E-4, 0.,    0.,    1.E-4, 0.,     0., \
            0.,    0.,    0.,    0.,    0.,    0.,     0., \
            0.,    0.,    0.,    0.001, 0.,    0.,     0., \
            0.,    0.,    0.,    0.,    0.001, 0.,     0., \
@@ -46,7 +46,7 @@ class Sim;
 #define K6 K3
 
 #define A 20.0,  0.,    0.,    0.,    0.,    0.,     0., \
-          0.,    0.0,  0.,    0.,    0.,    0.,     0., \
+          0.,    0.,  0.,    0.,    0.,    0.,     0., \
           0.,    0.,    1.0,    0.,    0.,    0.,     0., \
           0.,    0.,    0.,    20.0,  0.,    0.,     0., \
           0.,    0.,    0.,    0.,    0.0,  0.,     0., \
@@ -55,7 +55,7 @@ class Sim;
 
 #define FPS 10
 
-#define WAIT_FOR_ROBOT_TRESHOLD 30000
+#define WAIT_FOR_ROBOT_TRESHOLD 500
 
 #define WIDTH 320
 #define HEIGHT 240
@@ -105,6 +105,9 @@ class Robot : public sim::comp::SSSA {
 
     void _updateHormone();
     void _updateActions();
+
+    void _colorize();
+    void _decolorize();
 };
 
 #endif /* ROBOT_HPP */
