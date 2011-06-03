@@ -119,7 +119,7 @@ void Camera::_createCamera()
     // set up camera
     _cam = new osg::Camera;
     _cam->setClearColor(_bgcolor);
-    _cam->setProjectionMatrixAsPerspective(30, aspect, 0.01, 10.);
+    _cam->setProjectionMatrixAsPerspective(75, aspect, 0.01, 10.);
     _cam->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
     _cam->setViewport(0, 0, _width, _height);
     _cam->setRenderOrder(osg::Camera::PRE_RENDER);
@@ -153,7 +153,7 @@ void Camera::_createView()
     // set up camera
     osg::Camera *cam = new osg::Camera;
     cam->setClearColor(_bgcolor);
-    cam->setProjectionMatrixAsPerspective(30, aspect, 0.01, 10.);
+    cam->setProjectionMatrixAsPerspective(75, aspect, 0.01, 10.);
     cam->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
     cam->setViewport(0, 0, _width, _height);
     cam->setGraphicsContext(gc.get());
