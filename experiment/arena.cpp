@@ -231,6 +231,7 @@ void Arena::init(sim::Sim *sim)
 {
     PowerSource *ps;
 
+    /*
     ps = new PowerSource(sim, Vec3(0, 14.7, .7));
     _pw_sources.push_back(ps);
 
@@ -239,6 +240,7 @@ void Arena::init(sim::Sim *sim)
 
     ps = new PowerSource(sim, Vec3(14.7, 0, .7), Quat(Vec3(0, 0, 1), -M_PI_2));
     _pw_sources.push_back(ps);
+    */
 
     ps = new PowerSource(sim, Vec3(-14.7, 0, .7), Quat(Vec3(0, 0, 1), M_PI_2));
     _pw_sources.push_back(ps);
@@ -246,6 +248,7 @@ void Arena::init(sim::Sim *sim)
     //ps = new PowerSource(sim, Vec3(10, 14.7, 1.4));
     //_pw_sources.push_back(ps);
 
+    /*
     ps = new PowerSource(sim, Vec3(10, -14.7, 1.4), Quat(Vec3(0, 0, 1), M_PI));
     _pw_sources.push_back(ps);
 
@@ -254,4 +257,5 @@ void Arena::init(sim::Sim *sim)
 
     ps = new PowerSource(sim, Vec3(-14.7, 10, 1.4), Quat(Vec3(0, 0, 1), M_PI_2));
     _pw_sources.push_back(ps);
+    */
 }

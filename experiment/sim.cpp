@@ -149,7 +149,8 @@ Robot *Sim::_emergeRobot(Robot *r)
     //DBG("pos: " << pos.x() << " " << pos.y() << " " << pos.z());
     //DBG("rot: " << rot.x() << " " << rot.y() << " " << rot.z() << " " << rot.w());
 
-    rob = new Robot(pos, rot, false);
+    //rob = new Robot(pos, rot, false);
+    rob = new Robot(Vec3(-3., -3., .6), Quat(0, 0, 0, 1), true);
     addComponent(rob);
     _robots.push_back(rob);
 

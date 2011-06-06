@@ -72,6 +72,10 @@ Robot::Robot(const Vec3 &pos, const Quat &rot, bool use_cam)
     setMatrix(_K6, K6);
     setMatrix(_A, A);
 
+    gsl_vector_set_zero(_s);
+    gsl_vector_set_zero(_h);
+    //gsl_vector_set(_h, 6, INIT_POWER);
+
     _counter = 0;
     _wait_for_robot = 0;
 }
@@ -207,11 +211,11 @@ void Robot::cbPreStep()
         _updateActions();
 
         if (gsl_vector_get(_h, 6) > WAIT_FOR_ROBOT_TRESHOLD){
-            //call_sim = (_wait_for_robot == 0);
+            call_sim = (_wait_for_robot == 0);
             _wait_for_robot = 1;
             _colorize();
-            //if (call_sim)
-            //    _sim->waitForRobot(this);
+            if (call_sim)
+                _sim->waitForRobot(this);
         }else{
             //call_sim = (_wait_for_robot == 1);
             _wait_for_robot = 0;
@@ -222,6 +226,9 @@ void Robot::cbPreStep()
         //DBG("wfr: " << _wait_for_robot);
 
         _counter = 0;
+
+        if (!robot()->connectedRobot() && gsl_vector_get(_s, 2) > 60000)
+            _sim->connectRobots();
     }
 }
 
@@ -233,6 +240,7 @@ void Robot::_gatherInput()
 
     if (!_cam || !_cam->image()->valid()){
         gsl_vector_set_zero(_s);
+        gsl_vector_set(_s, 6, 1);
         return;
     }
 
@@ -256,7 +264,7 @@ void Robot::_gatherInput()
         seg2 = blobf::finderFindSegment(_finder2, img);
         seg2.y = HEIGHT - seg2.y;
 
-        if (seg2.size > 0){
+        if (seg2.size > 1000){
             if (seg2.x >= seg.x+10){
                 gsl_vector_set(_s, 3, (seg2.x-WIDTH));
             }else if (seg2.x <= seg.x-10){
@@ -281,7 +289,9 @@ void Robot::_gatherInput()
 //	gsl_vector_set(_s, 0,gsl_vector_get(_s,0)*1*seg.size*(seg.size+4*seg2.size));
 //	gsl_vector_set(_s, 3,gsl_vector_get(_s,3)*4*seg2.size*(seg.size+4*seg2.size));
 
-        gsl_vector_set(_s, 6, (_last_pos - _robot->pos()).length());
+        //gsl_vector_set(_s, 6, (_last_pos - _robot->pos()).length());
+        //gsl_vector_set(_s, 6, gsl_vector_get(_s, 6) + 1);
+        gsl_vector_set(_s, 6, 1);
     }
 
     _last_pos = _robot->pos();
@@ -387,9 +397,15 @@ void Robot::_updateActions()
     }else{
         gsl_blas_dgemv(CblasNoTrans, 1., _A, _h, 0., _a);
 
-        _robot->setVelLeft(VEL_OFFSET + gsl_vector_get(_a, 0));
-        _robot->setVelRight(VEL_OFFSET + -gsl_vector_get(_a, 0));
-        _robot->setVelArm(gsl_vector_get(_a, 1));
+        if (gsl_vector_get(_s, 2) > 60000){
+            _robot->setVelLeft(0.1 * (VEL_OFFSET + gsl_vector_get(_a, 0)));
+            _robot->setVelRight(0.1 * (VEL_OFFSET + -gsl_vector_get(_a, 0)));
+            _robot->setVelArm(0.1 * gsl_vector_get(_a, 1));
+        }else{
+            _robot->setVelLeft(VEL_OFFSET + gsl_vector_get(_a, 0));
+            _robot->setVelRight(VEL_OFFSET + -gsl_vector_get(_a, 0));
+            _robot->setVelArm(gsl_vector_get(_a, 1));
+        }
 
         /*
         if (_robot->connectedRobot()){
@@ -412,7 +428,7 @@ void Robot::_updateActions()
 void Robot::_colorize()
 {
     _robot->setChasisColor2(osg::Vec4(0.7, 0.1, 0.1, 1.), 1);
-    _robot->setChasisColor2(osg::Vec4(0.7, 0.7, 0.1, 1.), 2);
+    _robot->setChasisColor2(osg::Vec4(0.7, 0.7, 0.1, 1.), 3);
 }
 
 void Robot::_decolorize()

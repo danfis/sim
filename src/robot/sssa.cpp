@@ -250,7 +250,7 @@ int SSSA::canConnectTo(const sim::robot::SSSA &robot) const
 
     // obtain position and direction of this robot's ball
     ballSetup(&ball_pos, &ball_dir, &ball_up);
-    //DBG("ball setup: " << DBGV(ball_pos) << ", " << DBGV(ball_dir));
+    DBG("ball setup: " << DBGV(ball_pos) << ", " << DBGV(ball_dir));
 
     for (size_t i = 0; i < 3; i++){
         // check if socket isn't already connected
@@ -259,11 +259,11 @@ int SSSA::canConnectTo(const sim::robot::SSSA &robot) const
 
         // obtain pos and dir of robot's socket
         robot.socketSetup(i, &pos, &dir, &up);
-        //DBG("sock " << i << ": " << DBGV(pos) << ", " << DBGV(dir));
+        DBG("sock " << i << ": " << DBGV(pos) << ", " << DBGV(dir));
 
         // compute distance between ball and socket
         dist = (ball_pos - pos).length();
-        //DBG("  dist: " << dist);
+        DBG("  dist: " << dist);
         if (dist > max_dist)
             continue;
 
@@ -273,7 +273,7 @@ int SSSA::canConnectTo(const sim::robot::SSSA &robot) const
         // socket's dir reversed
         dir = -dir;
         rot_diff = (dir - ball_dir).length();
-        //DBG("  rot_diff: " << rot_diff);
+        DBG("  rot_diff: " << rot_diff);
         if (rot_diff > max_angle)
             continue;
         // the code above really isn't computation of angle but dir and
@@ -301,6 +301,8 @@ bool SSSA::connectTo(sim::robot::SSSA &robot)
     socket_num = canConnectTo(robot);
     if (socket_num < 0)
         return false;
+
+    DBG("");
 
     ballSetup(&pos, &dir, &up);
     _ball_conn = &robot;
@@ -370,6 +372,10 @@ void SSSA::_createChasis(const osg::Vec4 &color)
 
     id2 = b->addTriMesh(sssa_body2_verts, sssa_body2_verts_len,
                         sssa_body2_ids, sssa_body2_ids_len);
+    b->visBody(id2)->setColor(color);
+
+    id2 = b->addTriMesh(sssa_body3_verts, sssa_body3_verts_len,
+                        sssa_body3_ids, sssa_body3_ids_len);
     b->visBody(id2)->setColor(color);
 
     const osg::BoundingSphere &bound = b->visBody(id1)->node()->getBound();
