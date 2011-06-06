@@ -29,10 +29,11 @@ namespace sim {
 
 namespace comp {
 
-Watchdog::Watchdog(sim::Body *body, const double timeout, const char *paramFile){
+Watchdog::Watchdog(sim::Body *body, const double timeout, const char *paramFile, const bool simulatedTime){
     _body = body;
     _timeout = timeout;
 	_paramFile = paramFile;
+    _simulatedTime = simulatedTime;
 }
 
 Watchdog::~Watchdog(){
@@ -50,7 +51,13 @@ void Watchdog::finish(){
 
 void Watchdog::cbPostStep() {
 
-    sim::Time t = _sim->timeReal();
+    sim::Time t;
+    if (_simulatedTime) {
+        t = _sim->timeSimulated();
+    } else {
+        t = _sim->timeReal();
+    }
+
     const double ts = t.inSF();
     if (ts > _timeout ) {
         DBG("Watchdog:  time: " << ts << " reaches timeout: " << _timeout);

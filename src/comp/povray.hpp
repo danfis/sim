@@ -62,9 +62,11 @@ class Povray : public sim::Component {
 	sim::Sim *_sim;
 	int _frame;
     const char *_prefix;
+    const double _frameTime;
+    double _lastTime;
 
 	public:
-	Povray(const char *prefix = "");
+	Povray(const char *prefix = "", const double frameTime = 1.0/24.0);
 	~Povray();
 
 	void init(sim::Sim *sim);

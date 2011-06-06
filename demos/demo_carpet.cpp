@@ -153,7 +153,7 @@ class MovingCarpet : public sim::Sim {
             exit(0);
         }
 
-        sim::comp::Watchdog *wc = new sim::comp::Watchdog(bodies[numX/2][numY/2],10,paramFile);
+        sim::comp::Watchdog *wc = new sim::comp::Watchdog(bodies[numX/2][numY/2],10,paramFile,true);
         addComponent(wc);
 
     }

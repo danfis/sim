@@ -33,9 +33,18 @@ void SinController::cbPreStep() {
         arg = -arg;
     }
     const double newAngle = _amplitude*sin(arg);
-    _robot->setVelArm(newAngle);
 
-    std::cout << "Robot" << _name << " " << _robot->pos()[0] << " " << _robot->pos()[1] << " " << _robot->pos()[2] << "\n";
+    const double armAngle = _robot->armAngle();
+
+    const int sign = armAngle > newAngle ? -1 : 1; 
+    if (fabs(armAngle - newAngle) < 10.0*M_PI/180.0) {
+        _robot->setVelArm(sign*1);
+    } else {
+        _robot->setVelArm(sign*0.8);
+    }
+
+//    std::cout << "Robot" << _name << " " << _robot->pos()[0] << " " << _robot->pos()[1] << " " << _robot->pos()[2] << "\n";
+//    std::cerr << "Robot" << _name << " angle=" << armAngle << "\n";
 }
 #endif
 

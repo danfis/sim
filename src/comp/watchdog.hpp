@@ -32,13 +32,19 @@ namespace sim {
 
 namespace comp {
 
+/**Simple watchdog:
+  After predefined time, position of the given body is printed to a file and simulation is terminated.
+  If simulatedTime is true, then sim->timeSimulated is watched, otherwise sim->timeReal is watched
+  */
 class Watchdog : public sim::Component {
 	sim::Sim *_sim;
 	sim::Body *_body;
     double _timeout;
 	const char *_paramFile;
+    bool _simulatedTime;
 	public:
-	Watchdog(sim::Body *body, const double timeout, const char *paramFile);
+
+	Watchdog(sim::Body *body, const double timeout, const char *paramFile, const bool simulatedTime);
 	~Watchdog();
 
 

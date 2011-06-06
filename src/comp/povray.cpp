@@ -27,8 +27,8 @@ namespace sim {
 
 namespace comp {
 
-Povray::Povray(const char *prefix)
-    : sim::Component(), _frame(0), _prefix(prefix)
+Povray::Povray(const char *prefix, const double frameTime)
+    : sim::Component(), _frame(0), _prefix(prefix),_frameTime(frameTime),_lastTime(0)
 {
 }
 
@@ -80,32 +80,39 @@ void Povray::cbPostStep(){
 	char name[200];
     const std::list<VisBody *> &bodies = _sim->visWorld()->bodies();
 
-	sprintf(name, "%sframe_%06d.pov", _prefix, _frame);
-	std::ofstream ofs(name);
-	ofs << "#include \"camera.inc\"\n";
+    sim::Time t = _sim->timeSimulated();
 
-    int i = 0;
-    for_each(std::list<VisBody *>::const_iterator, bodies){
-		if (*it) {
-			sprintf(name,"object_%06d.inc",i);
-			ofs << "#include \"" << name << "\"\n";
-            i++;
-		}
-	}
+    if (t.inSF()-_lastTime > _frameTime) { 
 
-    i = 0;
-    for_each(std::list<VisBody *>::const_iterator, bodies){
-		if (*it) {
-			sprintf(name,"object_%06d",i);
-			ofs << "object {" << name << "\n";
-			(*it)->exportToPovray(ofs, VisBody::POVRAY_TRANSFORM);
-			ofs << "}\n";
-            i++;
-		}
-	}
-	ofs.close();
+        sprintf(name, "%sframe_%06d.pov", _prefix, _frame);
+        std::ofstream ofs(name);
+        ofs << "//simulated time: " << t.inSF() << "\n";
+        ofs << "#include \"camera.inc\"\n";
 
-	_frame++;
+        int i = 0;
+        for_each(std::list<VisBody *>::const_iterator, bodies){
+            if (*it) {
+                sprintf(name,"object_%06d.inc",i);
+                ofs << "#include \"" << name << "\"\n";
+                i++;
+            }
+        }
+
+        i = 0;
+        for_each(std::list<VisBody *>::const_iterator, bodies){
+            if (*it) {
+                sprintf(name,"object_%06d",i);
+                ofs << "object {" << name << "\n";
+                (*it)->exportToPovray(ofs, VisBody::POVRAY_TRANSFORM);
+                ofs << "}\n";
+                i++;
+            }
+        }
+        ofs.close();
+
+        _frame++;
+        _lastTime = t.inSF();
+    }
 }
 
 }

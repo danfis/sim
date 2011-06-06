@@ -48,7 +48,7 @@ ifeq '$(HAVE_ODE)' 'yes'
   TARGETS += demo_sssa_snake
   TARGETS += demo_sssa_gen
   TARGETS += demo_movement_tunning
-  TARGETS += demo_pso
+  TARGETS += demo_pso demo_psofitness_sssa
   TARGETS += demo_carpet
   ifeq '$(HAVE_OPENCV)' 'yes'
     TARGETS += demo_surfnav
@@ -99,10 +99,16 @@ demo_movement_tunning: demo_movement_tunning.cpp $(LIBDEPS)
 demo_pso: demo_pso.cpp $(LIBDEPS)
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
+demo_psofitness_sssa: demo_psofitness_sssa.cpp sinController.cpp $(LIBDEPS)
+	$(CXX) $(CXXFLAGS) -o $@ demo_psofitness_sssa.cpp sinController.cpp $(LDFLAGS)
+
 demo_surfnav: demo_surfnav.cpp $(LIBDEPS)
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 demo_carpet: demo_carpet.cpp $(LIBDEPS)
+	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+
+demo_%: demo_%.cpp $(LIBDEPS)
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 clean:
