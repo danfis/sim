@@ -36,7 +36,7 @@ namespace sim {
 namespace bullet {
 
 World::World()
-    : sim::World(),
+    : sim::WorldBullet(),
       _coll_conf(0),
       _dispatch(0),
       _broadphase(0),
@@ -190,6 +190,14 @@ void World::_setJointsForceToImpulse(const sim::Time &time)
 }
 
 } /* namespace bullet */
+
+
+namespace WorldFactory {
+WorldBullet *Bullet()
+{
+    return new sim::bullet::World();
+}
+} /* namespace WorldFactory */
 
 } /* namespace sim */
 

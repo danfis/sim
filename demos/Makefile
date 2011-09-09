@@ -25,6 +25,24 @@ CXXFLAGS += -I../src
 
 LIBDEPS += ../src/libsim.a
 LDFLAGS := -L../src -lsim $(LDFLAGS)
+LDFLAGS += $(OSG_LDFLAGS)
+
+ifeq '$(HAVE_ODE)' 'yes'
+  LDFLAGS += $(ODE_LDFLAGS)
+endif
+ifeq '$(HAVE_BT)' 'yes'
+  LDFLAGS += $(BT_LDFLAGS)
+endif
+ifeq '$(HAVE_SDL)' 'yes'
+  LDFLAGS += $(SDL_LDFLAGS)
+endif
+ifeq '$(HAVE_OPENCV)' 'yes'
+  LDFLAGS += $(OPENCV_LDFLAGS)
+endif
+ifeq '$(HAVE_PHYSX)' 'yes'
+  LDFLAGS += $(PHYSX_LDFLAGS)
+endif
+
 ifeq '$(HAVE_ODE)' 'yes'
   LIBDEPS += ../src/ode/libsim-ode.a
   LDFLAGS := -L../src/ode -lsim-ode $(LDFLAGS)

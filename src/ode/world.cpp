@@ -94,7 +94,7 @@ void __collision (void *data, dGeomID o1, dGeomID o2)
 
 
 World::World()
-    : sim::World(), _step_type(STEP_TYPE_NORMAL)
+    : sim::WorldODE(), _step_type(STEP_TYPE_NORMAL)
 {
     dInitODE2(0);
 
@@ -488,6 +488,14 @@ sim::Joint *World::createJointHinge2(sim::Body *oA, sim::Body *oB, const Vec3 &a
 
 
 } /* namespace ode */
+
+
+namespace WorldFactory {
+WorldODE *ODE()
+{
+    return new sim::ode::World();
+}
+} /* namespace WorldFactory */
 
 } /* namespace sim */
 

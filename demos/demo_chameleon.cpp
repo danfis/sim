@@ -120,7 +120,7 @@ class S : public sim::Sim {
 #ifdef SIM_HAVE_BULLET
         DBG("Using Bullet");
 
-        sim::bullet::World *w = new sim::bullet::World();
+        sim::WorldBullet *w = sim::WorldFactory::Bullet();
         setWorld(w);
 #endif /* SIM_HAVE_BULLET */
     }
@@ -130,12 +130,12 @@ class S : public sim::Sim {
 #ifdef SIM_HAVE_ODE
         DBG("Using ODE");
 
-        sim::ode::World *w = new sim::ode::World();
+        sim::WorldODE *w = sim::WorldFactory::ODE();
 
         setWorld(w);
         w->setCFM(0.0001);
         w->setERP(0.8);
-        w->setStepType(sim::ode::World::STEP_TYPE_QUICK);
+        w->setStepType(sim::WorldODE::STEP_TYPE_QUICK);
         w->setAutoDisable(0.01, 0.01, 5, 0.);
 
         w->setContactApprox1(true);

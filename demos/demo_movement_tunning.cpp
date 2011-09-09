@@ -25,7 +25,6 @@
 #include <sstream>
 #include <vector>
 
-#include "sim/ode/world.hpp"
 #include "sim/sim.hpp"
 #include "msg.hpp"
 #include "meshes/plane.h"
@@ -34,7 +33,6 @@
 #include "sim/comp/frequency.hpp"
 #include "sim/comp/watchdog.hpp"
 
-using namespace sim::ode;
 using sim::Vec3;
 using namespace std;
 
@@ -46,7 +44,7 @@ class SimMovementTunning : public sim::Sim {
     {
         setTimeStep(sim::Time::fromMs(20));
         setTimeSubSteps(2);
-        World *w = new World();
+        sim::WorldODE *w = sim::WorldFactory::ODE();
         setWorld(w);
 //        w->setCFM(1e-3);
 //      w->setCFM(0.01);

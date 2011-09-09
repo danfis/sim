@@ -22,6 +22,8 @@
 -include ../Makefile.local
 -include ../Makefile.include
 CXXFLAGS += -I.
+CXXFLAGS += $(OSG_CXXFLAGS)
+CXXFLAGS += $(SDL_CXXFLAGS)
 
 CONFIG_FLAGS =
 ifeq '$(HAVE_ODE)' 'yes'
@@ -32,6 +34,9 @@ ifeq '$(HAVE_BT)' 'yes'
 endif
 ifeq '$(HAVE_SDL)' 'yes'
   CONFIG_FLAGS += -DHAVE_SDL=1
+endif
+ifeq '$(HAVE_PHYSX)' 'yes'
+  CONFIG_FLAGS += -DHAVE_PHYSX=1
 endif
 
 SUBTARGETS =
@@ -46,7 +51,7 @@ endif
 
 TARGETS = libsim.a config.hpp
 OBJS = visbody.o visworld.o body.o joint.o sim.o component.o message.o \
-       time.o visworldmanip.o
+       time.o visworldmanip.o world.o
 OBJS += sensor/camera.o sensor/rangefinder.o
 OBJS += comp/povray.o comp/snake.o comp/frequency.o comp/watchdog.o \
         comp/syrotek.o comp/joystick.o comp/sssa.o comp/blender.o \
@@ -55,6 +60,7 @@ OBJS += comp/povray.o comp/snake.o comp/frequency.o comp/watchdog.o \
 OBJS += robot/syrotek.o robot/sssa.o
 
 ifeq '$(HAVE_OPENCV)' 'yes'
+  CXXFLAGS += $(OPENCV_CXXFLAGS)
   OBJS += alg/surfnav.o
 #  OBJS += ext/OpenSURF/fasthessian.o ext/OpenSURF/integral.o \
 #          ext/OpenSURF/ipoint.o ext/OpenSURF/utils.o \

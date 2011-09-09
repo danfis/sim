@@ -31,7 +31,7 @@ class MovingCarpet : public sim::Sim {
     MovingCarpet(const char *paramFile)
         : Sim()
     {
-        sim::ode::World *w = new sim::ode::World();
+        sim::WorldODE *w = sim::WorldFactory::ODE();
 
         setTimeStep(Time::fromMs(5));
         setTimeSubSteps(2);
@@ -41,7 +41,7 @@ class MovingCarpet : public sim::Sim {
 
         w->setCFM(0.0001);
         w->setERP(0.8);
-        w->setStepType(sim::ode::World::STEP_TYPE_QUICK);
+        w->setStepType(sim::WorldODE::STEP_TYPE_QUICK);
         w->setAutoDisable(0.01, 0.01, 5, 0.);
 
         w->setContactApprox1(true);
@@ -271,7 +271,7 @@ class MovingCarpet : public sim::Sim {
         osg::Vec4 color(0., 0.7, 0.1, 1.);
         sim::Body *c;
         int id;
-        sim::ode::World *w = (sim::ode::World *)world();
+        sim::WorldODE *w = (sim::WorldODE *)world();
 
         c = w->createBodyCompound();
         id = c->addBox(Vec3(30., 30., 0.1));

@@ -38,13 +38,7 @@ void __collision (void *data, dGeomID o1, dGeomID o2);
 /**
  * Physical representation world.
  */
-class World : public sim::World {
-  public:
-    enum StepType {
-        STEP_TYPE_NORMAL,
-        STEP_TYPE_QUICK
-    };
-
+class World : public sim::WorldODE {
   protected:
     typedef std::list<sim::Body *> _bodies_t;
     typedef _bodies_t::iterator _bodies_it_t;

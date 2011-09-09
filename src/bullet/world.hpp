@@ -42,7 +42,7 @@ namespace bullet {
 /**
  * Physical representation world.
  */
-class World : public sim::World {
+class World : public sim::WorldBullet {
   protected:
     typedef std::list<sim::Body *> _bodies_t;
     typedef _bodies_t::iterator _bodies_it_t;

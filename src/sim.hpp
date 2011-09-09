@@ -24,11 +24,11 @@
 
 #include <sim/config.hpp>
 
-#include "world.hpp"
-#include "visworld.hpp"
-#include "component.hpp"
-#include "message.hpp"
-#include "time.hpp"
+#include <sim/world.hpp>
+#include <sim/visworld.hpp>
+#include <sim/component.hpp>
+#include <sim/message.hpp>
+#include <sim/time.hpp>
 
 namespace sim {
 

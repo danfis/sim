@@ -78,11 +78,13 @@ HAVE_BT     ?= no
 HAVE_OSG    ?= no
 HAVE_SDL    ?= no
 HAVE_OPENCV ?= no
+HAVE_PHYSX  ?= no
 WANT_ODE    ?= yes
 WANT_OSG    ?= yes
 WANT_BT     ?= yes
 WANT_SDL    ?= yes
 WANT_OPENCV ?= yes
+WANT_PHYSX  ?= no
 
 # Try to find ODE
 ifeq '$(WANT_ODE)' 'yes'
@@ -149,18 +151,12 @@ ifeq '$(WANT_OPENCV)' 'yes'
   endif
 endif
 
-
-CXXFLAGS += $(OSG_CXXFLAGS)
-CXXFLAGS += $(ODE_CXXFLAGS)
-CXXFLAGS += $(BT_CXXFLAGS)
-CXXFLAGS += $(SDL_CXXFLAGS)
-CXXFLAGS += $(OPENCV_CXXFLAGS)
-
-LDFLAGS += $(OSG_LDFLAGS)
-LDFLAGS += $(ODE_LDFLAGS)
-LDFLAGS += $(BT_LDFLAGS)
-LDFLAGS += $(SDL_LDFLAGS)
-LDFLAGS += $(OPENCV_LDFLAGS)
+ifeq '$(WANT_PHYSX)' 'yes'
+  ifeq '$(HAVE_PHYSX)' 'no'
+    PHYSX_CXXFLAGS =
+    PHYSX_LDFLAGS =
+  endif
+endif
 
 check-dep-osg:
 	@echo "Checking Openscenegraph..."
@@ -192,6 +188,12 @@ check-dep-opencv:
 	@echo "  OPENCV_CXXFLAGS = $(OPENCV_CXXFLAGS)"
 	@echo "  OPENCV_LDFLAGS  = $(OPENCV_LDFLAGS)"
 
+check-dep-physx:
+	@echo "Checking PhysX..."
+	@echo "PhysX must be configured by hand!"
+	@echo "  PHYSX_CXXFLAGS = $(PHYSX_CXXFLAGS)"
+	@echo "  PHYSX_LDFLAGS  = $(PHYSX_LDFLAGS)"
+
 CHECKTARGETS = 
 ifeq '$(WANT_OSG)' 'yes'
   CHECKTARGETS += check-dep-osg
@@ -208,6 +210,9 @@ endif
 
 ifeq '$(WANT_OPENCV)' 'yes'
   CHECKTARGETS += check-dep-opencv
+endif
+ifeq '$(WANT_PHYSX)' 'yes'
+  CHECKTARGETS += check-dep-physx
 endif
 
 check-dep: $(CHECKTARGETS)
@@ -254,6 +259,16 @@ showvars:
 	@echo "HAVE_SDL     = $(HAVE_SDL)"
 	@echo "SDL_CXXFLAGS = $(SDL_CXXFLAGS)"
 	@echo "SDL_LDFLAGS  = $(SDL_LDFLAGS)"
+	@echo ""
+	@echo "WANT_OPENCV     = $(WANT_OPENCV)"
+	@echo "HAVE_OPENCV     = $(HAVE_OPENCV)"
+	@echo "OPENCV_CXXFLAGS = $(OPENCV_CXXFLAGS)"
+	@echo "OPENCV_LDFLAGS  = $(OPENCV_LDFLAGS)"
+	@echo ""
+	@echo "WANT_PHYSX      = $(WANT_PHYSX)"
+	@echo "HAVE_PHYSX      = $(HAVE_PHYSX)"
+	@echo "PHYSX_CXXFLAGS  = $(PHYSX_CXXFLAGS)"
+	@echo "PHYSX_LDFLAGS   = $(PHYSX_LDFLAGS)"
 
 .DEFAULT_GOAL := all
 .PHONY: showvars check-dep-osg check-dep-bt check-dep-ode check-dep-sdl

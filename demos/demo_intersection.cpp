@@ -21,12 +21,10 @@
 
 #include <iostream>
 #include <sim/sim.hpp>
-#include <sim/ode/world.hpp>
 #include <sim/msg.hpp>
 #include <sim/sensor/camera.hpp>
 #include <sim/sensor/rangefinder.hpp>
 
-using namespace sim::ode;
 using sim::Scalar;
 using sim::Vec3;
 using sim::Quat;
@@ -40,7 +38,7 @@ class S : public sim::Sim {
     S()
         : Sim()
     {
-        World *w = new World();
+        sim::WorldODE *w = sim::WorldFactory::ODE();
 
         setTimeStep(Time::fromMs(20));
         setTimeSubSteps(2);
@@ -65,7 +63,7 @@ class S : public sim::Sim {
         osg::Vec4 color(0., 0.7, 0.1, 1.);
         sim::Body *c;
         int id;
-        sim::ode::World *w = (sim::ode::World *)world();
+        sim::WorldODE *w = (sim::WorldODE *)world();
 
         c = w->createBodyCompound();
         id = c->addBox(Vec3(2., 2., 0.1));

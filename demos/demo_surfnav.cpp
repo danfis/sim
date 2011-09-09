@@ -139,7 +139,7 @@ class S : public sim::Sim {
     S()
         : Sim()
     {
-        sim::ode::World *w = new sim::ode::World();
+        sim::WorldODE *w = sim::WorldFactory::ODE();
 
         setTimeStep(Time::fromMs(20));
         setTimeSubSteps(2);
@@ -162,7 +162,7 @@ class S : public sim::Sim {
         osg::Vec4 color(0., 0.7, 0.1, 1.);
         sim::Body *c;
         int id;
-        sim::ode::World *w = (sim::ode::World *)world();
+        sim::WorldODE *w = (sim::WorldODE *)world();
 
         // floor
         c = w->createBodyCompound();

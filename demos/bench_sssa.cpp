@@ -21,7 +21,6 @@
 
 #include <iostream>
 #include <sim/sim.hpp>
-#include <sim/ode/world.hpp>
 #include <sim/msg.hpp>
 #include <sim/sensor/camera.hpp>
 
