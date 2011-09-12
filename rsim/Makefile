@@ -21,12 +21,18 @@
 
 -include ../Makefile.local
 -include ../Makefile.include
+
+ifeq '$(BFIN)' 'yes'
+  CC = /opt/blackfin/bin/bfin-linux-uclibc-gcc
+endif
+
 CFLAGS += -I.
-LDFLAGS += -L. -lrsim
+LDFLAGS += -L. -lrsim -lm
 
 SUBTARGETS =
 
 TARGETS = librsim.a test-client
+TARGETS += test-client-bfin
 OBJS = rsim.o
 
 all: $(TARGETS) $(SUBTARGETS)
@@ -34,6 +40,8 @@ all: $(TARGETS) $(SUBTARGETS)
 test-server: test-server.c librsim.a
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 test-client: test-client.c librsim.a
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+test-client-bfin: test-client-bfin.c librsim.a
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
 librsim.a: $(OBJS)

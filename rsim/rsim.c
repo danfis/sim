@@ -114,13 +114,13 @@ const rsim_msg_t *rsimNextMsg(rsim_t *c)
     // first read ID
     if (rsimReadID(c, &id) != 0)
         return NULL;
-    fprintf(stderr, "id: %d\n", (int)id);
+    //fprintf(stderr, "id: %d\n", (int)id);
 
     // then type
     if (rsimReadType(c, &type) != 0)
         return NULL;
 
-    fprintf(stderr, "type: %d\n", (int)type);
+    //fprintf(stderr, "type: %d\n", (int)type);
 
     if (type == RSIM_MSG_POS){
         msgf3 = (rsim_msg_float3_t *)malloc(sizeof(rsim_msg_float3_t));
@@ -155,7 +155,7 @@ const rsim_msg_t *rsimNextMsg(rsim_t *c)
         msgfs = (rsim_msg_floats_t *)malloc(sizeof(rsim_msg_floats_t)
                                               + sizeof(float) * len);
         msgfs->flen = len;
-        fprintf(stderr, "flen: %d\n", (int)len);
+        //fprintf(stderr, "flen: %d\n", (int)len);
         msgfs->f = (float *)(((char *)msgfs) + sizeof(rsim_msg_floats_t));
         for (i = 0; i < msgfs->flen; i++){
             if (rsimReadFloat(c, msgfs->f + i) != 0){

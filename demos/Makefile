@@ -78,6 +78,7 @@ ifeq '$(HAVE_ODE)' 'yes'
   TARGETS += demo_pso demo_psofitness_sssa
   TARGETS += demo_carpet
   TARGETS += demo_rserver
+  TARGETS += demo_rserver_bfin
   ifeq '$(HAVE_OPENCV)' 'yes'
     TARGETS += demo_surfnav
   endif

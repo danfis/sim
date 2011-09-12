@@ -19,7 +19,8 @@ int main(int argc, char *argv[])
     const rsim_msg_img_t *msgimg;
     FILE *fout;
 
-    ret = rsimConnect(&c, "127.0.0.1", 9876);
+    //ret = rsimConnect(&c, "127.0.0.1", 9876);
+    ret = rsimConnect(&c, "147.32.85.87", 9876);
     if (ret != 0){
         fprintf(stderr, "Can't connect to server.\n");
         return -1;
