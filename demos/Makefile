@@ -22,8 +22,6 @@
 -include ../Makefile.local
 -include ../Makefile.include
 CXXFLAGS += $(OSG_CXXFLAGS)
-CXXFLAGS += $(ODE_CXXFLAGS)
-CXXFLAGS += $(BT_CXXFLAGS)
 CXXFLAGS += $(SDL_CXXFLAGS)
 CXXFLAGS += $(OPENCV_CXXFLAGS)
 CXXFLAGS += -I../src
