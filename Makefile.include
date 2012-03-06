@@ -115,8 +115,7 @@ ifeq '$(WANT_OSG)' 'yes'
     HAVE_OSG = $(shell if pkg-config openscenegraph --exists; then echo "yes"; else echo "no"; fi;)
     ifeq '$(HAVE_OSG)' 'yes'
       OSG_CXXFLAGS = $(shell pkg-config openscenegraph --cflags)
-      OSG_LDFLAGS  = $(shell pkg-config openscenegraph --libs-only-L)
-      OSG_LDFLAGS += -losg -losgGA -losgViewer
+      OSG_LDFLAGS  = $(shell pkg-config openscenegraph --libs)
     endif
   endif
 endif

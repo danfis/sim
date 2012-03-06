@@ -21,7 +21,6 @@
 
 #include <osg/PolygonMode>
 #include <osgDB/WriteFile>
-#include <osgViewer/PixelBufferX11>
 #include <osgViewer/Renderer>
 #include <osg/ShapeDrawable>
 #include <string.h>

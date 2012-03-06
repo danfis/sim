@@ -22,12 +22,12 @@
 #ifndef _SIM_VISWORLDMANIP_HPP_
 #define _SIM_VISWORLDMANIP_HPP_
 
-#include <osgGA/MatrixManipulator>
+#include <osgGA/TrackballManipulator>
 #include <osg/Quat>
 
 namespace sim {
 
-class VisWorldManip : public osgGA::MatrixManipulator {
+class VisWorldManip : public osgGA::TrackballManipulator {
     public:
         VisWorldManip();
 
