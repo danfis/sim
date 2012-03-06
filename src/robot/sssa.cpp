@@ -56,18 +56,18 @@ SSSA::SSSA(sim::World *w, const Vec3 &pos,
     : _world(w), _pos(pos), _rot(rot), _color(color),
       _chasis(0),
       _ball_conn(0), _ball_joint(0),
-      _with_wheels(true),
+      _with_wheels(true), _with_boxes(false),
       _data(0)
 {
     _init();
 }
 
-SSSA::SSSA(sim::World *w, bool with_wheels, const Vec3 &pos,
-           const Quat &rot, const osg::Vec4 &color)
+SSSA::SSSA(sim::World *w, bool with_wheels, bool with_boxes,
+           const Vec3 &pos, const Quat &rot, const osg::Vec4 &color)
     : _world(w), _pos(pos), _rot(rot), _color(color),
       _chasis(0),
       _ball_conn(0), _ball_joint(0),
-      _with_wheels(with_wheels),
+      _with_wheels(with_wheels), _with_boxes(with_boxes),
       _data(0)
 {
     _init();
@@ -365,22 +365,26 @@ void SSSA::_createChasis(const osg::Vec4 &color)
     sim::Body *b;
     int id1, id2;
 
-    b = _world->createBodyCompound();
-    id1 = b->addTriMesh(sssa_body1_verts, sssa_body1_verts_len,
-                        sssa_body1_ids, sssa_body1_ids_len);
-    b->visBody(id1)->setColor(color);
+    if (_with_boxes){
+        b = _world->createBodyCube(1., 1.);
+    }else{
+        b = _world->createBodyCompound();
+        id1 = b->addTriMesh(sssa_body1_verts, sssa_body1_verts_len,
+                            sssa_body1_ids, sssa_body1_ids_len);
+        b->visBody(id1)->setColor(color);
 
-    id2 = b->addTriMesh(sssa_body2_verts, sssa_body2_verts_len,
-                        sssa_body2_ids, sssa_body2_ids_len);
-    b->visBody(id2)->setColor(color);
+        id2 = b->addTriMesh(sssa_body2_verts, sssa_body2_verts_len,
+                            sssa_body2_ids, sssa_body2_ids_len);
+        b->visBody(id2)->setColor(color);
 
-    id2 = b->addTriMesh(sssa_body3_verts, sssa_body3_verts_len,
-                        sssa_body3_ids, sssa_body3_ids_len);
-    b->visBody(id2)->setColor(color);
+        id2 = b->addTriMesh(sssa_body3_verts, sssa_body3_verts_len,
+                            sssa_body3_ids, sssa_body3_ids_len);
+        b->visBody(id2)->setColor(color);
 
-    const osg::BoundingSphere &bound = b->visBody(id1)->node()->getBound();
-    // TODO: find mass of chasis
-    b->setMassCube(bound.radius() * 2., 1.);
+        const osg::BoundingSphere &bound = b->visBody(id1)->node()->getBound();
+        // TODO: find mass of chasis
+        b->setMassCube(bound.radius() * 2., 1.);
+    }
 
     b->setPos(_pos);
     b->setRot(_rot);
@@ -397,15 +401,21 @@ void SSSA::_createArm(const osg::Vec4 &color)
     // TODO: find out correct offset
     Vec3 offset(0.65, 0., 0.);
 
-    b = _world->createBodyCompound();
-    id = b->addTriMesh(sssa_arm_verts, sssa_arm_verts_len,
-                       sssa_arm_ids, sssa_arm_ids_len,
-                       SIM_BODY_DEFAULT_VIS,
-                       offset);
-    b->visBody(id)->setColor(color);
+    if (_with_boxes){
+        b = _world->createBodyBox(Vec3(.17, 1., 1.), 0.2);
+    }else{
+        b = _world->createBodyCompound();
+        id = b->addTriMesh(sssa_arm_verts, sssa_arm_verts_len,
+                           sssa_arm_ids, sssa_arm_ids_len,
+                           SIM_BODY_DEFAULT_VIS,
+                           offset);
 
-    // TODO: find out bounding box of end of arm
-    b->setMassBox(Vec3(0.14, 0.5, 0.5), 0.2);
+        b->visBody(id)->setColor(color);
+
+        // TODO: find out bounding box of end of arm
+        b->setMassBox(Vec3(0.14, 0.5, 0.5), 0.2);
+    }
+
 
     b->setPos(_pos - (_rot * offset));
     b->setRot(_rot );

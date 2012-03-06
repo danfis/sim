@@ -41,7 +41,7 @@ SSSA *active = 0;
 class SSSA : public sim::comp::SSSA {
   public:
     SSSA(const Vec3 &pos, const Quat &rot = Quat(0., 0., 0., 1.))
-        : sim::comp::SSSA(0,pos, rot)
+        : sim::comp::SSSA(0, 1, pos, rot)
     {
     }
 

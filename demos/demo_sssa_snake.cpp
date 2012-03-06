@@ -39,6 +39,7 @@ using sim::comp::SSSA;
 bool use_ode = true;
 bool use_gui = true;
 bool use_wheels = true;
+bool use_boxes = false;
 
 class CEdge {
     public:
@@ -222,7 +223,7 @@ class S : public sim::Sim {
 
         // first we create the robots
         for(int i=0;i<(int)positions.size();i++) {
-            robots.push_back(new sim::robot::SSSA(world(),use_wheels,positions[i],rotations[i])); 
+            robots.push_back(new sim::robot::SSSA(world(),use_wheels, use_boxes, positions[i],rotations[i])); 
             robots.back()->activate();
         }
         
@@ -264,6 +265,8 @@ int main(int argc, char *argv[])
             use_gui = false;
         }else if (strcmp(argv[i], "--nowheels") == 0){
             use_wheels = false;
+        }else if (strcmp(argv[i], "--boxes") == 0){
+            use_boxes = true;
         }
     }
 

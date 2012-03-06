@@ -36,12 +36,14 @@ class SSSA : public sim::Component {
 
     sim::robot::SSSA *_robot;
     bool _with_wheels;
+    bool _with_boxes;
     sim::Vec3 _pos;
     sim::Quat _rot;
 
   public:
     SSSA(const sim::Vec3 &pos, const sim::Quat &rot = sim::Quat(0., 0., 0., 1.));
-    SSSA(bool with_wheels, const sim::Vec3 &pos, const sim::Quat &rot = sim::Quat(0., 0., 0., 1.));
+    SSSA(bool with_wheels, bool with_boxes,
+         const sim::Vec3 &pos, const sim::Quat &rot = sim::Quat(0., 0., 0., 1.));
     ~SSSA();
 
     const sim::Sim *sim() const { return _sim; }

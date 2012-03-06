@@ -76,6 +76,7 @@ class SSSA {
     sim::robot::SSSA *_sock_conn[3]; //!< Robots connected to sockets
 
     bool _with_wheels;
+    bool _with_boxes;
 
     void *_data;
   public:
@@ -83,7 +84,7 @@ class SSSA {
          const sim::Vec3 &pos = sim::Vec3(0., 0., 0.08),
          const sim::Quat &rot = sim::Quat(0., 0., 0., 1.),
          const osg::Vec4 &chasis_color = osg::Vec4(0., 0.1, 0.7, 0.6));
-    SSSA(sim::World *w, bool with_wheels = true,
+    SSSA(sim::World *w, bool with_wheels = true, bool with_boxes = false,
          const sim::Vec3 &pos = sim::Vec3(0., 0., 0.08),
          const sim::Quat &rot = sim::Quat(0., 0., 0., 1.),
          const osg::Vec4 &chasis_color = osg::Vec4(0., 0.1, 0.7, 0.6));

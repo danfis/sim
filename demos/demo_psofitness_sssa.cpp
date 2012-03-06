@@ -221,7 +221,7 @@ class S : public sim::Sim {
 
         // first we create the robots
         for(int i=0;i<(int)positions.size();i++) {
-            robots.push_back(new sim::robot::SSSA(world(),use_wheels,positions[i],rotations[i])); 
+            robots.push_back(new sim::robot::SSSA(world(),use_wheels,1,positions[i],rotations[i])); 
             robots.back()->activate();
         }
         
