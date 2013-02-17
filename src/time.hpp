@@ -25,6 +25,13 @@
 #include <time.h>
 #include <iostream>
 
+#include <sys/time.h>
+
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+
 namespace sim {
 
 class Time {
@@ -157,7 +164,21 @@ class Time {
     static Time cur()
         { Time t; cur(&t); return t; }
     static void cur(Time *t)
-        { clock_gettime(CLOCK_MONOTONIC, &t->_t); }
+    {
+#ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
+        struct timespec ts;
+        clock_serv_t cclock;
+        mach_timespec_t mts;
+        host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+        clock_get_time(cclock, &mts);
+        mach_port_deallocate(mach_task_self(), cclock);
+        ts.tv_sec = mts.tv_sec;
+        ts.tv_nsec = mts.tv_nsec;
+        t->_t = ts;
+#else
+        clock_gettime(CLOCK_MONOTONIC, &t->_t);
+#endif
+    }
     /* \} */
 
     /* \{ */

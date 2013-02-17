@@ -37,7 +37,7 @@ class Component {
     friend class SimComponentMessageRegistry;
 
     /** _only_ SimComponentMessageRegistry should touch this! */
-    std::list<const Message *> __msgs_to_deliver[2][Message::PRIO_MAX];
+    std::list<const Message *> __msgs_to_deliver[2][Message::PRIO_MAXIMUM];
 
   public:
     enum Priority {
@@ -46,7 +46,7 @@ class Component {
         PRIO_NORMAL,
         PRIO_HIGH,
         PRIO_HIGHEST,
-        PRIO_MAX
+        PRIO_MAXIMUM
     };
 
   protected:
