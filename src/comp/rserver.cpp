@@ -22,6 +22,7 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <sys/select.h>
 #include "comp/rserver.hpp"
 #include "msg.hpp"
@@ -422,7 +423,7 @@ void RServer::processMessage(const sim::Message &msg)
 
     if (msg.type() == RMessageOut::Type){
         omsg = (RMessageOut *)&msg;
-        _sendRMessage((const RMessageOut &)msg);
+        _sendRMessage((const RMessageOut &)omsg);
     }
 }
 

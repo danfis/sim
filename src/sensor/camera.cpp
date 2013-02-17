@@ -90,7 +90,7 @@ void Camera::cbPreStep()
     static char fn[100];
 
     if (_dump_prefix && _image->valid()){
-        sprintf(fn, "%s%06d.png", _dump_prefix, counter);
+        sprintf(fn, "%s%06d.png", _dump_prefix, (int)counter);
         osgDB::writeImageFile(*_image, fn);
         counter++;
     }

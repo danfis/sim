@@ -44,6 +44,8 @@ class World {
     World() : _vis(0), _gravity(0., 0., -9.81){}
 
   public:
+    virtual ~World(){}
+
     /* \{ */
     virtual VisWorld *visWorld() { return _vis; }
     virtual const VisWorld *visWorld() const { return _vis; }
