@@ -52,7 +52,7 @@ class SimComponentMessageRegistry {
     /**
      * List of Components with pending Messages.
      */
-    std::list<Component *> _active[2][Component::PRIO_MAX][Message::PRIO_MAX];
+    std::list<Component *> _active[2][Component::PRIO_MAXIMUM][Message::PRIO_MAXIMUM];
 
     /**
      * List of all messages.

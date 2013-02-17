@@ -85,7 +85,7 @@ class Message {
         PRIO_NORMAL,
         PRIO_HIGHER,
         PRIO_HIGHEST,
-        PRIO_MAX
+        PRIO_MAXIMUM
     };
 
   protected:

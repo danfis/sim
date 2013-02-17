@@ -136,8 +136,8 @@ void SimComponentMessageRegistry::assignMessage(Message *m)
 void SimComponentMessageRegistry::deliverMessages()
 {
     // first deliver to Components with highest priority - O(1)
-    for (int i = Component::PRIO_MAX - 1; i >= 0; i--){
-        for (int j = Message::PRIO_MAX - 1; j >= 0; j--){
+    for (int i = Component::PRIO_MAXIMUM - 1; i >= 0; i--){
+        for (int j = Message::PRIO_MAXIMUM - 1; j >= 0; j--){
             // check if there is any Component with pending messages - O(1)
             if (_active[_counter][i][j].size() > 0){
                 // deliver all messages to Components
