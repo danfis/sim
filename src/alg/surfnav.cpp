@@ -155,7 +155,7 @@ float SurfHist::hd() const
     if (!isZero(size))
         hd = hd / size;
 
-    if (isnan(hd))
+    if (std::isnan(hd))
         return 0.f;
     return hd;
 }
