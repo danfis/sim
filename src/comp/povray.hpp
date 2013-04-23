@@ -61,7 +61,7 @@ namespace comp {
 class Povray : public sim::Component {
 	sim::Sim *_sim;
 	int _frame;
-    const char *_prefix;
+    std::string _prefix;
     const double _frameTime;
     double _lastTime;
 

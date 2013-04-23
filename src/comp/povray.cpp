@@ -41,7 +41,7 @@ void Povray::init(sim::Sim *sim){
 
 	_sim = sim;
 
-	sprintf(name, "%scamera.inc", _prefix);
+	sprintf(name, "%scamera.inc", _prefix.c_str());
 	std::ofstream ofs(name);
 	ofs << "// camera definition \n";
 	ofs << "#include \"colors.inc\"\n";
@@ -59,7 +59,7 @@ void Povray::init(sim::Sim *sim){
     int i = 0;
     for_each(std::list<VisBody *>::const_iterator, bodies){
         if (*it){
-			sprintf(name, "%sobject_%06d.inc", _prefix, i);
+			sprintf(name, "%sobject_%06d.inc", _prefix.c_str(), i);
 			std::ofstream ofs(name);
 			sprintf(name,"object_%06d",i);
 			ofs << "#declare "<<name<<"=";
@@ -84,7 +84,7 @@ void Povray::cbPostStep(){
 
     if (t.inSF()-_lastTime > _frameTime) { 
 
-        sprintf(name, "%sframe_%06d.pov", _prefix, _frame);
+        sprintf(name, "%sframe_%06d.pov", _prefix.c_str(), _frame);
         std::ofstream ofs(name);
         ofs << "//simulated time: " << t.inSF() << "\n";
         ofs << "#include \"camera.inc\"\n";
