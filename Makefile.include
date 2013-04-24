@@ -42,7 +42,11 @@ ifeq '$(SYSTEM)' 'FreeBSD'
 else
   AWK ?= awk
   SED ?= sed
-  SYSTEM_LDFLAGS = -lrt -pthread
+ ifeq '$(SYSTEM)' 'Darwin'
+   SYSTEM_LDFLAGS = -pthread
+ else
+   SYSTEM_LDFLAGS = -lrt -pthread
+ endif
 endif
 
 NOWALL ?= no
