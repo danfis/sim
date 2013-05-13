@@ -84,7 +84,7 @@ void bodyMovedCB(dBodyID body)
 
 
 Body::Body(World *w)
-    : _world(w), _body(0), _next_id(1)
+    : _world(w), _body(0), _vis(0), _next_id(1)
 {
     setVisBody(0);
     dMassSetZero(&_mass);

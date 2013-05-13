@@ -133,13 +133,6 @@ World::World()
 
 World::~World()
 {
-    if (_world)
-        dWorldDestroy(_world);
-    if (_space)
-        dSpaceDestroy(_space);
-    if (_coll_contacts)
-        dJointGroupDestroy(_coll_contacts);
-
     // delete all bodies
     for_each(_bodies_it_t, _bodies){
         delete *it;
@@ -151,6 +144,13 @@ World::~World()
         delete *it;
     }
     _joints.clear();
+
+    if (_world)
+        dWorldDestroy(_world);
+    if (_space)
+        dSpaceDestroy(_space);
+    if (_coll_contacts)
+        dJointGroupDestroy(_coll_contacts);
 
     dCloseODE();
 }
