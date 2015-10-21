@@ -1,7 +1,7 @@
 # sim
 
 sim is a robotic simulator originaly created for Symbrion/Replicator european
-project [1](http://www.symbrion.eu).
+project (http://www.symbrion.eu).
 The goal of this project is to create a full library/framework for
 simulation of robots, sensors and environment.
 
@@ -30,12 +30,10 @@ It will generate HTML documentation into doxy/html directory.
 
 
 ## Compilation Under Mac OS
-On [2] is available full installation manual for sim and all required
+[Here](https://docs.google.com/document/d/18_r9FMkcgAUOjAuA5FlkqK92e064M0vD8S3KZabErzU/edit)
+is available full installation manual for sim and all required
 libraries.
 Credit goes to Honza Dvorksy who was kind to make the manual public.
-
-[1] http://www.symbrion.eu
-[2] https://docs.google.com/document/d/18\_r9FMkcgAUOjAuA5FlkqK92e064M0vD8S3KZabErzU/edit
 
 ## Acknowledgement
 This work was supported by SYMBRION and REPLICATOR projects.
